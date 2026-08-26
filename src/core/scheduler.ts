@@ -1,6 +1,6 @@
 type Task = [() => void, string, number];
 
-interface scheduler {
+interface Scheduler {
   tasks: Record<number, Task[]>;
   tags: Record<string, number>;
   current: number;
@@ -11,7 +11,7 @@ interface scheduler {
   stop: (tag: string) => void;
 }
 
-export const S: scheduler = {
+export const S: Scheduler = {
   tasks: {},
   tags: {},
   current: 0,

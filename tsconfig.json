@@ -6,8 +6,9 @@
 		"module": "ESNext",
 		"moduleResolution": "bundler",
 		"noEmit": true,
-		"noLib": true,
+		"noLib": false,
 		"skipLibCheck": true,
+		"ignoreDeprecations": "6.0",
 		"baseUrl": ".",
 		"paths": {
 			"@bloxd": [

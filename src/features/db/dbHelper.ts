@@ -18,12 +18,11 @@ export function getData<Key extends DbKeys>(
   const raw = api.getPlayerDbValue(playerId, key);
   if(raw === undefined) return;
 
-  if(typeof raw === "number") return raw as PlayerData[Key];
-  else if(typeof raw === "string"){
+  if(typeof raw === "string"){
     try{
       return JSON.parse(raw) as PlayerData[Key]
     }catch{
-      return raw as PlayerData[Key]
+      return undefined;
     }
   }
 }
