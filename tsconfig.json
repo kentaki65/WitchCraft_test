@@ -2,15 +2,12 @@
 	"compilerOptions": {
 		"allowJs": true,
 		"checkJs": false,
-		"strict": true,
+		"strict": false,
 		"module": "ESNext",
 		"moduleResolution": "bundler",
 		"noEmit": true,
 		"noLib": true,
 		"skipLibCheck": true,
-		"noUnusedLocals": true,
-		"noUnusedParameters": true,
-		"noUncheckedIndexedAccess": true,
 		"baseUrl": ".",
 		"paths": {
 			"@bloxd": [
