@@ -7,7 +7,7 @@ interface Scheduler {
   opCounter: number;
   activeIndex: number;
   execute: () => void;
-  run: (task: () => void, delay: number, tag?: string) => void;
+  run: (task: () => void, delay?: number, tag?: string) => void;
   stop: (tag: string) => void;
 }
 

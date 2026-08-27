@@ -1,5 +1,5 @@
 import type * as Types from "@bloxd";
-import { DbKeys, PlayerData } from "../../core/types";
+import { DbKeys, PlayerData } from "../types";
 
 export function setData<Key extends DbKeys>(
   playerId: Types.PlayerId, 
