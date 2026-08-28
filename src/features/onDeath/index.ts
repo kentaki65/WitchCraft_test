@@ -3,7 +3,7 @@ import { toYMDHMS } from "../../utils/math";
 import { setData, getData } from "../../core/api/dbHelper";
 import type * as Types from "@bloxd";
 
-onPlayerJoin = (playerId) => {
+function onJoin(playerId: Types.PlayerId){
   api.setClientOption(playerId, "lightingOverride", true);
   const data = getData(playerId, "deadPlayer")
 
@@ -49,5 +49,8 @@ function onDeath(victim: Types.PlayerId): void {
   setData(victim, "deadPlayer", deadData);
 }
 
-onMobKilledPlayer = onDeath;
-onPlayerKilledOtherPlayer = onDeath;
+export const handlers = {
+  onPlayerJoin: onJoin,
+  onMobKilledPlayer: onDeath,
+  onPlayerKilledOtherPlayer: onDeath
+}

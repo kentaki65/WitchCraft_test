@@ -1,4 +1,4 @@
-import { randomOnePick } from "src/utils/math";
+import { randomOnePick } from "../../utils/math";
 import { S } from "../../core/scheduler";
 import type * as Types from "@bloxd";
 
@@ -42,7 +42,7 @@ S.run(function loop() {
   S.run(loop, 5);
 })
 
-onPlayerDamagingMob = (playerId, mobId, damageDealt, withItem) => {
+export function handlePlayerAttackingMob(playerId: Types.PlayerId, mobId: Types.MobId, damageDealt: number, withItem: Types.ItemName){
   const meta = api.getMobSetting(mobId, "metaInfo") || "";
   const metaParts = meta.split("/");
   const [x, y, z] = api.getPosition(mobId);
@@ -59,6 +59,7 @@ onPlayerDamagingMob = (playerId, mobId, damageDealt, withItem) => {
   }
 
   if (metaParts.includes("Vengeance")) {
+    //@ts-ignore
     const reflect = Math.floor(damageDealt * 0.1);
     api.applyHealthChange(playerId, -reflect);
   }
@@ -73,6 +74,7 @@ onPlayerDamagingMob = (playerId, mobId, damageDealt, withItem) => {
   }
 
   if (metaParts.includes("Sticky")) {
+    //@ts-ignore
     const randomSlot = Math.floor(Math.random() * 9);
     api.setSelectedInventorySlotI(playerId, randomSlot);
   }
@@ -117,11 +119,11 @@ onPlayerDamagingMob = (playerId, mobId, damageDealt, withItem) => {
       },
     ],
     blendMode: 1,
-    hideDist: 10
+    hideDist: 100
   })
 };
 
-onMobDamagingPlayer = (attackingMob, damagedPlayer, damageDealt) => {
+export function handleMobAttackingPlayer(attackingMob: Types.MobId, damagedPlayer: Types.PlayerId, damageDealt: number, withItem: Types.ItemName){
   const meta = api.getMobSetting(attackingMob, "metaInfo") || "";
   const metaParts = meta.split("/");
   const itemname = api.getHeldItem(damagedPlayer)?.name;
@@ -132,10 +134,12 @@ onMobDamagingPlayer = (attackingMob, damagedPlayer, damageDealt) => {
 
   if (metaParts.includes("Berserk")) {
     api.applyHealthChange(attackingMob, -10);
+    //@ts-ignore
     return Math.floor(damageDealt * 2);
   }
 
   if (metaParts.includes("Lifesteal")) {
+    //@ts-ignore
     const heal = Math.floor(damageDealt * 0.5);
     api.applyHealthChange(attackingMob, heal);
   }

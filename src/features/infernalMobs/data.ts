@@ -1,4 +1,4 @@
-import { MobDatas } from "src/core/types";
+import { MobDatas } from "../../core/types";
 import type * as Types from "@bloxd";
 
 export const mobDatas: Record<string, MobDatas> = {
