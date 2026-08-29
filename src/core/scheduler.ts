@@ -24,11 +24,16 @@ export const S: Scheduler = {
       let canceledAt = S.tags[tag];
 
       if (!(taskId < canceledAt)) {
-        fn();
+        try{
+          fn();
+        }catch(e: any){
+          api.log(`error in scheduler tag: ${tag}\nmessage: ${e.message}`);
+        }
       }
     } while (++S.activeIndex < tasks.length);
   },
   run(task: () => void, delay: number, tag = "_def_"): void {
+    api.log(`スケジューラに登録された ${tag}`);
     let tick = S.current + delay;
     if (!S.tasks[tick]) {
         S.tasks[tick] = [];
@@ -42,7 +47,7 @@ export const S: Scheduler = {
   }
 };
 
-tick = () => {
+function handleTick(){
   const hasFunc = S.tasks[S.current];
   if (hasFunc !== undefined) {
     S.execute();
@@ -50,3 +55,7 @@ tick = () => {
   delete S.tasks[S.current++]; //今実行したタスクを削除
   S.activeIndex = 0;
 };
+
+export const handlers = {
+  tick: handleTick,
+}

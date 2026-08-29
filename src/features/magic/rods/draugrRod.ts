@@ -1,6 +1,8 @@
 import { MagicSystem } from "../magicSystem";
 
 export class DraugrRod extends MagicSystem {
+  protected readonly itemName: string = "draugrRod";
+
   onPlayerClick(...args: any[]): void {
     
   }
@@ -8,18 +10,6 @@ export class DraugrRod extends MagicSystem {
     
   }
   onPlayerAltAction(...args: any[]): void {
-    
-  }
-  onAttemptKillPlayer(...args: any[]): void {
-    
-  }
-  onPlayerDropItem(...args: any[]): void {
-    
-  }
-  onPlayerPickedUpItem(...args: any[]): void {
-    
-  }
-  onPlayerSwapInvenSlots(...args: any[]): void {
     
   }
   onTouchscreenActionButton(...args: any[]): void {

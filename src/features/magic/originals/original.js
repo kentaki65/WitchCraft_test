@@ -29,7 +29,8 @@ const datas = [
 				let damage = Math.min(100, 10 + Math.floor(s / 1000) * 10 / 2)
 				fireShootIds[id] = []
 				for (let d = 4; d <= points; d += 2) {
-					fireShootIds[id].push(setTimeout(() => { let px = x + dx * d; let py = y + dy * d; let pz = z + dz * d; api.broadcastSound(`firecracker1`, 1, 1, { playerIdOrPos: [px, py, pz], maxHearDist: 10 }); api.playParticleEffect({ pos1: [px - 2, py - 2, pz - 2], pos2: [px + 2, py + 2, pz + 2], presetId: `redFirecrackerLarge` }); for (const i of api.getEntitiesInRect([px - 4, py - 4, pz - 4], [px + 4, py + 4, pz + 4])) { if (i === id) continue; api.attemptApplyDamage({ eId: id, hitEId: i, attemptedDmgAmt: Math.max(1, damage - d), withItem: `Fireball Block` }) } }, d * 100))
+					fireShootIds[id].push(setTimeout(() => { 
+						let px = x + dx * d; let py = y + dy * d; let pz = z + dz * d; api.broadcastSound(`firecracker1`, 1, 1, { playerIdOrPos: [px, py, pz], maxHearDist: 10 }); api.playParticleEffect({ pos1: [px - 2, py - 2, pz - 2], pos2: [px + 2, py + 2, pz + 2], presetId: `redFirecrackerLarge` }); for (const i of api.getEntitiesInRect([px - 4, py - 4, pz - 4], [px + 4, py + 4, pz + 4])) { if (i === id) continue; api.attemptApplyDamage({ eId: id, hitEId: i, attemptedDmgAmt: Math.max(1, damage - d), withItem: `Fireball Block` }) } }, d * 100))
 				}
 			}
 			api.removeMiddleScreenBar(id)

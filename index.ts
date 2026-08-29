@@ -164,6 +164,8 @@ Loader.BUILD(BUILD_LOCATION)
 import * as $0 from "./src/features/achievements/index"
 import * as $1 from "./src/features/infernalMobs/index"
 import * as $2 from "./src/features/onDeath/index";
+import * as $3 from "./src/features/magic/index";
+import * as $4 from "./src/core/scheduler";
 
-Loader.modules = [$0, $1, $2];
+Loader.modules = [$0, $1, $2, $3, $4];
 Loader.INIT()
