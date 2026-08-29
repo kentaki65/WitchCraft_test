@@ -33,7 +33,6 @@ export const S: Scheduler = {
     } while (++S.activeIndex < tasks.length);
   },
   run(task: () => void, delay: number, tag = "_def_"): void {
-    api.log(`スケジューラに登録された ${tag}`);
     let tick = S.current + delay;
     if (!S.tasks[tick]) {
         S.tasks[tick] = [];

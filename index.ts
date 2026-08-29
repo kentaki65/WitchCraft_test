@@ -169,3 +169,5 @@ import * as $4 from "./src/core/scheduler";
 
 Loader.modules = [$0, $1, $2, $3, $4];
 Loader.INIT()
+
+api.log("loaded!")

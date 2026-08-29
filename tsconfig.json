@@ -6,7 +6,7 @@
 		"module": "ESNext",
 		"moduleResolution": "bundler",
 		"noEmit": true,
-		"noLib": true,
+		"noLib": false,
 		"skipLibCheck": true,
 		"baseUrl": ".",
 		"paths": {

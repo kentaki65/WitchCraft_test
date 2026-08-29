@@ -1,6 +1,5 @@
 import type * as Types from "@bloxd";
 import { S } from "../../core/scheduler";
-const MS_PER_TICK = 50;
 
 //子が絶対持ってるものは abstractで
 //持ってるやつと持ってないやつがあるのは空実装にしてoverrideする
@@ -15,6 +14,7 @@ export abstract class MagicSystem {
   protected chargeStart = 0;
   protected cooldown = 0;
   protected currentMode: 0 | 1 = 0;
+  protected crouching = false;
 
   constructor(playerId: Types.PlayerId) {
     this.playerId = playerId;
@@ -33,6 +33,15 @@ export abstract class MagicSystem {
 
   protected isCrouching(): boolean {
     return api.isPlayerCrouching(this.playerId);
+  }
+
+  protected updateCrouching(): void {
+    const crouching = this.isCrouching();
+    if(crouching && !this.crouching){
+      this.switchMode();
+    }
+
+    this.crouching = crouching;
   }
 
   protected startCharging(): void {
@@ -68,68 +77,6 @@ export abstract class MagicSystem {
     this.charging = false;
     api.removeMiddleScreenBar(this.playerId);
     this.resetMovement();
-  }
-
-  protected calcPoint(chargeTime: number): number {
-    const point = Math.min(20, Math.floor(chargeTime / 250));
-    return point;
-  }
-
-  protected calcDamage(chargeTime: number): number {
-    const damage = Math.min(100, 10 + Math.floor(chargeTime / 1000) * 5);
-    return damage;
-  }
-
-  protected spawnProjectile({ x, y, z, dx, dy, dz, dist, damage }) {
-    let px = x + dx * dist;
-    let py = y + dy * dist;
-    let pz = z + dz * dist;
-
-    api.broadcastSound(`firecracker1`, 1, 1, {
-      playerIdOrPos: [px, py, pz],
-      maxHearDist: 10
-    });
-
-    api.playParticleEffect({
-      pos1: [px, py, pz].map(n => n - 2),
-      pos2: [px, py, pz].map(n => n + 2),
-      presetId: `redFirecrackerLarge`
-    });
-
-    const targets = api.getEntitiesInRect([px, py, pz].map(n => n - 4), [px, py, pz].map(n => n + 4));
-
-    for (const targetId of targets) {
-      if (targetId === this.playerId) continue;
-      api.attemptApplyDamage({
-        eId: this.playerId,
-        hitEId: targetId,
-        attemptedDmgAmt: Math.max(1, damage - dist),
-        withItem: `Fireball Block`
-      })
-    }
-  }
-
-  protected castChargedSpell(chargeTime: number): void {
-    api.log(`chargetime: ${chargeTime}`);
-    const [x, y, z] = api.getPosition(this.playerId);
-    const [dx, dy, dz] = api.getPlayerFacingInfo(this.playerId)?.dir ?? [0, 0, 1];
-
-    const points = this.calcPoint(chargeTime);
-    const damage = this.calcDamage(chargeTime);
-
-    for (let offset = 0; offset < points; offset += 2) {
-      const dist = offset + 4;
-      S.run(() => {
-        this.spawnProjectile({
-          x, y, z, dx, dy, dz, dist, damage
-        });
-      }, Math.round((dist * 100) / MS_PER_TICK), this.schedulerTag);
-    }
-  }
-
-  protected getChargeColor(chargeTime: number): string {
-    const level = Math.min(8, Math.floor(chargeTime / 500));
-    return ["white", "white", "lime", "lime", "yellow", "yellow", "orange", "orange", "red"][level];
   }
 
   public onEquip(): void {
