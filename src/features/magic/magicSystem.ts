@@ -9,6 +9,7 @@ export abstract class MagicSystem {
   protected abstract readonly itemName: string;
   public readonly schedulerTag: string;
 
+  protected readonly MIN_CHARGE = [500, 2000] as const;
   protected slot = 0;
   protected charging = false;
   protected chargeStart = 0;
@@ -43,9 +44,20 @@ export abstract class MagicSystem {
 
     this.crouching = crouching;
   }
+  
+  protected getChargeColor(chargeTime: number): string {
+    const level = Math.min(8, Math.floor(chargeTime / 500));
+    return ["white", "white", "lime", "lime", "yellow", "yellow", "orange", "orange", "red"][level];
+  }
 
   protected startCharging(): void {
     if (this.charging) return;
+
+    /*
+    これらで強制的に三人称視点にしてアニメーションを見せよう
+    api.setCameraZoom(myId, 1)
+    api.setClientOption(myId,"cameraPositionOffset", [0, 1, 0])
+    */
 
     this.charging = true;
     this.chargeStart = api.now();
@@ -93,6 +105,10 @@ export abstract class MagicSystem {
     this.cooldown = api.now();
   }
 
+  abstract calcPoint(chargeTime: number): number;
+  abstract calcDamage(chargeTime: number): number;
+  abstract castFirstSpell(chargeTime: number): void;
+  abstract castSecondSpell(chargeTime: number): void;
   abstract tick: (...args: any[]) => void;
   abstract onPlayerAltAction: (...args: any[]) => void;
   abstract onPlayerClick: (...args: any[]) => void;

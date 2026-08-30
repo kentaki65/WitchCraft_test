@@ -5,17 +5,6 @@ import type * as Types from "@bloxd";
 
 export class MoltenMagmaRod extends MagicSystem {
   protected readonly itemName: RodTypes = "Molten Magma Rod";
-  private readonly MIN_CHARGE = [500, 2000] as const;
-
-  protected calcPoint(chargeTime: number): number {
-    const point = Math.min(20, Math.floor(chargeTime / 250));
-    return point;
-  }
-
-  protected calcDamage(chargeTime: number): number {
-    const damage = Math.min(100, 10 + Math.floor(chargeTime / 1000) * 5);
-    return damage;
-  }
 
   protected spawnProjectile({ x, y, z, dx, dy, dz, dist, damage }) {
     let px = x + dx * dist;
@@ -46,7 +35,17 @@ export class MoltenMagmaRod extends MagicSystem {
     }
   }
 
-  protected castChargedSpell(chargeTime: number): void {
+  calcPoint(chargeTime: number): number {
+    const point = Math.min(20, Math.floor(chargeTime / 250));
+    return point;
+  }
+
+  calcDamage(chargeTime: number): number {
+    const damage = Math.min(100, 10 + Math.floor(chargeTime / 1000) * 5);
+    return damage;
+  }
+  
+  castFirstSpell(chargeTime: number): void {
     const [x, y, z] = api.getPosition(this.playerId);
     const [dx, dy, dz] = api.getPlayerFacingInfo(this.playerId)?.dir ?? [0, 0, 1];
 
@@ -63,7 +62,7 @@ export class MoltenMagmaRod extends MagicSystem {
     }
   }
 
-  protected castKnockbackSpell(chargeTime: number) {
+  castSecondSpell(chargeTime: number) {
     const [px, py, pz] = api.getPosition(this.playerId);
     const [dx, dy, dz] = api.getPlayerFacingInfo(this.playerId)?.dir ?? [0, 0, 1];
     const x = px + dx * 0.5;
@@ -114,12 +113,6 @@ export class MoltenMagmaRod extends MagicSystem {
     }
   }
 
-
-  protected getChargeColor(chargeTime: number): string {
-    const level = Math.min(8, Math.floor(chargeTime / 500));
-    return ["white", "white", "lime", "lime", "yellow", "yellow", "orange", "orange", "red"][level];
-  }
-
   onPlayerClick = (): void => {
     this.startCharging();
   }
@@ -128,8 +121,8 @@ export class MoltenMagmaRod extends MagicSystem {
     const chargeTime = this.stopCharging();
     if (chargeTime === undefined || chargeTime < this.MIN_CHARGE[this.currentMode]) return;
 
-    if (this.crouching) this.castChargedSpell(chargeTime);
-    else this.castKnockbackSpell(chargeTime);
+    if (this.crouching) this.castFirstSpell(chargeTime);
+    else this.castSecondSpell(chargeTime);
   }
 
   onPlayerAltAction = (): void => {
@@ -143,8 +136,8 @@ export class MoltenMagmaRod extends MagicSystem {
       const chargeTime = this.stopCharging();
       if (chargeTime === undefined || chargeTime < this.MIN_CHARGE[this.currentMode]) return;
 
-      if (this.crouching) this.castChargedSpell(chargeTime);
-      else this.castKnockbackSpell(chargeTime);
+      if (this.crouching) this.castFirstSpell(chargeTime);
+      else this.castSecondSpell(chargeTime);
     }
   }
 
@@ -162,9 +155,9 @@ export class MoltenMagmaRod extends MagicSystem {
     ], 0, 100)
 
     if (chargeTime > 5000) {
-      if(this.crouching) this.castChargedSpell(chargeTime);
-      else this.castKnockbackSpell(chargeTime);
-      
+      if(this.crouching) this.castFirstSpell(chargeTime);
+      else this.castSecondSpell(chargeTime);
+
       this.chargeStart = api.now();
       api.initiateMiddleScreenBar(this.playerId, 5000, true, 0)
       api.setClientOption(this.playerId, `runningSpeed`, 2);
