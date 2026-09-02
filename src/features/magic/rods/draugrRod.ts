@@ -32,16 +32,6 @@ export class DraugrRod extends MagicSystem {
     }
   }
 
-  calcPoint(chargeTime: number): number {
-    const point = Math.min(20, Math.floor(chargeTime / 250));
-    return point;
-  }
-
-  calcDamage(chargeTime: number): number {
-    const damage = Math.min(100, 10 + Math.floor(chargeTime / 1000) * 5);
-    return damage;
-  }
-
   castFirstSpell(chargeTime: number): void {
     let [x, y, z] = api.getPosition(this.playerId); y += 1.5;
     const [dx, dy, dz] = api.getPlayerFacingInfo(this.playerId)?.dir ?? [0, 0, 1];
@@ -213,7 +203,7 @@ export class DraugrRod extends MagicSystem {
     const chargeTime = this.stopCharging();
     if (chargeTime === undefined || chargeTime < this.MIN_CHARGE[this.currentMode]) return;
 
-    if (this.crouching) this.castFirstSpell(chargeTime);
+    if (!this.crouching) this.castFirstSpell(chargeTime);
     else this.castSecondSpell(chargeTime);
   }
 
@@ -228,7 +218,7 @@ export class DraugrRod extends MagicSystem {
       const chargeTime = this.stopCharging();
       if (chargeTime === undefined || chargeTime < this.MIN_CHARGE[this.currentMode]) return;
 
-      if (this.crouching) this.castFirstSpell(chargeTime);
+      if (!this.crouching) this.castFirstSpell(chargeTime);
       else this.castSecondSpell(chargeTime);
     }
   }

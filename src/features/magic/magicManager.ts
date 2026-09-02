@@ -2,6 +2,7 @@ import type * as Types from "@bloxd";
 import { MagicSystem } from "./magicSystem";
 import { MoltenMagmaRod } from "./rods/moltenMagmaRod";
 import { DraugrRod } from "./rods/draugrRod";
+import { cursedRod } from "./rods/cursedRod";
 
 export class MagicManager {
   private magics = new Map<Types.PlayerId, MagicSystem>()
@@ -86,6 +87,9 @@ export class MagicManager {
         break;
       case "Draugr Rod":
         magic = new DraugrRod(id);
+        break;
+      case "Cursed Rod":
+        magic = new cursedRod(id);
         break;
     }
 

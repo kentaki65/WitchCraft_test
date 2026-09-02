@@ -27,7 +27,7 @@ export abstract class MagicSystem {
     this.cancelCharging();
     S.stop(this.schedulerTag);
   }
-  
+
   protected switchMode(): void {
     this.currentMode = this.currentMode === 0 ? 1 : 0;
   }
@@ -36,15 +36,25 @@ export abstract class MagicSystem {
     return api.isPlayerCrouching(this.playerId);
   }
 
+  calcPoint(chargeTime: number): number {
+    const point = Math.min(20, Math.floor(chargeTime / 250));
+    return point;
+  }
+
+  calcDamage(chargeTime: number): number {
+    const damage = Math.min(100, 10 + Math.floor(chargeTime / 1000) * 5);
+    return damage;
+  }
+
   protected updateCrouching(): void {
     const crouching = this.isCrouching();
-    if(crouching && !this.crouching){
+    if (crouching && !this.crouching) {
       this.switchMode();
     }
 
     this.crouching = crouching;
   }
-  
+
   protected getChargeColor(chargeTime: number): string {
     const level = Math.min(8, Math.floor(chargeTime / 500));
     return ["white", "white", "lime", "lime", "yellow", "yellow", "orange", "orange", "red"][level];
@@ -53,14 +63,9 @@ export abstract class MagicSystem {
   protected startCharging(): void {
     if (this.charging) return;
 
-    /*
-    これらで強制的に三人称視点にしてアニメーションを見せよう
-    api.setCameraZoom(myId, 1)
-    api.setClientOption(myId,"cameraPositionOffset", [0, 1, 0])
-    */
-
     this.charging = true;
     this.chargeStart = api.now();
+    this.startChargingAnimation();
     api.initiateMiddleScreenBar(this.playerId, 5000, true, 0);
     api.setClientOption(this.playerId, `runningSpeed`, 2);
     api.setClientOption(this.playerId, `walkingSpeed`, 2)
@@ -69,6 +74,274 @@ export abstract class MagicSystem {
   protected resetMovement(): void {
     api.setClientOption(this.playerId, "runningSpeed", 7);
     api.setClientOption(this.playerId, "walkingSpeed", 4);
+  }
+
+  protected startChargingAnimation() {
+    S.stop(`cameraReset: ${this.playerId}`);
+    api.setCameraZoom(this.playerId, 1);
+    api.setClientOption(this.playerId, "cameraPositionOffset", [0, 1, 0]);
+
+    api.animateEntity(this.playerId, {
+      loop: false,
+      animationDurationMs: 800,
+      nodeAnimations: {
+        ArmRightMesh: {
+          timeline: [
+            {
+              timeFraction: 0,
+              rotation: {
+                lerpMode: "catmull-rom-spline",
+                point: [0, 0, 0]
+              }
+            },
+            {
+              timeFraction: 0.6,
+              rotation: {
+                lerpMode: "catmull-rom-spline",
+                point: [-0.8, 0.5, -0.3]
+              }
+            },
+            {
+              timeFraction: 1,
+              rotation: {
+                lerpMode: "catmull-rom-spline",
+                // 甲を合わせる
+                point: [-1.2, 0.8, -0.5]
+              }
+            }
+          ]
+        },
+
+        ArmLeftMesh: {
+          timeline: [
+            {
+              timeFraction: 0,
+              rotation: {
+                lerpMode: "catmull-rom-spline",
+                point: [0, 0, 0]
+              }
+            },
+            {
+              timeFraction: 0.6,
+              rotation: {
+                lerpMode: "catmull-rom-spline",
+                point: [-0.8, -0.5, 0.3]
+              }
+            },
+            {
+              timeFraction: 1,
+              rotation: {
+                lerpMode: "catmull-rom-spline",
+                // 甲を合わせる
+                point: [-1.2, -0.8, 0.5]
+              }
+            }
+          ]
+        }
+      }
+    });
+    S.run(() => {
+      this.duringChargeAnimation()
+    }, 16);
+  }
+
+  protected duringChargeAnimation() {
+    api.animateEntity(this.playerId, {
+      loop: true,
+      animationDurationMs: 1200,
+      nodeAnimations: {
+        ArmRightMesh: {
+          timeline: [
+            {
+              timeFraction: 0,
+              rotation: {
+                lerpMode: "catmull-rom-spline",
+                point: [-1.2, 0.8, -0.5]
+              }
+            },
+            {
+              timeFraction: 0.25,
+              rotation: {
+                lerpMode: "catmull-rom-spline",
+                // 右手：上
+                point: [-1.0, 0.8, -0.5]
+              }
+            },
+            {
+              timeFraction: 0.5,
+              rotation: {
+                lerpMode: "catmull-rom-spline",
+                // 右手：下
+                point: [-1.4, 0.8, -0.5]
+              }
+            },
+            {
+              timeFraction: 0.75,
+              rotation: {
+                lerpMode: "catmull-rom-spline",
+                // 右手：上
+                point: [-1.0, 0.8, -0.5]
+              }
+            },
+            {
+              timeFraction: 1,
+              rotation: {
+                lerpMode: "catmull-rom-spline",
+                // 右手：下
+                point: [-1.4, 0.8, -0.5]
+              }
+            }
+          ]
+        },
+
+        ArmLeftMesh: {
+          timeline: [
+            {
+              timeFraction: 0,
+              rotation: {
+                lerpMode: "catmull-rom-spline",
+                point: [-1.2, -0.8, 0.5]
+              }
+            },
+            {
+              timeFraction: 0.25,
+              rotation: {
+                lerpMode: "catmull-rom-spline",
+                // 左手：下
+                point: [-1.4, -0.8, 0.5]
+              }
+            },
+            {
+              timeFraction: 0.5,
+              rotation: {
+                lerpMode: "catmull-rom-spline",
+                // 左手：上
+                point: [-1.0, -0.8, 0.5]
+              }
+            },
+            {
+              timeFraction: 0.75,
+              rotation: {
+                lerpMode: "catmull-rom-spline",
+                // 左手：下
+                point: [-1.4, -0.8, 0.5]
+              }
+            },
+            {
+              timeFraction: 1,
+              rotation: {
+                lerpMode: "catmull-rom-spline",
+                // 左手：上
+                point: [-1.0, -0.8, 0.5]
+              }
+            }
+          ]
+        }
+      }
+    });
+  }
+
+  protected finishChargingAnimation() {
+    api.animateEntity(this.playerId, {
+      loop: false,
+      animationDurationMs: 1200,
+      nodeAnimations: {
+        ArmRightMesh: {
+          timeline: [
+            {
+              timeFraction: 0,
+              rotation: {
+                lerpMode: "catmull-rom-spline",
+                // 溜めた状態
+                point: [-1.3, 0.8, -0.5]
+              }
+            },
+            {
+              timeFraction: 0.25,
+              rotation: {
+                lerpMode: "catmull-rom-spline",
+                // 一瞬引いて力を溜める
+                point: [-1.6, 0.9, -0.6]
+              }
+            },
+            {
+              timeFraction: 0.5,
+              rotation: {
+                lerpMode: "catmull-rom-spline",
+                // 一気に前へ振り出す
+                point: [-2.4, 0.2, -0.7]
+              }
+            },
+            {
+              timeFraction: 0.7,
+              rotation: {
+                lerpMode: "catmull-rom-spline",
+                // 魔法を撃ち出した状態
+                point: [-2.8, 0.0, -0.8]
+              }
+            },
+            {
+              timeFraction: 1,
+              rotation: {
+                lerpMode: "catmull-rom-spline",
+                // 反動で少し戻す
+                point: [-2.5, 0.1, -0.7]
+              }
+            }
+          ]
+        },
+
+        ArmLeftMesh: {
+          timeline: [
+            {
+              timeFraction: 0,
+              rotation: {
+                lerpMode: "catmull-rom-spline",
+                // 溜めた状態
+                point: [-1.3, -0.8, 0.5]
+              }
+            },
+            {
+              timeFraction: 0.25,
+              rotation: {
+                lerpMode: "catmull-rom-spline",
+                // 一瞬引いて力を溜める
+                point: [-1.6, -0.9, 0.6]
+              }
+            },
+            {
+              timeFraction: 0.5,
+              rotation: {
+                lerpMode: "catmull-rom-spline",
+                // 一気に前へ振り出す
+                point: [-2.4, -0.2, 0.7]
+              }
+            },
+            {
+              timeFraction: 0.7,
+              rotation: {
+                lerpMode: "catmull-rom-spline",
+                // 魔法を撃ち出した状態
+                point: [-2.8, 0.0, 0.8]
+              }
+            },
+            {
+              timeFraction: 1,
+              rotation: {
+                lerpMode: "catmull-rom-spline",
+                // 反動で少し戻す
+                point: [-2.5, -0.1, 0.7]
+              }
+            }
+          ]
+        }
+      }
+    });
+
+    S.run(() => {
+      api.setCameraZoom(this.playerId, 0);
+      api.setClientOptionToDefault(this.playerId, "cameraPositionOffset");
+    }, 20, `cameraReset: ${this.playerId}`);
   }
 
   protected diffCharging(): number {
@@ -80,6 +353,7 @@ export abstract class MagicSystem {
 
     this.charging = false;
     this.resetMovement();
+    this.finishChargingAnimation();
     return this.diffCharging();
   }
 
@@ -105,8 +379,6 @@ export abstract class MagicSystem {
     this.cooldown = api.now();
   }
 
-  abstract calcPoint(chargeTime: number): number;
-  abstract calcDamage(chargeTime: number): number;
   abstract castFirstSpell(chargeTime: number): void;
   abstract castSecondSpell(chargeTime: number): void;
   abstract tick: (...args: any[]) => void;

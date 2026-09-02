@@ -34,16 +34,6 @@ export class MoltenMagmaRod extends MagicSystem {
       })
     }
   }
-
-  calcPoint(chargeTime: number): number {
-    const point = Math.min(20, Math.floor(chargeTime / 250));
-    return point;
-  }
-
-  calcDamage(chargeTime: number): number {
-    const damage = Math.min(100, 10 + Math.floor(chargeTime / 1000) * 5);
-    return damage;
-  }
   
   castFirstSpell(chargeTime: number): void {
     const [x, y, z] = api.getPosition(this.playerId);
@@ -121,7 +111,7 @@ export class MoltenMagmaRod extends MagicSystem {
     const chargeTime = this.stopCharging();
     if (chargeTime === undefined || chargeTime < this.MIN_CHARGE[this.currentMode]) return;
 
-    if (this.crouching) this.castFirstSpell(chargeTime);
+    if (!this.crouching) this.castFirstSpell(chargeTime);
     else this.castSecondSpell(chargeTime);
   }
 
@@ -136,7 +126,7 @@ export class MoltenMagmaRod extends MagicSystem {
       const chargeTime = this.stopCharging();
       if (chargeTime === undefined || chargeTime < this.MIN_CHARGE[this.currentMode]) return;
 
-      if (this.crouching) this.castFirstSpell(chargeTime);
+      if (!this.crouching) this.castFirstSpell(chargeTime);
       else this.castSecondSpell(chargeTime);
     }
   }
