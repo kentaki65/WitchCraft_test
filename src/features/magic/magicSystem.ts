@@ -23,7 +23,6 @@ export abstract class MagicSystem {
   }
 
   public deactivate(): void {
-    api.log("Cancelが呼ばれた")
     this.cancelCharging();
     S.stop(this.schedulerTag);
   }

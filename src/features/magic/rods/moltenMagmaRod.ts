@@ -145,7 +145,7 @@ export class MoltenMagmaRod extends MagicSystem {
     ], 0, 100)
 
     if (chargeTime > 5000) {
-      if(this.crouching) this.castFirstSpell(chargeTime);
+      if(!this.crouching) this.castFirstSpell(chargeTime);
       else this.castSecondSpell(chargeTime);
 
       this.chargeStart = api.now();

@@ -77,6 +77,8 @@ export const randomOnePick = <T>(arr: T[]): T | undefined => {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
+export const getDistance = (p1: Vec3, p2: Vec3) => Math.hypot(p2[0] - p1[0], p2[1] - p1[1], p2[2] - p1[2]);
+
 export const randomPicks = <T>(arr: T[], count: number): T[] => {
   if (!arr || arr.length === 0) return [];
   const shuffled = [...arr].sort(() => Math.random() - 0.5);
@@ -113,4 +115,26 @@ export function subtractVec(a: Vec3, b: Vec3): Vec3 {
     b[1] - a[1],
     b[2] - a[2]
   ];
+}
+
+export function divideVec(a: Vec3, b: Vec3, x: number): Vec3[] | undefined{
+  if(x <= 1) return;
+  const points: Vec3[] = [];
+
+  for(let k = 1; k < x; k++){
+    // 内分点の公式: ((x - k) * a + k * b) / x
+    const targetX = ((x - k) * a[0] + k * b[0]) / x;
+    const targetY = ((x - k) * a[1] + k * b[1]) / x;
+    const targetZ = ((x - k) * a[2] + k * b[2]) / x;
+
+    points.push([targetX, targetY, targetZ]);
+  }
+
+  return points;
+}
+
+export function normalize(arr: number[]) {
+  const len = Math.hypot(...arr);
+  if (len === 0) return arr.map(() => 0);
+  return arr.map(val => val / len);
 }

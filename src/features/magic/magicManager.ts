@@ -66,6 +66,10 @@ export class MagicManager {
     this.magics.get(playerId)?.onPlayerAltAction();
   };
 
+  onPlayerClick = (playerId: Types.PlayerId, ...args: any[]) => {
+    this.magics.get(playerId)?.onPlayerClick();
+  }
+  
   onPlayerClickUp = (playerId: Types.PlayerId, ...args: any[]) => {
     this.magics.get(playerId)?.onPlayerClickUp();
   };

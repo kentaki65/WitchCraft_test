@@ -1,64 +1,102 @@
-import { findNearest, subtractVec } from "../../../utils/math";
+import { divideVec, findNearest, subtractVec, getDistance, randomNumber, normalize } from "../../../utils/math";
 import { MagicSystem } from "../magicSystem";
 import { S } from "../../../core/scheduler";
 import type * as Types from "@bloxd";
 
+type Vec3 = [number, number, number];
+
 export class cursedRod extends MagicSystem {
   protected readonly itemName = "Cursed Rod";
-  protected readonly chainInterval = 20;
+  protected readonly chainInterval = 2;
+  protected readonly segments = 5;
+  protected readonly reachTick = this.chainInterval * this.segments;
 
-  chainAttack(targetId: Types.MobId, vec: Types.Vec3, fromPos: Types.Vec3) {
-    api.playParticleEffect({
-      dir1: vec,
-      dir2: vec,
-      pos1: fromPos,
-      pos2: fromPos.map(n => n + 1),
-      texture: "soul_0",
-      minLifeTime: 0.4,
-      maxLifeTime: 0.6,
-      minEmitPower: 5,
-      maxEmitPower: 10,
-      minSize: 1,
-      maxSize: 2,
-      manualEmitCount: 10,
-      gravity: [0, 0, 0],
-      colorGradients: [
-        {
-          timeFraction: 0,
-          minColor: [60, 60, 150, 1],
-          maxColor: [128, 0, 128, 1],
-        },
-      ],
-      velocityGradients: [
-        {
-          timeFraction: 0,
-          factor: 1,
-          factor2: 1,
-        },
-      ],
-      blendMode: 1,
-      hideDist: 500,
-    });
-    //攻撃など
+  playChainEffect(targetId: Types.MobId, fromPos: Vec3) {
+    const loop = (index: number): void => {
+      let targetPos = api.getPosition(targetId);
+      const points: Vec3[] = divideVec(fromPos, targetPos, this.segments);
+
+      const pos: Vec3 = [
+        points[index][0],
+        points[index][1] + 1,
+        points[index][2],
+      ];
+
+      if (!points) return;
+      const dir = subtractVec(pos, targetPos);
+
+      api.broadcastSound(`wraithHurt`, 1, 1, {
+        playerIdOrPos: targetPos,
+        maxHearDist: 50
+      })
+
+      api.playParticleEffect({
+        dir1: dir,
+        dir2: dir,
+        pos1: pos.map(n => n - 0.1),
+        pos2: pos.map(n => n + 0.1),
+        texture: "soul_0",
+        minLifeTime: 0.5,
+        maxLifeTime: 1,
+        minEmitPower: 0,
+        maxEmitPower: 0,
+        minSize: 0.5,
+        maxSize: 1,
+        manualEmitCount: 10,
+        gravity: [0, 0, 0],
+        colorGradients: [
+          {
+            timeFraction: 0,
+            minColor: [70, 215, 230, 1],
+            maxColor: [75, 225, 240, 1],
+          },
+        ],
+        velocityGradients: [
+          {
+            timeFraction: 0,
+            factor: 1,
+            factor2: 1,
+          },
+        ],
+        blendMode: 1,
+        hideDist: 500,
+      });
+
+      if (index + 1 < points.length) {
+        S.run(() => loop(index + 1), 2);
+      } else {
+        api.attemptApplyDamage({
+          eId: this.playerId,
+          hitEId: targetId,
+          attemptedDmgAmt: 25 * index,
+          withItem: this.itemName
+        });
+      }
+    }
+
+    loop(0);
   }
 
-  attackNearest(fromPos: Types.Vec3, hitted: Set<Types.MobId>, remaining: number) {
-    if(remaining === 0) return;
+  attackNearest(fromPos: Vec3, hitted: Set<Types.MobId>, remaining: number) {
+    if (remaining <= 0) return;
 
+    const margin = 10;
     const targets = api.getEntitiesInRect(
-      fromPos.map(n => n - 10), 
-      fromPos.map(n => n + 10)
-    ).filter(n => !hitted.has(n)).filter(n => n !== this.playerId);;
+      fromPos.map(n => n - margin),
+      fromPos.map(n => n + margin)
+    ).filter(n => !hitted.has(n)).filter(n => n !== this.playerId).filter(n => api.getEntityType(n) !== "Item");
 
-    api.log(targets);
     const nearest = findNearest(targets, fromPos);
     if (!nearest) return;
 
     const nearestPos = api.getPosition(nearest);
-    const vec = subtractVec(fromPos, nearestPos);
 
-    this.chainAttack(nearest, vec, fromPos);
-    S.run(() => this.attackNearest(nearestPos, hitted.add(nearest), remaining - 1), this.chainInterval)
+    this.playChainEffect(nearest, fromPos);
+
+    S.run(
+      () => this.attackNearest(nearestPos, hitted.add(nearest), remaining - 1),
+      this.reachTick
+    );
   }
 
   castFirstSpell(chargeTime: number): void {
@@ -68,7 +106,7 @@ export class cursedRod extends MagicSystem {
     const chain = this.calcPoint(chargeTime);
     const dist = 10;
 
-    const fromPos: Types.Vec3 = [
+    const fromPos: Vec3 = [
       x + dx * dist,
       y + dy * dist,
       z + dz * dist,
@@ -83,15 +121,28 @@ export class cursedRod extends MagicSystem {
     if (!firstTarget) return;
 
     const firstTargetPos = api.getPosition(firstTarget);
-    const vecPlayerMob = subtractVec(playerPos, firstTargetPos);
     const hitted = new Set<Types.MobId>([firstTarget]);
 
-    this.chainAttack(firstTarget, vecPlayerMob, playerPos);
-    S.run(() => this.attackNearest(firstTargetPos, hitted, chain), this.chainInterval);
+    this.playChainEffect(firstTarget, playerPos);
+    S.run(() => this.attackNearest(firstTargetPos, hitted, chain), this.reachTick);
   }
 
   castSecondSpell(chargeTime: number): void {
+    const [x, y, z] = api.getPosition(this.playerId);
+    const dir: Vec3 = api.getPlayerFacingInfo(this.playerId).dir ?? [0, 0, 1];
 
+    const [dx, dy, dz] = normalize(dir.map(n => -n));
+    const min: Vec3 = [
+      x + dx * 3 - 1,
+      y + 3 - 1,
+      z + dz * 3 - 1,
+    ];
+
+    const max: Vec3 = [
+      x + dx * 3 + 1,
+      y + 3 + 1,
+      z + dz * 3 + 1,
+    ];
   }
 
   onPlayerClick = (): void => {
@@ -136,7 +187,7 @@ export class cursedRod extends MagicSystem {
     ], 0, 100)
 
     if (chargeTime > 5000) {
-      if (this.crouching) this.castFirstSpell(chargeTime);
+      if (!this.crouching) this.castFirstSpell(chargeTime);
       else this.castSecondSpell(chargeTime);
 
       this.chargeStart = api.now();

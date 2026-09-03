@@ -5,29 +5,7 @@ type Module = {
 	[key: string]: any
 }
 
-const BUILD_LOCATION: [number, number, number] = [0, 1, 0]
-
-const MODULES = [
-	"./test.js",
-	"./hello.js"
-]
-
 class Loader {
-	static BUILD(e = BUILD_LOCATION) {
-		api.setBlock(e, "Code Block")
-		api.setBlockData(...e, {
-			persisted: {
-				shared: {
-					text: `${MODULES.map((e, n) => `
-						import * as $${n} from "${e}"
-					`).join(";")};Loader.modules = [${MODULES.map((e, n) => `
-						$${n}
-					`).join(",")}]`
-				}
-			}
-		})
-	}
-
 	static modules: Module[] = []
 
 	static returns = {
@@ -158,8 +136,6 @@ class Loader {
 		}
 	}
 }
-
-Loader.BUILD(BUILD_LOCATION)
 
 import * as $0 from "./src/features/achievements/index"
 import * as $1 from "./src/features/infernalMobs/index"
