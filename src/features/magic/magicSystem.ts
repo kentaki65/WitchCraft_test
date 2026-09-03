@@ -9,7 +9,7 @@ export abstract class MagicSystem {
   protected abstract readonly itemName: string;
   public readonly schedulerTag: string;
 
-  protected readonly MIN_CHARGE = [500, 2000] as const;
+  protected readonly MIN_CHARGE: readonly [number, number] = [500, 2000];
   protected slot = 0;
   protected charging = false;
   protected chargeStart = 0;
@@ -24,6 +24,23 @@ export abstract class MagicSystem {
 
   public deactivate(): void {
     this.cancelCharging();
+    api.animateEntity(this.playerId, {
+      loop: false,
+      animationDurationMs: 1,
+      nodeAnimations: {
+        ArmRightMesh: {
+          timeline: [
+            {
+              timeFraction: 0,
+              rotation: {
+                lerpMode: "catmull-rom-spline",
+                point: [0, 0, 0]
+              }
+            },
+          ]
+        }
+      }
+    });
     S.stop(this.schedulerTag);
   }
 

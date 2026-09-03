@@ -10,6 +10,7 @@ export class cursedRod extends MagicSystem {
   protected readonly chainInterval = 2;
   protected readonly segments = 5;
   protected readonly reachTick = this.chainInterval * this.segments;
+  protected override readonly MIN_CHARGE = [2000, 2000] as const;
 
   playChainEffect(targetId: Types.MobId, fromPos: Vec3) {
     const loop = (index: number): void => {
