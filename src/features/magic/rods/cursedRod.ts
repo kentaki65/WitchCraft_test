@@ -1,4 +1,4 @@
-import { divideVec, findNearest, subtractVec, getDistance, randomNumber, normalize } from "../../../utils/math";
+import { divideVec, findNearest, subtractVec, dot, normalize } from "../../../utils/math";
 import { MagicSystem } from "../magicSystem";
 import { S } from "../../../core/scheduler";
 import type * as Types from "@bloxd";
@@ -10,7 +10,8 @@ export class cursedRod extends MagicSystem {
   protected readonly chainInterval = 2;
   protected readonly segments = 5;
   protected readonly reachTick = this.chainInterval * this.segments;
-  protected override readonly MIN_CHARGE = [2000, 2000] as const;
+  protected override readonly MIN_CHARGE = [2000, 200] as const;
+  protected markedMobs = new Set<Types.PlayerId | Types.MobId>();
 
   playChainEffect(targetId: Types.MobId, fromPos: Vec3) {
     const loop = (index: number): void => {
@@ -66,10 +67,12 @@ export class cursedRod extends MagicSystem {
       if (index + 1 < points.length) {
         S.run(() => loop(index + 1), 2);
       } else {
+        const markedMultiplier = 5;
+        const damage = this.markedMobs.has(targetId) ? 25 * index * markedMultiplier : 25 * index;
         api.attemptApplyDamage({
           eId: this.playerId,
           hitEId: targetId,
-          attemptedDmgAmt: 25 * index,
+          attemptedDmgAmt: damage,
           withItem: this.itemName
         });
       }
@@ -128,22 +131,94 @@ export class cursedRod extends MagicSystem {
     S.run(() => this.attackNearest(firstTargetPos, hitted, chain), this.reachTick);
   }
 
+  getMobsInSight(
+    playerPos: Vec3,
+    dir: Vec3,
+    maxDistance: number,
+    maxRadius: number = 1.5 // 視線からの許容横ズレ
+  ): Types.MobId[] {
+    const entities = api.getEntitiesInRect(
+      playerPos.map(n => n - maxDistance),
+      playerPos.map(n => n + maxDistance)
+    );
+
+    return entities.filter(id => {
+      if (id === this.playerId) return false;
+
+      const mobPos = api.getPosition(id);
+      const toMob = subtractVec(mobPos, playerPos);
+      const forwardDist = dot(toMob, dir);
+
+      if (forwardDist < 0 || forwardDist > maxDistance) return false;
+
+      // dir方向への投影ベクトルとtoMobの差 = 横方向のズレ
+      const projected = dir.map(n => n * forwardDist) as Vec3;
+      const lateral = subtractVec(toMob, projected);
+      const lateralDist = Math.sqrt(dot(lateral, lateral));
+
+      return lateralDist <= maxRadius;
+    });
+  }
+
   castSecondSpell(chargeTime: number): void {
-    const [x, y, z] = api.getPosition(this.playerId);
-    const dir: Vec3 = api.getPlayerFacingInfo(this.playerId).dir ?? [0, 0, 1];
+    const playerPos = api.getPosition(this.playerId);
+    const dir = normalize(
+      api.getPlayerFacingInfo(this.playerId).dir ?? [0, 0, 1]
+    ).map(n => -n) as Vec3;
 
-    const [dx, dy, dz] = normalize(dir.map(n => -n));
-    const min: Vec3 = [
-      x + dx * 3 - 1,
-      y + 3 - 1,
-      z + dz * 3 - 1,
-    ];
+    const point = this.calcPoint(chargeTime);
+    const mobs = this.getMobsInSight(playerPos, dir, 20).splice(0, point);
 
-    const max: Vec3 = [
-      x + dx * 3 + 1,
-      y + 3 + 1,
-      z + dz * 3 + 1,
-    ];
+    for (const id of mobs) {
+      S.stop("debuf" + id);
+      this.markedMobs.add(id);
+
+      api.broadcastSound("hauntedHorrorImpact", 1, 1, {
+        playerIdOrPos: id,
+        maxHearDist: 50
+      })
+
+      api.applyEffect(id, `Weakness`, 10000, {
+        inbuiltLevel: 2
+      })
+
+      api.applyEffect(id, `Slowness`, 10000, {
+        inbuiltLevel: 2
+      })
+
+      api.updateEntityNodeMeshAttachment(
+        id,
+        "HeadMesh",
+        "ParticleEmitter",
+        {
+          dir1: [0.2, 1, 0.2],
+          dir2: [-0.2, -1, -0.2],
+          emitRate: 200,
+          manualEmitCount: 200,
+          width: 1,
+          height: 1,
+          depth: 1.5,
+          texture: "soul_0",
+          minLifeTime: 0.1,
+          maxLifeTime: 0.5,
+          minEmitPower: 1,
+          maxEmitPower: 3,
+          minSize: 0.5,
+          maxSize: 1,
+          gravity: [0, 10, 0],
+          colorGradients: [
+            { timeFraction: 0, minColor: [0, 0, 0, 1], maxColor: [0, 0, 0, 1] },
+            { timeFraction: 2, minColor: [200, 0, 0, 1], maxColor: [105, 0, 0, 1] }
+          ],
+          velocityGradients: [{ timeFraction: 0, factor: 1, factor2: 1 }],
+          blendMode: 4
+        },
+        [0, -0.8, -0.5]
+      );
+      S.run(() => {
+        this.markedMobs.delete(id);
+      }, 2000, "debuf" + id)
+    }
   }
 
   onPlayerClick = (): void => {

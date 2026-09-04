@@ -111,9 +111,9 @@ export function findNearest(points: string[], target: [number, number, number]):
 
 export function subtractVec(a: Vec3, b: Vec3): Vec3 {
   return [
-    b[0] - a[0],
-    b[1] - a[1],
-    b[2] - a[2]
+    a[0] - b[0],
+    a[1] - b[1],
+    a[2] - b[2]
   ];
 }
 
@@ -133,8 +133,18 @@ export function divideVec(a: Vec3, b: Vec3, x: number): Vec3[] | undefined{
   return points;
 }
 
-export function normalize(arr: number[]) {
+export function normalize(arr: Vec3): Vec3 {
   const len = Math.hypot(...arr);
-  if (len === 0) return arr.map(() => 0);
-  return arr.map(val => val / len);
+
+  if (len === 0) return [0, 0, 0];
+
+  return [
+    arr[0] / len,
+    arr[1] / len,
+    arr[2] / len,
+  ];
+}
+
+export function dot(a: number[], b: number[]): number {
+  return a.reduce((sum, value, index) => sum + value * (b[index] ?? 0), 0);
 }

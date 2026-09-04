@@ -15,3 +15,5 @@ export const handlers = {
   onPlayerClickUp: magicManager.onPlayerClickUp,
   onPlayerAltAction: magicManager.onPlayerAltAction,
 };
+
+//ominousBellHit 死の宣告で使えそうな音
