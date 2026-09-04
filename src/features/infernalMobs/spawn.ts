@@ -3,6 +3,7 @@ import { mobDatas, baseSettings } from "./data";
 import type * as Types from "@bloxd";
 
 const EXCLUDE_NAMES = ["Pig", "Cow", "Sheep", "Wildcat", "Bear", "Wolf", "Deer", "Stag", "Gorilla", "Horse"];
+let prevSpawnedId: Types.MobHerdId | null = null;
 
 function applyMobsettings(mobId: Types.MobId, settings: [Types.MobSetting, any][]): void{
   for(const [key, value] of settings){
@@ -14,8 +15,10 @@ function applyMobsettings(mobId: Types.MobId, settings: [Types.MobSetting, any][
   } 
 }
 
-export function handleSpawning(mobId: Types.MobId, mobType: Types.MobType){
+export function handleSpawning(mobId: Types.MobId, mobType: Types.MobType, x: number, y: number, z: number, mobHerdId: Types.MobHerdId){
   if (EXCLUDE_NAMES.includes(mobType)) return;
+  if(prevSpawnedId && mobHerdId === prevSpawnedId) return;
+  prevSpawnedId = mobHerdId;
 
   const base = Object.entries(baseSettings) as [Types.MobSetting, any][];
   const keys = Object.keys(mobDatas);

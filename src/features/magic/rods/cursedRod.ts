@@ -25,7 +25,7 @@ export class cursedRod extends MagicSystem {
       ];
 
       if (!points) return;
-      const dir = subtractVec(pos, targetPos);
+      const dir = subtractVec(targetPos, pos);
 
       api.broadcastSound(`wraithHurt`, 1, 1, {
         playerIdOrPos: targetPos,
@@ -135,7 +135,7 @@ export class cursedRod extends MagicSystem {
     playerPos: Vec3,
     dir: Vec3,
     maxDistance: number,
-    maxRadius: number = 1.5 // 視線からの許容横ズレ
+    maxRadius: number = 2
   ): Types.MobId[] {
     const entities = api.getEntitiesInRect(
       playerPos.map(n => n - maxDistance),
@@ -144,14 +144,13 @@ export class cursedRod extends MagicSystem {
 
     return entities.filter(id => {
       if (id === this.playerId) return false;
-
+      
       const mobPos = api.getPosition(id);
       const toMob = subtractVec(mobPos, playerPos);
       const forwardDist = dot(toMob, dir);
 
       if (forwardDist < 0 || forwardDist > maxDistance) return false;
 
-      // dir方向への投影ベクトルとtoMobの差 = 横方向のズレ
       const projected = dir.map(n => n * forwardDist) as Vec3;
       const lateral = subtractVec(toMob, projected);
       const lateralDist = Math.sqrt(dot(lateral, lateral));
@@ -162,9 +161,7 @@ export class cursedRod extends MagicSystem {
 
   castSecondSpell(chargeTime: number): void {
     const playerPos = api.getPosition(this.playerId);
-    const dir = normalize(
-      api.getPlayerFacingInfo(this.playerId).dir ?? [0, 0, 1]
-    ).map(n => -n) as Vec3;
+    const dir = normalize(api.getPlayerFacingInfo(this.playerId).dir ?? [0, 0, 1]);
 
     const point = this.calcPoint(chargeTime);
     const mobs = this.getMobsInSight(playerPos, dir, 20).splice(0, point);
@@ -215,6 +212,7 @@ export class cursedRod extends MagicSystem {
         },
         [0, -0.8, -0.5]
       );
+
       S.run(() => {
         this.markedMobs.delete(id);
       }, 2000, "debuf" + id)
