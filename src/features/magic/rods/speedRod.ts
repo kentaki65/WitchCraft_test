@@ -46,7 +46,7 @@ export class SpeedRod extends MagicSystem<SpeedRodSkillNames> {
 
   onPlayerClickUp = (): void => {
     const chargeTime = this.stopCharging();
-    if (chargeTime === undefined || chargeTime < this.MIN_CHARGE[this.currentMode]) return;
+    if (chargeTime === undefined || chargeTime < (this.rodSettings[this.currentMode]?.minCharge || 0)) return;
 
     if (!this.crouching) this.castFirstSpell(chargeTime);
     else this.castSecondSpell(chargeTime);
@@ -61,7 +61,7 @@ export class SpeedRod extends MagicSystem<SpeedRodSkillNames> {
       this.startCharging();
     } else {
       const chargeTime = this.stopCharging();
-      if (chargeTime === undefined || chargeTime < this.MIN_CHARGE[this.currentMode]) return;
+      if (chargeTime === undefined || chargeTime < (this.rodSettings[this.currentMode]?.minCharge || 0)) return;
 
       if (!this.crouching) this.castFirstSpell(chargeTime);
       else this.castSecondSpell(chargeTime);

@@ -29,7 +29,6 @@ export class cursedRod extends MagicSystem<CursedRodSkillNames> {
     CursedRodSkillNames.WraithChain, CursedRodSkillNames.SoulHex
   ]
 
-  protected override readonly MIN_CHARGE = [2000, 200] as const;
   protected markedMobs = new Set<Types.PlayerId | Types.MobId>();
 
   playChainEffect(targetId: Types.MobId, fromPos: Vec3) {
@@ -243,7 +242,7 @@ export class cursedRod extends MagicSystem<CursedRodSkillNames> {
 
   onPlayerClickUp = (): void => {
     const chargeTime = this.stopCharging();
-    if (chargeTime === undefined || chargeTime < this.MIN_CHARGE[this.currentMode]) return;
+    if (chargeTime === undefined || chargeTime < (this.rodSettings[this.currentMode]?.minCharge || 0)) return;
 
     if (!this.crouching) this.castFirstSpell(chargeTime);
     else this.castSecondSpell(chargeTime);
@@ -258,7 +257,7 @@ export class cursedRod extends MagicSystem<CursedRodSkillNames> {
       this.startCharging();
     } else {
       const chargeTime = this.stopCharging();
-      if (chargeTime === undefined || chargeTime < this.MIN_CHARGE[this.currentMode]) return;
+      if (chargeTime === undefined || chargeTime < (this.rodSettings[this.currentMode]?.minCharge || 0)) return;
 
       if (!this.crouching) this.castFirstSpell(chargeTime);
       else this.castSecondSpell(chargeTime);

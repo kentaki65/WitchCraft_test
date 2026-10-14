@@ -129,7 +129,7 @@ export class MoltenMagmaRod extends MagicSystem<MoltenMagmaRodSkillNames> {
 
   onPlayerClickUp = (): void => {
     const chargeTime = this.stopCharging();
-    if (chargeTime === undefined || chargeTime < this.MIN_CHARGE[this.currentMode]) return;
+    if (chargeTime === undefined || chargeTime < (this.rodSettings[this.currentMode]?.minCharge || 0)) return;
 
     if (!this.crouching) this.castFirstSpell(chargeTime);
     else this.castSecondSpell(chargeTime);
@@ -144,7 +144,7 @@ export class MoltenMagmaRod extends MagicSystem<MoltenMagmaRodSkillNames> {
       this.startCharging();
     } else {
       const chargeTime = this.stopCharging();
-      if (chargeTime === undefined || chargeTime < this.MIN_CHARGE[this.currentMode]) return;
+      if (chargeTime === undefined || chargeTime < (this.rodSettings[this.currentMode]?.minCharge || 0)) return;
 
       if (!this.crouching) this.castFirstSpell(chargeTime);
       else this.castSecondSpell(chargeTime);

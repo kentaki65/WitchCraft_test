@@ -23,7 +23,6 @@ export abstract class MagicSystem<TSkill extends number = number> {
   protected abstract readonly rodSettings: Record<TSkill, RodSettings>;
   protected abstract readonly skills: readonly TSkill[];
 
-  protected readonly MIN_CHARGE: readonly [number, number] = [500, 2000];
   protected slot = 0;
   protected charging = false;
   protected chargeStart = 0;
