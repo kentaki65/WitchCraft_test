@@ -3,6 +3,7 @@ import { MagicSystem } from "./magicSystem";
 import { MoltenMagmaRod } from "./rods/moltenMagmaRod";
 import { DraugrRod } from "./rods/draugrRod";
 import { cursedRod } from "./rods/cursedRod";
+import { SpeedRod } from "./rods/speedRod";
 
 export class MagicManager {
   private magics = new Map<Types.PlayerId, MagicSystem>()
@@ -87,13 +88,16 @@ export class MagicManager {
 
     switch (item?.name) {
       case "Molten Magma Rod":
-        magic = new MoltenMagmaRod(id);
+        magic = new MoltenMagmaRod(id, 0);
         break;
       case "Draugr Rod":
-        magic = new DraugrRod(id);
+        magic = new DraugrRod(id, 0);
         break;
       case "Cursed Rod":
-        magic = new cursedRod(id);
+        magic = new cursedRod(id, 0);
+        break;
+      case "Speed Rod":
+        magic = new SpeedRod(id, 0);
         break;
     }
 

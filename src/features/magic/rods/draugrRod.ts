@@ -1,10 +1,29 @@
-import { MagicSystem } from "../magicSystem";
+import { MagicSystem, RodSettings } from "../magicSystem";
 import { S } from "../../../core/scheduler";
 import type * as Types from "@bloxd";
 
-export class DraugrRod extends MagicSystem {
+enum DraugrRodSkillNames {
+  "FrostBurial", "AbsoluteZero"
+}
+
+export class DraugrRod extends MagicSystem<DraugrRodSkillNames> {
   protected readonly itemName: string = "Draugr Rod";
 
+  protected readonly skills = [
+    DraugrRodSkillNames.FrostBurial, DraugrRodSkillNames.AbsoluteZero
+  ];
+  
+  protected readonly rodSettings: Record<DraugrRodSkillNames, RodSettings> = {
+    [DraugrRodSkillNames.FrostBurial]: {
+      needCharge: true,
+      minCharge: 2000
+    },
+    [DraugrRodSkillNames.AbsoluteZero]: {
+      needCharge: true,
+      minCharge: 2000
+    }
+  };
+  
   protected spawnProjectile({ x, y, z, dx, dy, dz, dist, damage, chargeTime }) {
     let px = x + dx * dist;
     let py = y + dy * dist;

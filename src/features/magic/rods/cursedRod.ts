@@ -1,15 +1,34 @@
 import { divideVec, findNearest, subtractVec, dot, normalize } from "../../../utils/math";
-import { MagicSystem } from "../magicSystem";
+import { MagicSystem, RodSettings } from "../magicSystem";
 import { S } from "../../../core/scheduler";
 import type * as Types from "@bloxd";
 
 type Vec3 = [number, number, number];
 
-export class cursedRod extends MagicSystem {
+enum CursedRodSkillNames {
+  "WraithChain", "SoulHex"
+}
+
+export class cursedRod extends MagicSystem<CursedRodSkillNames> {
   protected readonly itemName = "Cursed Rod";
   protected readonly chainInterval = 2;
   protected readonly segments = 5;
   protected readonly reachTick = this.chainInterval * this.segments;
+
+  protected readonly rodSettings: Record<CursedRodSkillNames, RodSettings> = {
+    [CursedRodSkillNames.WraithChain]: {
+      needCharge: true,
+      minCharge: 2000
+    },
+    [CursedRodSkillNames.SoulHex]: {
+      needCharge: false,
+    }
+  }
+  
+  protected readonly skills = [
+    CursedRodSkillNames.WraithChain, CursedRodSkillNames.SoulHex
+  ]
+
   protected override readonly MIN_CHARGE = [2000, 200] as const;
   protected markedMobs = new Set<Types.PlayerId | Types.MobId>();
 
@@ -191,7 +210,6 @@ export class cursedRod extends MagicSystem {
           dir1: [0.2, 1, 0.2],
           dir2: [-0.2, -1, -0.2],
           emitRate: 200,
-          manualEmitCount: 200,
           width: 1,
           height: 1,
           depth: 1.5,

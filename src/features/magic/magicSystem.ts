@@ -4,20 +4,35 @@ import { S } from "../../core/scheduler";
 //子が絶対持ってるものは abstractで
 //持ってるやつと持ってないやつがあるのは空実装にしてoverrideする
 
-export abstract class MagicSystem {
+export type RodSettings =
+  | {
+      needCharge: false;
+      minCharge?: number;
+    }
+  | {
+      needCharge: true;
+      minCharge: number;
+    };
+
+export abstract class MagicSystem<TSkill extends number = number> {
   protected playerId: Types.PlayerId;
-  protected abstract readonly itemName: string;
+
   public readonly schedulerTag: string;
+
+  protected abstract readonly itemName: string;
+  protected abstract readonly rodSettings: Record<TSkill, RodSettings>;
+  protected abstract readonly skills: readonly TSkill[];
 
   protected readonly MIN_CHARGE: readonly [number, number] = [500, 2000];
   protected slot = 0;
   protected charging = false;
   protected chargeStart = 0;
   protected cooldown = 0;
-  protected currentMode: 0 | 1 = 0;
+  protected currentMode: TSkill;
   protected crouching = false;
 
-  constructor(playerId: Types.PlayerId) {
+  constructor(playerId: Types.PlayerId, initialMode: TSkill) {
+    this.currentMode = initialMode;
     this.playerId = playerId;
     this.schedulerTag = `magic:${this.playerId}`;
   }
@@ -45,7 +60,10 @@ export abstract class MagicSystem {
   }
 
   protected switchMode(): void {
-    this.currentMode = this.currentMode === 0 ? 1 : 0;
+    const index = this.skills.indexOf(this.currentMode);
+    const nextIndex = (index + 1) % this.skills.length;
+
+    this.currentMode = this.skills[nextIndex];
   }
 
   protected isCrouching(): boolean {
@@ -156,6 +174,7 @@ export abstract class MagicSystem {
         }
       }
     });
+
     S.run(() => {
       this.duringChargeAnimation()
     }, 16);

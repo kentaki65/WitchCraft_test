@@ -5,6 +5,7 @@
 		"strict": false,
 		"module": "ESNext",
 		"moduleResolution": "bundler",
+		"target": "ES2015",
 		"noEmit": true,
 		"noLib": true,
 		"skipLibCheck": true,
@@ -12,6 +13,15 @@
 		"paths": {
 			"@bloxd": [
 				"./node_modules/@bloxd/index.d.ts"
+			],
+			"@plugins/debug": [
+				"./node_modules/@plugins/debug/index.d.ts"
+			],
+			"@plugins/helpers": [
+				"./node_modules/@plugins/helpers/index.d.ts"
+			],
+			"@plugins/sessionBasedGame": [
+				"./node_modules/@plugins/sessionBasedGame/index.d.ts"
 			]
 		}
 	},

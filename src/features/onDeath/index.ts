@@ -1,4 +1,4 @@
-import { DeadPlayer } from "src/core/types";
+import { DeadPlayer } from "../../core/types";
 import { toYMDHMS } from "../../utils/math";
 import { setData, getData } from "../../core/api/dbHelper";
 import type * as Types from "@bloxd";
@@ -31,26 +31,48 @@ function onJoin(playerId: Types.PlayerId){
 }
 
 function onDeath(victim: Types.PlayerId): void {
-  const [_, month, day, hour, minute ] = toYMDHMS(Math.floor(api.now() / 1000), 9);
+  const [_, month, day, hour, minute] =
+    toYMDHMS(Math.floor(api.now() / 1000), 9);
+
   const pos = api.getPosition(victim);
+  const time = `${month}/${day} ${hour}:${minute}`;
+
   api.setDirectionArrow(
     victim,
     "lastDiedPos" + victim,
     pos,
-    [`${month}/${day} ${hour}:${minute} 死亡地点`],
+    [`${time} 死亡地点`],
     true
   );
 
   const deadData: DeadPlayer = {
     lastDiedPos: pos,
-    lastDiedTime: `${month}/${day} ${hour}:${minute}`
-  }
+    lastDiedTime: time
+  };
 
   setData(victim, "deadPlayer", deadData);
 }
 
+function onMobKilledPlayer(
+  attackingMob: Types.MobId,
+  killedPlayer: Types.PlayerId,
+  damageDealt: number,
+  withItem: string
+): void {
+  onDeath(killedPlayer);
+}
+
+function onPlayerKilledOtherPlayer(
+  attackingPlayer: Types.PlayerId,
+  killedPlayer: Types.PlayerId,
+  damageDealt: number,
+  withItem: string
+): void {
+  onDeath(killedPlayer);
+}
+
 export const handlers = {
   onPlayerJoin: onJoin,
-  onMobKilledPlayer: onDeath,
-  onPlayerKilledOtherPlayer: onDeath
-}
+  onMobKilledPlayer,
+  onPlayerKilledOtherPlayer
+};

@@ -1,10 +1,30 @@
-import { MagicSystem } from "../magicSystem";
+import { MagicSystem, RodSettings } from "../magicSystem";
 import { S } from "../../../core/scheduler";
 import { RodTypes } from "../../../core/types";
 import type * as Types from "@bloxd";
 
-export class MoltenMagmaRod extends MagicSystem {
+enum MoltenMagmaRodSkillNames {
+  MagmaBarrage,
+  Eruption,
+}
+
+export class MoltenMagmaRod extends MagicSystem<MoltenMagmaRodSkillNames> {
   protected readonly itemName: RodTypes = "Molten Magma Rod";
+  
+  protected readonly skills  = [
+    MoltenMagmaRodSkillNames.MagmaBarrage, MoltenMagmaRodSkillNames.Eruption
+  ];
+
+  protected readonly rodSettings: Record<MoltenMagmaRodSkillNames, RodSettings> = {
+    [MoltenMagmaRodSkillNames.MagmaBarrage]: {
+      needCharge: true,
+      minCharge: 2000
+    },
+    [MoltenMagmaRodSkillNames.Eruption]: {
+      needCharge: true,
+      minCharge: 500
+    }
+  }
 
   protected spawnProjectile({ x, y, z, dx, dy, dz, dist, damage }) {
     let px = x + dx * dist;
