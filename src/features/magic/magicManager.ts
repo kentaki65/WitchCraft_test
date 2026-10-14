@@ -9,6 +9,7 @@ export class MagicManager {
   private magics = new Map<Types.PlayerId, MagicSystem>()
 
   onPlayerJoin = (playerId: Types.PlayerId): void => {
+    api.setClientOption(playerId, "canFish", false);
     this.updateMagic(playerId);
   }
 

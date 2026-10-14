@@ -5,7 +5,7 @@
 		"strict": false,
 		"module": "ESNext",
 		"moduleResolution": "bundler",
-		"target": "ES2015",
+		"target": "es2025",
 		"noEmit": true,
 		"noLib": true,
 		"skipLibCheck": true,

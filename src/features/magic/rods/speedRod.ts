@@ -14,9 +14,11 @@ export class SpeedRod extends MagicSystem<SpeedRodSkillNames> {
 
   protected readonly rodSettings: Record<SpeedRodSkillNames, RodSettings> = {
     [SpeedRodSkillNames.Flashstep]: {
+      useThirdParsonView: true,
       needCharge: false,
     },
     [SpeedRodSkillNames.Overdrive]: {
+      useThirdParsonView: false,
       needCharge: false,
     }
   };
@@ -41,7 +43,7 @@ export class SpeedRod extends MagicSystem<SpeedRodSkillNames> {
   };
 
   onPlayerClick = (): void => {
-    this.startCharging();
+    this.startCharging(this.rodSettings[this.currentMode].useThirdParsonView);
   }
 
   onPlayerClickUp = (): void => {
@@ -53,12 +55,12 @@ export class SpeedRod extends MagicSystem<SpeedRodSkillNames> {
   }
 
   onPlayerAltAction = (): void => {
-    this.startCharging();
+    this.startCharging(this.rodSettings[this.currentMode].useThirdParsonView);
   }
 
   onTouchscreenActionButton = (playerId: Types.PlayerId, touchDown: boolean): void => {
     if (touchDown) {
-      this.startCharging();
+      this.startCharging(this.rodSettings[this.currentMode].useThirdParsonView);
     } else {
       const chargeTime = this.stopCharging();
       if (chargeTime === undefined || chargeTime < (this.rodSettings[this.currentMode]?.minCharge || 0)) return;

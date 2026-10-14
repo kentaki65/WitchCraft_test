@@ -17,10 +17,12 @@ export class cursedRod extends MagicSystem<CursedRodSkillNames> {
 
   protected readonly rodSettings: Record<CursedRodSkillNames, RodSettings> = {
     [CursedRodSkillNames.WraithChain]: {
+      useThirdParsonView: true,
       needCharge: true,
       minCharge: 2000
     },
     [CursedRodSkillNames.SoulHex]: {
+      useThirdParsonView: false,
       needCharge: false,
     }
   }
@@ -237,7 +239,7 @@ export class cursedRod extends MagicSystem<CursedRodSkillNames> {
   }
 
   onPlayerClick = (): void => {
-    this.startCharging();
+    this.startCharging(this.rodSettings[this.currentMode].useThirdParsonView);
   }
 
   onPlayerClickUp = (): void => {
@@ -249,12 +251,12 @@ export class cursedRod extends MagicSystem<CursedRodSkillNames> {
   }
 
   onPlayerAltAction = (): void => {
-    this.startCharging();
+    this.startCharging(this.rodSettings[this.currentMode].useThirdParsonView);
   }
 
   onTouchscreenActionButton = (playerId: Types.PlayerId, touchDown: boolean): void => {
     if (touchDown) {
-      this.startCharging();
+      this.startCharging(this.rodSettings[this.currentMode].useThirdParsonView);
     } else {
       const chargeTime = this.stopCharging();
       if (chargeTime === undefined || chargeTime < (this.rodSettings[this.currentMode]?.minCharge || 0)) return;

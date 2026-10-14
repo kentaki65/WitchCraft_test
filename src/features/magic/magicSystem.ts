@@ -1,15 +1,18 @@
 import type * as Types from "@bloxd";
 import { S } from "../../core/scheduler";
+import { asyncAnimate } from "src/core/api/animateHelper";
 
 //子が絶対持ってるものは abstractで
 //持ってるやつと持ってないやつがあるのは空実装にしてoverrideする
 
 export type RodSettings =
   | {
+      useThirdParsonView: boolean;
       needCharge: false;
       minCharge?: number;
     }
   | {
+    useThirdParsonView: boolean;
       needCharge: true;
       minCharge: number;
     };
@@ -93,12 +96,12 @@ export abstract class MagicSystem<TSkill extends number = number> {
     return ["white", "white", "lime", "lime", "yellow", "yellow", "orange", "orange", "red"][level];
   }
 
-  protected startCharging(): void {
+  protected startCharging(useThirdParsonView: boolean): void {
     if (this.charging) return;
 
     this.charging = true;
     this.chargeStart = api.now();
-    this.startChargingAnimation();
+    this.startChargingAnimation(useThirdParsonView);
     api.initiateMiddleScreenBar(this.playerId, 5000, true, 0);
     api.setClientOption(this.playerId, `runningSpeed`, 2);
     api.setClientOption(this.playerId, `walkingSpeed`, 2)
@@ -109,12 +112,12 @@ export abstract class MagicSystem<TSkill extends number = number> {
     api.setClientOption(this.playerId, "walkingSpeed", 4);
   }
 
-  protected startChargingAnimation() {
+  protected startChargingAnimation(useThirdParsonView: boolean) {
     S.stop(`cameraReset: ${this.playerId}`);
     api.setCameraZoom(this.playerId, 1);
     api.setClientOption(this.playerId, "cameraPositionOffset", [0, 1, 0]);
 
-    api.animateEntity(this.playerId, {
+    asyncAnimate(this.playerId, {
       loop: false,
       animationDurationMs: 800,
       nodeAnimations: {
@@ -172,11 +175,9 @@ export abstract class MagicSystem<TSkill extends number = number> {
           ]
         }
       }
-    });
-
-    S.run(() => {
+    }).then(() => {
       this.duringChargeAnimation()
-    }, 16);
+    })
   }
 
   protected duringChargeAnimation() {

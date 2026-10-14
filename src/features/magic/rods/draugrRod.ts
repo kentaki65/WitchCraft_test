@@ -15,10 +15,12 @@ export class DraugrRod extends MagicSystem<DraugrRodSkillNames> {
   
   protected readonly rodSettings: Record<DraugrRodSkillNames, RodSettings> = {
     [DraugrRodSkillNames.FrostBurial]: {
+      useThirdParsonView: true,
       needCharge: true,
       minCharge: 2000
     },
     [DraugrRodSkillNames.AbsoluteZero]: {
+      useThirdParsonView: true,
       needCharge: true,
       minCharge: 2000
     }
@@ -215,7 +217,7 @@ export class DraugrRod extends MagicSystem<DraugrRodSkillNames> {
   }
 
   onPlayerClick = (): void => {
-    this.startCharging();
+    this.startCharging(this.rodSettings[this.currentMode].useThirdParsonView);
   }
 
   onPlayerClickUp = (): void => {
@@ -227,12 +229,12 @@ export class DraugrRod extends MagicSystem<DraugrRodSkillNames> {
   }
 
   onPlayerAltAction = (): void => {
-    this.startCharging();
+    this.startCharging(this.rodSettings[this.currentMode].useThirdParsonView);
   }
 
   onTouchscreenActionButton = (playerId: Types.PlayerId, touchDown: boolean): void => {
     if (touchDown) {
-      this.startCharging();
+      this.startCharging(this.rodSettings[this.currentMode].useThirdParsonView);
     } else {
       const chargeTime = this.stopCharging();
       if (chargeTime === undefined || chargeTime < (this.rodSettings[this.currentMode]?.minCharge || 0)) return;

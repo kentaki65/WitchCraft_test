@@ -17,10 +17,12 @@ export class MoltenMagmaRod extends MagicSystem<MoltenMagmaRodSkillNames> {
 
   protected readonly rodSettings: Record<MoltenMagmaRodSkillNames, RodSettings> = {
     [MoltenMagmaRodSkillNames.MagmaBarrage]: {
+      useThirdParsonView: true,
       needCharge: true,
       minCharge: 2000
     },
     [MoltenMagmaRodSkillNames.Eruption]: {
+      useThirdParsonView: true,
       needCharge: true,
       minCharge: 500
     }
@@ -124,7 +126,7 @@ export class MoltenMagmaRod extends MagicSystem<MoltenMagmaRodSkillNames> {
   }
 
   onPlayerClick = (): void => {
-    this.startCharging();
+    this.startCharging(this.rodSettings[this.currentMode].useThirdParsonView);
   }
 
   onPlayerClickUp = (): void => {
@@ -136,12 +138,12 @@ export class MoltenMagmaRod extends MagicSystem<MoltenMagmaRodSkillNames> {
   }
 
   onPlayerAltAction = (): void => {
-    this.startCharging();
+    this.startCharging(this.rodSettings[this.currentMode].useThirdParsonView);
   }
 
   onTouchscreenActionButton = (playerId: Types.PlayerId, touchDown: boolean): void => {
     if (touchDown) {
-      this.startCharging();
+      this.startCharging(this.rodSettings[this.currentMode].useThirdParsonView);
     } else {
       const chargeTime = this.stopCharging();
       if (chargeTime === undefined || chargeTime < (this.rodSettings[this.currentMode]?.minCharge || 0)) return;
