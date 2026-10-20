@@ -1,14 +1,22 @@
 import { PlayerId } from "@bloxd";
-import { setTimeout } from "@plugins/helpers"
+import { setTimeout } from "@plugins/helpers";
+import { Parameters } from "../types";
+import { Promise } from "./promise";
+import type { PolyfillPromise } from "./promise";
 
 type AnimateEntitySchema = Parameters<typeof api.animateEntity>[1];
 
 export function asyncAnimate(
-  playerId: PlayerId, 
+  playerId: PlayerId,
   animationSchema: AnimateEntitySchema
-){
-  return new globalThis.Promise((resolve) => {
+): PolyfillPromise<void> {
+  return new Promise<void>((resolve) => {
+    const duration =
+      animationSchema && "animationDurationMs" in animationSchema
+        ? animationSchema.animationDurationMs
+        : 1000;
+
     api.animateEntity(playerId, animationSchema);
-    setTimeout(resolve, animationSchema.animationDurationMs)
-  })
+    setTimeout(() => resolve(), duration);
+  });
 }

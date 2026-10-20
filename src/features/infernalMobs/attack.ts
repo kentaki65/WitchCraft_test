@@ -1,10 +1,13 @@
 import { randomOnePick } from "../../utils/math";
-import { S } from "../../core/scheduler";
 import type * as Types from "@bloxd";
+import { setInterval, setTimeout, clearTimeout, TimeoutId } from "@plugins/helpers";
 
 const engagingMob = new Map<Types.PlayerId, Types.MobId>();
 
-S.run(function loop() {
+const engagingTimers = new Map<Types.PlayerId, TimeoutId>();
+const gravityTimers = new Map<Types.PlayerId, TimeoutId>();
+
+setInterval(() => {
   for (const [pId, mId] of engagingMob.entries()) {
     if (!api.getMobIds().includes(mId)) {
       engagingMob.delete(pId);
@@ -39,8 +42,7 @@ S.run(function loop() {
 
     //if(metaParts.includes(""))
   }
-  S.run(loop, 5);
-})
+}, 250);
 
 export function handlePlayerAttackingMob(playerId: Types.PlayerId, mobId: Types.MobId, damageDealt: number, withItem: Types.ItemName){
   const meta = api.getMobSetting(mobId, "metaInfo") || "";
@@ -48,10 +50,17 @@ export function handlePlayerAttackingMob(playerId: Types.PlayerId, mobId: Types.
   const [x, y, z] = api.getPosition(mobId);
 
   engagingMob.set(playerId, mobId);
-  S.stop("engaging" + playerId);
-  S.run(() => {
+  const oldTimer = engagingTimers.get(playerId);
+
+  if(oldTimer !== undefined){
+    clearTimeout(oldTimer);
+  }
+
+  const timer = setTimeout(() => {
     engagingMob.delete(playerId);
-  }, 300, "engaging" + playerId);
+  }, 15000);
+
+  engagingTimers.set(playerId, timer);
 
   if (metaParts.includes("1UP") && !metaParts.includes("1UP_USED") && api.getHealth(mobId) <= 100) {
     api.setHealth(mobId, 1000, undefined, true);
@@ -59,7 +68,6 @@ export function handlePlayerAttackingMob(playerId: Types.PlayerId, mobId: Types.
   }
 
   if (metaParts.includes("Vengeance")) {
-    //@ts-ignore
     const reflect = Math.floor(damageDealt * 0.1);
     api.applyHealthChange(playerId, -reflect);
   }
@@ -74,7 +82,6 @@ export function handlePlayerAttackingMob(playerId: Types.PlayerId, mobId: Types.
   }
 
   if (metaParts.includes("Sticky")) {
-    //@ts-ignore
     const randomSlot = Math.floor(Math.random() * 9);
     api.setSelectedInventorySlotI(playerId, randomSlot);
   }
@@ -134,12 +141,10 @@ export function handleMobAttackingPlayer(attackingMob: Types.MobId, damagedPlaye
 
   if (metaParts.includes("Berserk")) {
     api.applyHealthChange(attackingMob, -10);
-    //@ts-ignore
     return Math.floor(damageDealt * 2);
   }
 
   if (metaParts.includes("Lifesteal")) {
-    //@ts-ignore
     const heal = Math.floor(damageDealt * 0.5);
     api.applyHealthChange(attackingMob, heal);
   }
@@ -150,10 +155,17 @@ export function handleMobAttackingPlayer(attackingMob: Types.MobId, damagedPlaye
 
   if (metaParts.includes("Gravity")) {
     api.setClientOption(damagedPlayer, "jumpAmount", 4);
-    S.stop("gravity" + damagedPlayer);
-    S.run(() => {
+    const oldTimer = gravityTimers.get(damagedPlayer);
+
+    if(oldTimer !== undefined) {
+      clearTimeout(oldTimer);
+    }
+
+    const timer = setTimeout(() => {
       api.setClientOption(damagedPlayer, "jumpAmount", 8);
-    }, 200, "gravity" + damagedPlayer);
+    }, 10000);
+
+    gravityTimers.set(damagedPlayer, timer);
   }
 
   if (metaParts.includes("Drain")) {

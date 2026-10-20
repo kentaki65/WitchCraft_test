@@ -7,15 +7,15 @@ import { asyncAnimate } from "src/core/api/animateHelper";
 
 export type RodSettings =
   | {
-      useThirdParsonView: boolean;
-      needCharge: false;
-      minCharge?: number;
-    }
+    useThirdParsonView: boolean;
+    needCharge: false;
+    minCharge?: number;
+  }
   | {
     useThirdParsonView: boolean;
-      needCharge: true;
-      minCharge: number;
-    };
+    needCharge: true;
+    minCharge: number;
+  };
 
 export abstract class MagicSystem<TSkill extends number = number> {
   protected playerId: Types.PlayerId;
@@ -277,7 +277,7 @@ export abstract class MagicSystem<TSkill extends number = number> {
   }
 
   protected finishChargingAnimation() {
-    api.animateEntity(this.playerId, {
+    asyncAnimate(this.playerId, {
       loop: false,
       animationDurationMs: 1200,
       nodeAnimations: {
@@ -371,12 +371,10 @@ export abstract class MagicSystem<TSkill extends number = number> {
           ]
         }
       }
-    });
-
-    S.run(() => {
+    }).then(() => {
       api.setCameraZoom(this.playerId, 0);
       api.setClientOptionToDefault(this.playerId, "cameraPositionOffset");
-    }, 20, `cameraReset: ${this.playerId}`);
+    })
   }
 
   protected diffCharging(): number {
@@ -414,11 +412,64 @@ export abstract class MagicSystem<TSkill extends number = number> {
     this.cooldown = api.now();
   }
 
+  onPlayerClick = (): void => {
+    this.startCharging(this.rodSettings[this.currentMode].useThirdParsonView);
+  }
+
+  onPlayerClickUp = (): void => {
+    const chargeTime = this.stopCharging();
+    if (chargeTime === undefined || chargeTime < (this.rodSettings[this.currentMode]?.minCharge || 0)) return;
+
+    if (!this.crouching) this.castFirstSpell(chargeTime);
+    else this.castSecondSpell(chargeTime);
+  }
+
+  onPlayerAltAction = (): void => {
+    this.startCharging(this.rodSettings[this.currentMode].useThirdParsonView);
+  }
+
+  onTouchscreenActionButton = (playerId: Types.PlayerId, touchDown: boolean): void => {
+    if (touchDown) {
+      this.startCharging(this.rodSettings[this.currentMode].useThirdParsonView);
+    } else {
+      const chargeTime = this.stopCharging();
+      if (chargeTime === undefined || chargeTime < (this.rodSettings[this.currentMode]?.minCharge || 0)) return;
+
+      if (!this.crouching) this.castFirstSpell(chargeTime);
+      else this.castSecondSpell(chargeTime);
+    }
+  }
+
+  tick = (): void => {
+    this.updateCrouching();
+    if (!this.charging) return;
+
+    const chargeTime = this.diffCharging();
+    const color = this.getChargeColor(chargeTime);
+
+    api.shakePlayerCamera(this.playerId, chargeTime / 1e5, 50);
+    api.sendFlyingMiddleMessage(this.playerId, [
+      { icon: `fa-solid fa-crosshairs`, style: { color, opacity: 0.3 } },
+      { str: `\n`.repeat(3) }
+    ], 0, 100)
+
+    if (chargeTime > 5000) {
+      if (!this.crouching) this.castFirstSpell(chargeTime);
+      else this.castSecondSpell(chargeTime);
+
+      this.chargeStart = api.now();
+      api.initiateMiddleScreenBar(this.playerId, 5000, true, 0)
+      api.setClientOption(this.playerId, `runningSpeed`, 2);
+      api.setClientOption(this.playerId, `walkingSpeed`, 2);
+    }
+  }
+
   abstract castFirstSpell(chargeTime: number): void;
   abstract castSecondSpell(chargeTime: number): void;
-  abstract tick: (...args: any[]) => void;
-  abstract onPlayerAltAction: (...args: any[]) => void;
-  abstract onPlayerClick: (...args: any[]) => void;
-  abstract onPlayerClickUp: (...args: any[]) => void;
-  abstract onTouchscreenActionButton: (...args: any[]) => void;
+  
+  //abstract tick: (...args: any[]) => void;
+  // abstract onPlayerAltAction: (...args: any[]) => void;
+  // abstract onPlayerClick: (...args: any[]) => void;
+  // abstract onPlayerClickUp: (...args: any[]) => void;
+  // abstract onTouchscreenActionButton: (...args: any[]) => void;
 }

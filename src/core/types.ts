@@ -5,6 +5,22 @@ export type FontAwesomes = "angle-down" | "angle-up" | "angles-up" | "arrow-up-r
 export type AchievementKeys = "Hello_Bloxd" |"mine_stone" |"upgrade_tools" |"smelt_iron" |"obtain_armor" |"iron_tools" |"mine_diamond" |"shiny_gear" |"Get_Moonstone" |"adventure" |"shoot_arrow" |"from_zero" |"TryingAgainAndAgain" |"husbandry" |"plant_seed" |"nightmare" |"beyond_the_nightmare" |"nightmareIsNotOverYet" |"frozenInquisitor" |"melting";
 export type RodTypes = "Molten Magma Rod" | "Draugr Rod";
 
+export type ReturnType<T extends (...args: any[]) => any> =
+  T extends (...args: any[]) => infer R ? R : any;
+
+export type Parameters<
+  T extends (...args: any[]) => any
+> = T extends (...args: infer P) => any ? P : never;
+
+export type Awaited<T> =
+  T extends null | undefined
+    ? T
+    : T extends object & { then(onfulfilled: infer F, ...args: any[]): any }
+      ? F extends (value: infer V, ...args: any[]) => any
+        ? Awaited<V>
+        : never
+      : T;
+
 export interface PlayerData {
   deadPlayer: DeadPlayer;
   achievement: AchievementSlot;
