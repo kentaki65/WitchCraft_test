@@ -1,9 +1,17 @@
 import type * as Types from "@bloxd";
 import { S } from "../../core/scheduler";
-import { asyncAnimate } from "src/core/api/animateHelper";
+import { asyncAnimate } from "../../core/api/animateHelper";
+import { CustomButtonManager } from "src/core/managers/KeyManager";
 
 //子が絶対持ってるものは abstractで
 //持ってるやつと持ってないやつがあるのは空実装にしてoverrideする
+
+export const magicButtonKeyIds = {
+  switchMagic: "switchmagic_X",
+  skill1: "magic_skill1",
+} as const;
+
+export type MagicButtonKeyId = typeof magicButtonKeyIds[keyof typeof magicButtonKeyIds];
 
 export type RodSettings =
   | {
@@ -32,11 +40,18 @@ export abstract class MagicSystem<TSkill extends number = number> {
   protected cooldown = 0;
   protected currentMode: TSkill;
   protected crouching = false;
+  protected keyManager: CustomButtonManager;
 
-  constructor(playerId: Types.PlayerId, initialMode: TSkill) {
+  constructor(playerId: Types.PlayerId, initialMode: TSkill, keyManager: CustomButtonManager) {
     this.currentMode = initialMode;
     this.playerId = playerId;
+    this.keyManager = keyManager;
+
     this.schedulerTag = `magic:${this.playerId}`;
+  }
+
+  public deactiveButton(id: MagicButtonKeyId): void {
+    this.keyManager.delete(id);
   }
 
   public deactivate(): void {
@@ -399,6 +414,8 @@ export abstract class MagicSystem<TSkill extends number = number> {
   }
 
   public onEquip(): void {
+    this.deactiveButton(magicButtonKeyIds.switchMagic);
+    
     api.setClientOption(
       this.playerId,
       "touchscreenActionButton",
@@ -412,11 +429,15 @@ export abstract class MagicSystem<TSkill extends number = number> {
     this.cooldown = api.now();
   }
 
-  onPlayerClick = (): void => {
+  onPlayerPressedButton(): void {
+
+  };
+
+  onPlayerClick(): void {
     this.startCharging(this.rodSettings[this.currentMode].useThirdParsonView);
   }
 
-  onPlayerClickUp = (): void => {
+  onPlayerClickUp(): void {
     const chargeTime = this.stopCharging();
     if (chargeTime === undefined || chargeTime < (this.rodSettings[this.currentMode]?.minCharge || 0)) return;
 
@@ -424,11 +445,11 @@ export abstract class MagicSystem<TSkill extends number = number> {
     else this.castSecondSpell(chargeTime);
   }
 
-  onPlayerAltAction = (): void => {
+  onPlayerAltAction(): void {
     this.startCharging(this.rodSettings[this.currentMode].useThirdParsonView);
   }
 
-  onTouchscreenActionButton = (playerId: Types.PlayerId, touchDown: boolean): void => {
+  onTouchscreenActionButton (playerId: Types.PlayerId, touchDown: boolean): void {
     if (touchDown) {
       this.startCharging(this.rodSettings[this.currentMode].useThirdParsonView);
     } else {
@@ -440,7 +461,7 @@ export abstract class MagicSystem<TSkill extends number = number> {
     }
   }
 
-  tick = (): void => {
+  tick (): void {
     this.updateCrouching();
     if (!this.charging) return;
 
@@ -466,7 +487,7 @@ export abstract class MagicSystem<TSkill extends number = number> {
 
   abstract castFirstSpell(chargeTime: number): void;
   abstract castSecondSpell(chargeTime: number): void;
-  
+
   //abstract tick: (...args: any[]) => void;
   // abstract onPlayerAltAction: (...args: any[]) => void;
   // abstract onPlayerClick: (...args: any[]) => void;

@@ -5,7 +5,7 @@
 		"strict": false,
 		"module": "ESNext",
 		"moduleResolution": "bundler",
-		"target": "es2025",
+		"target": "ES2015",
 		"noEmit": true,
 		"noLib": true,
 		"skipLibCheck": true,
@@ -32,6 +32,10 @@
 	],
 	"files": [
 		"node_modules/@bloxd/globals.d.ts",
-		"node_modules/@bloxd/lib.d.ts"
+		"node_modules/@bloxd/lib.d.ts",
+		"node_modules/@plugins/helpers/chunk.ts",
+		"node_modules/@plugins/helpers/index.ts",
+		"node_modules/@plugins/helpers/random.ts",
+		"node_modules/@plugins/helpers/timers.ts"
 	]
 }

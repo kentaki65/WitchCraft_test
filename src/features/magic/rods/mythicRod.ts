@@ -23,7 +23,7 @@ export class MythicRod extends MagicSystem<MythicRodSkillNames> {
   ];
 
   castFirstSpell(chargeTime: number){
-
+    
   }
   
   castSecondSpell(chargeTime: number): void {

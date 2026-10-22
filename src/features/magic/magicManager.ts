@@ -4,9 +4,19 @@ import { MoltenMagmaRod } from "./rods/moltenMagmaRod";
 import { DraugrRod } from "./rods/draugrRod";
 import { cursedRod } from "./rods/cursedRod";
 import { SpeedRod } from "./rods/speedRod";
+import { CustomButtonManager } from "src/core/managers/KeyManager";
 
 export class MagicManager {
-  private magics = new Map<Types.PlayerId, MagicSystem>()
+  protected readonly playerId: Types.PlayerId;
+  protected readonly keyManager: CustomButtonManager;
+  protected magicSystem: MagicSystem | null;
+
+  constructor(playerId: Types.PlayerId, keyManager: CustomButtonManager){
+    this.playerId = playerId;
+    this.keyManager = keyManager;
+
+    this.magicSystem = null;
+  }
 
   onPlayerJoin = (playerId: Types.PlayerId): void => {
     api.setClientOption(playerId, "canFish", false);
@@ -14,17 +24,17 @@ export class MagicManager {
   }
 
   onPlayerLeave = (playerId: Types.PlayerId): void => {
-    this.magics.get(playerId)?.deactivate();
-    this.magics.delete(playerId);
+    this.magicSystem?.deactivate();
+    this.magicSystem = null;
   }
 
   onPlayerSelectInventorySlot = (playerId: Types.PlayerId, slot: number) => {
-    this.magics.get(playerId)?.deactivate();
+    this.magicSystem?.deactivate();
     this.updateMagic(playerId, slot);
   }
 
   onPlayerSwapInvenSlots = (playerId: Types.PlayerId, firstSlot: number, secondSlot: number) => {
-    this.magics.get(playerId)?.deactivate();
+    this.magicSystem?.deactivate();
     api.setClientOptionToDefault(playerId, "touchscreenActionButton");
 
     if (firstSlot >= 0 && firstSlot <= 9) {
@@ -34,11 +44,11 @@ export class MagicManager {
   }
 
   onPlayerDropItem = (playerId: Types.PlayerId, x: number, y: number, z: number, item: string, amount: number, slot: number): void => {
-    this.magics.get(playerId)?.deactivate();
+    this.magicSystem?.deactivate();
     const selectedSlot = api.getSelectedInventorySlotI(playerId);
 
     if (selectedSlot !== slot) {
-      this.magics.get(playerId)?.onEquip();
+      this.magicSystem?.onEquip();
     } else {
       api.setClientOptionToDefault(
         playerId,
@@ -48,37 +58,37 @@ export class MagicManager {
   }
 
   onPlayerPickedUpItem = (playerId: Types.PlayerId, itemName: string, itemAmount: number, itemEntityId: Types.EntityId) => {
-    this.magics.get(playerId)?.onEquip();
+    this.magicSystem?.onEquip();
   }
 
   onAttemptKillPlayer = (playerId: Types.PlayerId): void => {
-    const magic = this.magics.get(playerId);
-    if (!magic) return;
-
-    magic.onPlayerDeath();
+    if (!this.magicSystem) return;
+    this.magicSystem?.onPlayerDeath();
   }
 
   tick = () => {
-    for (const magic of this.magics.values()) {
-      magic.tick();
-    }
+    this.magicSystem?.tick();
   };
 
   onPlayerAltAction = (playerId: Types.PlayerId, ...args: any[]) => {
-    this.magics.get(playerId)?.onPlayerAltAction();
+    this.magicSystem?.onPlayerAltAction();
   };
 
   onPlayerClick = (playerId: Types.PlayerId, ...args: any[]) => {
-    this.magics.get(playerId)?.onPlayerClick();
+    this.magicSystem?.onPlayerClick();
   }
   
   onPlayerClickUp = (playerId: Types.PlayerId, ...args: any[]) => {
-    this.magics.get(playerId)?.onPlayerClickUp();
+    this.magicSystem?.onPlayerClickUp();
   };
 
   onTouchscreenActionButton = (playerId: Types.PlayerId, touchDown: boolean) => {
-    this.magics.get(playerId)?.onTouchscreenActionButton(playerId, touchDown)
+    this.magicSystem?.onTouchscreenActionButton(playerId, touchDown)
   };
+
+  onPlayerPressedButton = (playerId: Types.PlayerId, buttonId: string) => {
+    this.magicSystem.onPlayerPressedButton();
+  }
 
   private updateMagic(id: Types.PlayerId, slot?: number): void {
     const item = slot === undefined
@@ -89,26 +99,26 @@ export class MagicManager {
 
     switch (item?.name) {
       case "Molten Magma Rod":
-        magic = new MoltenMagmaRod(id, 0);
+        magic = new MoltenMagmaRod(id, 0, this.keyManager);
         break;
       case "Draugr Rod":
-        magic = new DraugrRod(id, 0);
+        magic = new DraugrRod(id, 0, this.keyManager);
         break;
       case "Cursed Rod":
-        magic = new cursedRod(id, 0);
+        magic = new cursedRod(id, 0, this.keyManager);
         break;
       case "Speed Rod":
-        magic = new SpeedRod(id, 0);
+        magic = new SpeedRod(id, 0, this.keyManager);
         break;
     }
 
     if (!magic) {
-      this.magics.delete(id);
+      this.magicSystem = null;
       api.setClientOptionToDefault(id, "touchscreenActionButton");
       return;
     }
 
-    this.magics.set(id, magic);
+    this.magicSystem = magic;
     magic.onEquip();
   }
 }
