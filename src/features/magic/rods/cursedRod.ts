@@ -9,7 +9,7 @@ enum CursedRodSkillNames {
   "WraithChain", "SoulHex"
 }
 
-export class cursedRod extends MagicSystem<CursedRodSkillNames> {
+export class CursedRod extends MagicSystem<CursedRodSkillNames> {
   protected readonly itemName = "Cursed Rod";
   protected readonly chainInterval = 2;
   protected readonly segments = 5;
@@ -33,71 +33,92 @@ export class cursedRod extends MagicSystem<CursedRodSkillNames> {
 
   protected markedMobs = new Set<Types.PlayerId | Types.MobId>();
 
+  castSpell(mode: CursedRodSkillNames, chargeTime: number): void {
+    switch (mode) {
+      case 0:
+        this.castFirstSpell(chargeTime);
+        break;
+
+      case 1:
+        this.castSecondSpell(chargeTime);
+        break;
+    }
+  }
   playChainEffect(targetId: Types.MobId, fromPos: Vec3) {
     let index = 0;
     const chainIntervalId = setInterval(() => {
-      let targetPos = api.getPosition(targetId);
-      const points: Vec3[] = divideVec(fromPos, targetPos, this.segments);
+      try {
+        let targetPos = api.getPosition(targetId);
+        const points: Vec3[] = divideVec(fromPos, targetPos, this.segments);
 
-      const pos: Vec3 = [
-        points[index][0],
-        points[index][1] + 1,
-        points[index][2],
-      ];
+        if (!points) {
+          clearInterval(chainIntervalId);
+          api.log("playChainEffect: unable to create chain points");
+          return;
+        }
 
-      if (!points) return;
-      const dir = subtractVec(targetPos, pos);
+        if (index >= points.length) {
+          const markedMultiplier = 5;
+          const damage = this.markedMobs.has(targetId) ? 25 * index * markedMultiplier : 25 * index;
+          api.attemptApplyDamage({
+            eId: this.playerId,
+            hitEId: targetId,
+            attemptedDmgAmt: damage,
+            withItem: this.itemName
+          });
 
-      api.broadcastSound(`wraithHurt`, 1, 1, {
-        playerIdOrPos: targetPos,
-        maxHearDist: 50
-      })
+          clearInterval(chainIntervalId);
+          return;
+        }
 
-      api.playParticleEffect({
-        dir1: dir,
-        dir2: dir,
-        pos1: pos.map(n => n - 0.1),
-        pos2: pos.map(n => n + 0.1),
-        texture: "soul_0",
-        minLifeTime: 0.5,
-        maxLifeTime: 1,
-        minEmitPower: 0,
-        maxEmitPower: 0,
-        minSize: 0.5,
-        maxSize: 1,
-        manualEmitCount: 10,
-        gravity: [0, 0, 0],
-        colorGradients: [
-          {
-            timeFraction: 0,
-            minColor: [70, 215, 230, 1],
-            maxColor: [75, 225, 240, 1],
-          },
-        ],
-        velocityGradients: [
-          {
-            timeFraction: 0,
-            factor: 1,
-            factor2: 1,
-          },
-        ],
-        blendMode: 1,
-        hideDist: 500,
-      });
+        const pos: Vec3 = [
+          points[index][0],
+          points[index][1] + 1,
+          points[index][2],
+        ];
 
-      if (index + 1 > points.length) {
-        const markedMultiplier = 5;
-        const damage = this.markedMobs.has(targetId) ? 25 * index * markedMultiplier : 25 * index;
-        api.attemptApplyDamage({
-          eId: this.playerId,
-          hitEId: targetId,
-          attemptedDmgAmt: damage,
-          withItem: this.itemName
+        const dir = subtractVec(targetPos, pos);
+
+        api.broadcastSound(`wraithHurt`, 1, 1, {
+          playerIdOrPos: targetPos,
+          maxHearDist: 50
+        })
+
+        api.playParticleEffect({
+          dir1: dir,
+          dir2: dir,
+          pos1: pos.map(n => n - 0.1),
+          pos2: pos.map(n => n + 0.1),
+          texture: "soul_0",
+          minLifeTime: 0.5,
+          maxLifeTime: 1,
+          minEmitPower: 0,
+          maxEmitPower: 0,
+          minSize: 0.5,
+          maxSize: 1,
+          manualEmitCount: 10,
+          gravity: [0, 0, 0],
+          colorGradients: [
+            {
+              timeFraction: 0,
+              minColor: [70, 215, 230, 1],
+              maxColor: [75, 225, 240, 1],
+            },
+          ],
+          velocityGradients: [
+            {
+              timeFraction: 0,
+              factor: 1,
+              factor2: 1,
+            },
+          ],
+          blendMode: 1,
+          hideDist: 500,
         });
-
-        clearInterval(chainIntervalId);
-      } else {
         index++;
+      } catch (e: any) {
+        clearInterval(chainIntervalId);
+        //api.log("playChainEffect", e.message, e.stack)
       }
     }, 100);
   }
@@ -151,7 +172,11 @@ export class cursedRod extends MagicSystem<CursedRodSkillNames> {
     this.playChainEffect(firstTarget, playerPos);
 
     setInterval(() => {
-      this.attackNearest(firstTargetPos, hitted, chain);
+      try {
+        this.attackNearest(firstTargetPos, hitted, chain)
+      } catch (e: any) { //api.log("castFirstSpell", e.message, e.stack) 
+
+      }
     }, this.reachms);
   }
 

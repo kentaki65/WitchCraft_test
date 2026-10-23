@@ -12,7 +12,7 @@ export class DraugrRod extends MagicSystem<DraugrRodSkillNames> {
   protected readonly skills = [
     DraugrRodSkillNames.FrostBurial, DraugrRodSkillNames.AbsoluteZero
   ];
-  
+
   protected readonly rodSettings: Record<DraugrRodSkillNames, RodSettings> = {
     [DraugrRodSkillNames.FrostBurial]: {
       useThirdParsonView: true,
@@ -25,7 +25,7 @@ export class DraugrRod extends MagicSystem<DraugrRodSkillNames> {
       minCharge: 2000
     }
   };
-  
+
   protected spawnProjectile({ x, y, z, dx, dy, dz, dist, damage, chargeTime }) {
     let px = x + dx * dist;
     let py = y + dy * dist;
@@ -50,6 +50,17 @@ export class DraugrRod extends MagicSystem<DraugrRodSkillNames> {
         attemptedDmgAmt: Math.max(1, damage - dist),
         withItem: `Iceball`
       })
+    }
+  }
+  castSpell(mode: DraugrRodSkillNames, chargeTime: number): void {
+    switch (mode) {
+      case 0:
+        this.castFirstSpell(chargeTime);
+        break;
+
+      case 1:
+        this.castSecondSpell(chargeTime);
+        break;
     }
   }
 

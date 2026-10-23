@@ -28,6 +28,18 @@ export class SpeedRod extends MagicSystem<SpeedRodSkillNames> {
 
   protected readonly MIN_CHARGE = [1, 0] as const;
 
+  castSpell(mode: SpeedRodSkillNames, chargeTime: number): void {
+    switch (mode) {
+      case 0:
+        this.castFirstSpell(chargeTime);
+        break;
+
+      case 1:
+        this.castSecondSpell(chargeTime);
+        break;
+    }
+  }
+
   castFirstSpell(chargeTime: number): void {
     const dir: Vec3 = normalize(api.getPlayerFacingInfo(this.playerId).dir ?? [0, 0, 1]);
     const max = 75;

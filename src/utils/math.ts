@@ -86,7 +86,7 @@ export const randomPicks = <T>(arr: T[], count: number): T[] => {
 }
 
 export function findNearest(points: string[], target: Vec3): string | undefined {
-  if(points.some(e => !api.isAlive(e))) return undefined;
+  if(points.some(e => !api.checkValid(e))) return undefined;
 
   const targets: Target[] = points.map(id => ({ id, position: api.getPosition(id) }));
 

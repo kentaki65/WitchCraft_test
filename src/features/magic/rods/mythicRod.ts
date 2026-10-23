@@ -22,11 +22,23 @@ export class MythicRod extends MagicSystem<MythicRodSkillNames> {
     MythicRodSkillNames.Doom, MythicRodSkillNames.Singularity
   ];
 
-  castFirstSpell(chargeTime: number){
-    
+  castSpell(mode: MythicRodSkillNames, chargeTime: number): void {
+    switch (mode) {
+      case 0:
+        this.castFirstSpell(chargeTime);
+        break;
+
+      case 1:
+        this.castSecondSpell(chargeTime);
+        break;
+    }
   }
-  
+
+  castFirstSpell(chargeTime: number) {
+
+  }
+
   castSecondSpell(chargeTime: number): void {
-    
+
   }
 }

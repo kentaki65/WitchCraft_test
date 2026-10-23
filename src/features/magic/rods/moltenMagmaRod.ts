@@ -11,8 +11,8 @@ enum MoltenMagmaRodSkillNames {
 
 export class MoltenMagmaRod extends MagicSystem<MoltenMagmaRodSkillNames> {
   protected readonly itemName: RodTypes = "Molten Magma Rod";
-  
-  protected readonly skills  = [
+
+  protected readonly skills = [
     MoltenMagmaRodSkillNames.MagmaBarrage, MoltenMagmaRodSkillNames.Eruption
   ];
 
@@ -55,6 +55,18 @@ export class MoltenMagmaRod extends MagicSystem<MoltenMagmaRodSkillNames> {
         attemptedDmgAmt: Math.max(1, damage - dist),
         withItem: `Fireball Block`
       })
+    }
+  }
+  
+  castSpell(mode: MoltenMagmaRodSkillNames, chargeTime: number): void {
+    switch (mode) {
+      case 0:
+        this.castFirstSpell(chargeTime);
+        break;
+
+      case 1:
+        this.castSecondSpell(chargeTime);
+        break;
     }
   }
   

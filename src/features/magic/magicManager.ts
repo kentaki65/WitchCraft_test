@@ -2,7 +2,7 @@ import type * as Types from "@bloxd";
 import { MagicSystem } from "./magicSystem";
 import { MoltenMagmaRod } from "./rods/moltenMagmaRod";
 import { DraugrRod } from "./rods/draugrRod";
-import { cursedRod } from "./rods/cursedRod";
+import { CursedRod } from "./rods/cursedRod";
 import { SpeedRod } from "./rods/speedRod";
 import { CustomButtonManager } from "../../core/managers/KeyManager";
 
@@ -31,21 +31,8 @@ export class MagicManager {
   onPlayerSelectInventorySlot = (
     playerId: Types.PlayerId,
     slot: number
-  ) => {
-    api.log("deactive: start");
-    
-    if(this.magicSystem) {
-      try{
-        this.magicSystem.deactivate()
-      }catch(e: any){
-        //@ts-ignore
-        api.log(e.message, e.stack);
-      }
-    }
-
-    api.log("deactive: end");
-    api.log("updateMagic");
-
+  ) => {    
+    if(this.magicSystem) this.magicSystem.deactivate()
     this.updateMagic(playerId, slot);
   };
 
@@ -103,12 +90,10 @@ export class MagicManager {
   };
 
   onPlayerPressedButton = (playerId: Types.PlayerId, buttonId: string) => {
-    this.magicSystem.onPlayerPressedButton();
+    this.magicSystem.onPlayerPressedButton(buttonId);
   }
 
   private updateMagic(id: Types.PlayerId, slot?: number): void {
-    api.log("updating");
-
     const item = slot === undefined
       ? api.getHeldItem(id)
       : api.getItemSlot(id, slot);
@@ -123,7 +108,7 @@ export class MagicManager {
         magic = new DraugrRod(id, 0, this.keyManager);
         break;
       case "Cursed Rod":
-        magic = new cursedRod(id, 0, this.keyManager);
+        magic = new CursedRod(id, 0, this.keyManager);
         break;
       case "Speed Rod":
         magic = new SpeedRod(id, 0, this.keyManager);

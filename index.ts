@@ -145,3 +145,4 @@ Loader.modules = [$0, $1, $2, $3];
 Loader.INIT()
 
 api.log("loaded!")
+api.broadcastSound("sweep6", 1, 1);
