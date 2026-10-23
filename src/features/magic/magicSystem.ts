@@ -2,16 +2,10 @@ import type * as Types from "@bloxd";
 import { setInterval, clearInterval, setTimeout, TimeoutId, clearTimeout, IntervalId } from "@plugins/helpers";
 import { asyncAnimate } from "../../core/api/animateHelper";
 import { CustomButtonManager } from "../../core/managers/KeyManager";
+import { MagicButtonKeyId, magicButtonKeyIds } from "./magicManager";
 
 //子が絶対持ってるものは abstractで
 //持ってるやつと持ってないやつがあるのは空実装にしてoverrideする
-
-export const magicButtonKeyIds = {
-  switchMagic: "switchmagic_X",
-  skill1: "magic_skill1",
-} as const;
-
-export type MagicButtonKeyId = typeof magicButtonKeyIds[keyof typeof magicButtonKeyIds];
 
 export type RodSettings =
   | {

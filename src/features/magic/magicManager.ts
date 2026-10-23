@@ -6,6 +6,13 @@ import { CursedRod } from "./rods/cursedRod";
 import { SpeedRod } from "./rods/speedRod";
 import { CustomButtonManager } from "../../core/managers/KeyManager";
 
+export const magicButtonKeyIds = {
+  switchMagic: "switchmagic_X",
+  skill1: "magic_skill1",
+} as const;
+
+export type MagicButtonKeyId = typeof magicButtonKeyIds[keyof typeof magicButtonKeyIds];
+
 export class MagicManager {
   protected readonly playerId: Types.PlayerId;
   protected readonly keyManager: CustomButtonManager;
