@@ -1,27 +1,25 @@
 import type * as Types from "@bloxd";
-type ButtonRegistration = { setting: Types.CustomButtonType, callback: () => void };
 
 export class CustomButtonManager {
   protected playerId: Types.PlayerId;
-  protected customButtons: Map<string, ButtonRegistration>;
+  protected customButtons: Map<string, Types.CustomButtonType>;
 
   constructor(playerId: Types.PlayerId) {
     this.playerId = playerId;
     this.customButtons = new Map();
   }
 
-  add(newSetting: ButtonRegistration): void {
-    this.customButtons.set(newSetting.setting.id, newSetting);
+  add(newSetting: Types.CustomButtonType): void {
+    this.customButtons.set(newSetting.id, newSetting);
     this.update();
   }
 
   update() {
-    api.setClientOption(this.playerId, "customButtons", Array.from(this.customButtons.values(), e => e.setting))
+    api.setClientOption(this.playerId, "customButtons", Array.from(this.customButtons.values()))
   }
 
   handleOnPressKey(pressedKeyId: string): void {
     const button = this.customButtons.get(pressedKeyId);
-    if (button) button.callback();
   }
 
   delete(id: string): boolean {
