@@ -1,7 +1,7 @@
 import type * as Types from "@bloxd";
-import { S } from "../../core/scheduler";
+import { setInterval, clearInterval, setTimeout, TimeoutId, clearTimeout, IntervalId } from "@plugins/helpers";
 import { asyncAnimate } from "../../core/api/animateHelper";
-import { CustomButtonManager } from "src/core/managers/KeyManager";
+import { CustomButtonManager } from "../../core/managers/KeyManager";
 
 //子が絶対持ってるものは abstractで
 //持ってるやつと持ってないやつがあるのは空実装にしてoverrideする
@@ -28,7 +28,8 @@ export type RodSettings =
 export abstract class MagicSystem<TSkill extends number = number> {
   protected playerId: Types.PlayerId;
 
-  public readonly schedulerTag: string;
+  public timeoutId: TimeoutId;
+  public intervalId: IntervalId;
 
   protected abstract readonly itemName: string;
   protected abstract readonly rodSettings: Record<TSkill, RodSettings>;
@@ -46,8 +47,6 @@ export abstract class MagicSystem<TSkill extends number = number> {
     this.currentMode = initialMode;
     this.playerId = playerId;
     this.keyManager = keyManager;
-
-    this.schedulerTag = `magic:${this.playerId}`;
   }
 
   public deactiveButton(id: MagicButtonKeyId): void {
@@ -55,7 +54,11 @@ export abstract class MagicSystem<TSkill extends number = number> {
   }
 
   public deactivate(): void {
+    api.log("1: cancelCharging start");
     this.cancelCharging();
+    api.log("2: cancelCharging end");
+
+    api.log("3: animateEntity start");
     api.animateEntity(this.playerId, {
       loop: false,
       animationDurationMs: 1,
@@ -73,7 +76,10 @@ export abstract class MagicSystem<TSkill extends number = number> {
         }
       }
     });
-    S.stop(this.schedulerTag);
+    api.log("4: animateEntity end");
+
+    this.clearTimers();
+    api.log("5: clearTimers end");
   }
 
   protected switchMode(): void {
@@ -128,7 +134,6 @@ export abstract class MagicSystem<TSkill extends number = number> {
   }
 
   protected startChargingAnimation(useThirdParsonView: boolean) {
-    S.stop(`cameraReset: ${this.playerId}`);
     api.setCameraZoom(this.playerId, 1);
     api.setClientOption(this.playerId, "cameraPositionOffset", [0, 1, 0]);
 
@@ -396,6 +401,12 @@ export abstract class MagicSystem<TSkill extends number = number> {
     return api.now() - this.chargeStart;
   }
 
+  protected clearTimers(): void {
+    api.log("cleared timers")
+    //if (this.timeoutId) clearTimeout(this.timeoutId);
+    //if (this.intervalId) clearInterval(this.intervalId);
+  }
+
   protected stopCharging(): number | undefined {
     if (!this.charging) return undefined;
 
@@ -415,7 +426,7 @@ export abstract class MagicSystem<TSkill extends number = number> {
 
   public onEquip(): void {
     this.deactiveButton(magicButtonKeyIds.switchMagic);
-    
+
     api.setClientOption(
       this.playerId,
       "touchscreenActionButton",
@@ -425,7 +436,7 @@ export abstract class MagicSystem<TSkill extends number = number> {
 
   public onPlayerDeath(): void {
     this.cancelCharging();
-    S.stop(this.schedulerTag);
+    this.clearTimers();
     this.cooldown = api.now();
   }
 
@@ -449,7 +460,7 @@ export abstract class MagicSystem<TSkill extends number = number> {
     this.startCharging(this.rodSettings[this.currentMode].useThirdParsonView);
   }
 
-  onTouchscreenActionButton (playerId: Types.PlayerId, touchDown: boolean): void {
+  onTouchscreenActionButton(playerId: Types.PlayerId, touchDown: boolean): void {
     if (touchDown) {
       this.startCharging(this.rodSettings[this.currentMode].useThirdParsonView);
     } else {
@@ -461,7 +472,7 @@ export abstract class MagicSystem<TSkill extends number = number> {
     }
   }
 
-  tick (): void {
+  tick(): void {
     this.updateCrouching();
     if (!this.charging) return;
 
@@ -487,10 +498,4 @@ export abstract class MagicSystem<TSkill extends number = number> {
 
   abstract castFirstSpell(chargeTime: number): void;
   abstract castSecondSpell(chargeTime: number): void;
-
-  //abstract tick: (...args: any[]) => void;
-  // abstract onPlayerAltAction: (...args: any[]) => void;
-  // abstract onPlayerClick: (...args: any[]) => void;
-  // abstract onPlayerClickUp: (...args: any[]) => void;
-  // abstract onTouchscreenActionButton: (...args: any[]) => void;
 }

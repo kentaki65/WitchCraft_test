@@ -7,7 +7,6 @@ type Module = {
 
 class Loader {
 	static modules: Module[] = []
-
 	static returns = {
 		tick: [],
 		onClose: [],
@@ -140,7 +139,7 @@ class Loader {
 import * as $0 from "./src/features/achievements/index"
 import * as $1 from "./src/features/infernalMobs/index"
 import * as $2 from "./src/features/onDeath/index";
-import * as $3 from "./src/core/scheduler";
+import * as $3 from "./src/core/managers/index";
 
 Loader.modules = [$0, $1, $2, $3];
 Loader.INIT()

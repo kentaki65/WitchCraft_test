@@ -1,6 +1,6 @@
+import { tickToMs } from "../../../utils/math";
 import { MagicSystem, RodSettings } from "../magicSystem";
-import { S } from "../../../core/scheduler";
-import type * as Types from "@bloxd";
+import { setInterval, clearInterval, setTimeout, TimeoutId, clearTimeout } from "@plugins/helpers";
 
 enum DraugrRodSkillNames {
   "FrostBurial", "AbsoluteZero"
@@ -97,11 +97,11 @@ export class DraugrRod extends MagicSystem<DraugrRodSkillNames> {
     });
 
     for (let dist = 1; dist <= points; dist++) {
-      S.run(() => {
+      this.timeoutId = setTimeout(() => {
         this.spawnProjectile(
           { x, y, z, dx, dy, dz, dist, damage, chargeTime }
         )
-      }, Math.round((dist * 100) / 50), this.schedulerTag)
+      }, tickToMs(Math.round((dist * 100) / 50)))
     }
   }
 

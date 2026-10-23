@@ -85,7 +85,9 @@ export const randomPicks = <T>(arr: T[], count: number): T[] => {
   return shuffled.slice(0, count);
 }
 
-export function findNearest(points: string[], target: [number, number, number]): string | undefined {
+export function findNearest(points: string[], target: Vec3): string | undefined {
+  if(points.some(e => !api.isAlive(e))) return undefined;
+
   const targets: Target[] = points.map(id => ({ id, position: api.getPosition(id) }));
 
   const nearest = targets.reduce<Target | undefined>((nearest, current) => {
@@ -100,8 +102,7 @@ export function findNearest(points: string[], target: [number, number, number]):
     const ndz = nearest.position[2] - target[2];
 
     const distance = dx * dx + dy * dy + dz * dz;
-    const nearestDistance =
-      ndx * ndx + ndy * ndy + ndz * ndz;
+    const nearestDistance = ndx * ndx + ndy * ndy + ndz * ndz;
 
     return distance < nearestDistance ? current : nearest;
   }, undefined);
@@ -147,4 +148,8 @@ export function normalize(arr: Vec3): Vec3 {
 
 export function dot(a: number[], b: number[]): number {
   return a.reduce((sum, value, index) => sum + value * (b[index] ?? 0), 0);
+}
+
+export function tickToMs(tick: number) {
+  return Math.floor(tick / 20)
 }

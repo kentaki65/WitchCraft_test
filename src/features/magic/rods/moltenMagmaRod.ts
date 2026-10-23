@@ -1,7 +1,8 @@
 import { MagicSystem, RodSettings } from "../magicSystem";
-import { S } from "../../../core/scheduler";
+import { setInterval, clearInterval, setTimeout, TimeoutId, clearTimeout } from "@plugins/helpers";
 import { RodTypes } from "../../../core/types";
 import type * as Types from "@bloxd";
+import { tickToMs } from "../../../utils/math";
 
 enum MoltenMagmaRodSkillNames {
   MagmaBarrage,
@@ -66,11 +67,11 @@ export class MoltenMagmaRod extends MagicSystem<MoltenMagmaRodSkillNames> {
 
     for (let offset = 0; offset < points; offset += 2) {
       const dist = offset + 4;
-      S.run(() => {
+      this.timeoutId = setTimeout(() => {
         this.spawnProjectile({
           x, y, z, dx, dy, dz, dist, damage
         });
-      }, Math.round((dist * 100) / 50), this.schedulerTag);
+      }, tickToMs(Math.round((dist * 100) / 50)));
     }
   }
 

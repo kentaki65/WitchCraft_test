@@ -4,14 +4,14 @@ import { MoltenMagmaRod } from "./rods/moltenMagmaRod";
 import { DraugrRod } from "./rods/draugrRod";
 import { cursedRod } from "./rods/cursedRod";
 import { SpeedRod } from "./rods/speedRod";
-import { CustomButtonManager } from "src/core/managers/KeyManager";
+import { CustomButtonManager } from "../../core/managers/KeyManager";
 
 export class MagicManager {
   protected readonly playerId: Types.PlayerId;
   protected readonly keyManager: CustomButtonManager;
   protected magicSystem: MagicSystem | null;
 
-  constructor(playerId: Types.PlayerId, keyManager: CustomButtonManager){
+  constructor(playerId: Types.PlayerId, keyManager: CustomButtonManager) {
     this.playerId = playerId;
     this.keyManager = keyManager;
 
@@ -28,10 +28,26 @@ export class MagicManager {
     this.magicSystem = null;
   }
 
-  onPlayerSelectInventorySlot = (playerId: Types.PlayerId, slot: number) => {
-    this.magicSystem?.deactivate();
+  onPlayerSelectInventorySlot = (
+    playerId: Types.PlayerId,
+    slot: number
+  ) => {
+    api.log("deactive: start");
+    
+    if(this.magicSystem) {
+      try{
+        this.magicSystem.deactivate()
+      }catch(e: any){
+        //@ts-ignore
+        api.log(e.message, e.stack);
+      }
+    }
+
+    api.log("deactive: end");
+    api.log("updateMagic");
+
     this.updateMagic(playerId, slot);
-  }
+  };
 
   onPlayerSwapInvenSlots = (playerId: Types.PlayerId, firstSlot: number, secondSlot: number) => {
     this.magicSystem?.deactivate();
@@ -77,7 +93,7 @@ export class MagicManager {
   onPlayerClick = (playerId: Types.PlayerId, ...args: any[]) => {
     this.magicSystem?.onPlayerClick();
   }
-  
+
   onPlayerClickUp = (playerId: Types.PlayerId, ...args: any[]) => {
     this.magicSystem?.onPlayerClickUp();
   };
@@ -91,6 +107,8 @@ export class MagicManager {
   }
 
   private updateMagic(id: Types.PlayerId, slot?: number): void {
+    api.log("updating");
+
     const item = slot === undefined
       ? api.getHeldItem(id)
       : api.getItemSlot(id, slot);

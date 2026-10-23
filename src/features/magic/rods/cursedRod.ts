@@ -1,6 +1,6 @@
-import { divideVec, findNearest, subtractVec, dot, normalize } from "../../../utils/math";
+import { divideVec, findNearest, subtractVec, dot, normalize, tickToMs } from "../../../utils/math";
 import { MagicSystem, RodSettings } from "../magicSystem";
-import { S } from "../../../core/scheduler";
+import { setInterval, clearInterval, setTimeout, TimeoutId, clearTimeout } from "@plugins/helpers";
 import type * as Types from "@bloxd";
 
 type Vec3 = [number, number, number];
@@ -13,7 +13,7 @@ export class cursedRod extends MagicSystem<CursedRodSkillNames> {
   protected readonly itemName = "Cursed Rod";
   protected readonly chainInterval = 2;
   protected readonly segments = 5;
-  protected readonly reachTick = this.chainInterval * this.segments;
+  protected readonly reachms = tickToMs(this.chainInterval * this.segments);
 
   protected readonly rodSettings: Record<CursedRodSkillNames, RodSettings> = {
     [CursedRodSkillNames.WraithChain]: {
@@ -26,7 +26,7 @@ export class cursedRod extends MagicSystem<CursedRodSkillNames> {
       needCharge: false,
     }
   }
-  
+
   protected readonly skills = [
     CursedRodSkillNames.WraithChain, CursedRodSkillNames.SoulHex
   ]
@@ -34,7 +34,8 @@ export class cursedRod extends MagicSystem<CursedRodSkillNames> {
   protected markedMobs = new Set<Types.PlayerId | Types.MobId>();
 
   playChainEffect(targetId: Types.MobId, fromPos: Vec3) {
-    const loop = (index: number): void => {
+    let index = 0;
+    const chainIntervalId = setInterval(() => {
       let targetPos = api.getPosition(targetId);
       const points: Vec3[] = divideVec(fromPos, targetPos, this.segments);
 
@@ -84,9 +85,7 @@ export class cursedRod extends MagicSystem<CursedRodSkillNames> {
         hideDist: 500,
       });
 
-      if (index + 1 < points.length) {
-        S.run(() => loop(index + 1), 2);
-      } else {
+      if (index + 1 > points.length) {
         const markedMultiplier = 5;
         const damage = this.markedMobs.has(targetId) ? 25 * index * markedMultiplier : 25 * index;
         api.attemptApplyDamage({
@@ -95,10 +94,12 @@ export class cursedRod extends MagicSystem<CursedRodSkillNames> {
           attemptedDmgAmt: damage,
           withItem: this.itemName
         });
-      }
-    }
 
-    loop(0);
+        clearInterval(chainIntervalId);
+      } else {
+        index++;
+      }
+    }, 100);
   }
 
   attackNearest(fromPos: Vec3, hitted: Set<Types.MobId>, remaining: number) {
@@ -117,9 +118,9 @@ export class cursedRod extends MagicSystem<CursedRodSkillNames> {
 
     this.playChainEffect(nearest, fromPos);
 
-    S.run(
+    setTimeout(
       () => this.attackNearest(nearestPos, hitted.add(nearest), remaining - 1),
-      this.reachTick
+      this.reachms
     );
   }
 
@@ -148,7 +149,10 @@ export class cursedRod extends MagicSystem<CursedRodSkillNames> {
     const hitted = new Set<Types.MobId>([firstTarget]);
 
     this.playChainEffect(firstTarget, playerPos);
-    S.run(() => this.attackNearest(firstTargetPos, hitted, chain), this.reachTick);
+
+    setInterval(() => {
+      this.attackNearest(firstTargetPos, hitted, chain);
+    }, this.reachms);
   }
 
   getMobsInSight(
@@ -164,7 +168,7 @@ export class cursedRod extends MagicSystem<CursedRodSkillNames> {
 
     return entities.filter(id => {
       if (id === this.playerId) return false;
-      
+
       const mobPos = api.getPosition(id);
       const toMob = subtractVec(mobPos, playerPos);
       const forwardDist = dot(toMob, dir);
@@ -186,8 +190,10 @@ export class cursedRod extends MagicSystem<CursedRodSkillNames> {
     const point = this.calcPoint(chargeTime);
     const mobs = this.getMobsInSight(playerPos, dir, 20).splice(0, point);
 
+    let intervalId: TimeoutId | null = null;
+
     for (const id of mobs) {
-      S.stop("debuf" + id);
+      if (intervalId) clearTimeout(intervalId)
       this.markedMobs.add(id);
 
       api.broadcastSound("hauntedHorrorImpact", 1, 1, {
@@ -232,9 +238,9 @@ export class cursedRod extends MagicSystem<CursedRodSkillNames> {
         [0, -0.8, -0.5]
       );
 
-      S.run(() => {
+      intervalId = setTimeout(() => {
         this.markedMobs.delete(id);
-      }, 2000, "debuf" + id)
+      }, 100000)
     }
   }
 }
