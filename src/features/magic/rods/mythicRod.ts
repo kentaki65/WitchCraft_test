@@ -1,7 +1,8 @@
 import { MagicSystem, RodSettings } from "../magicSystem";
 
-enum MythicRodSkillNames {
-  Doom, Singularity
+export enum MythicRodSkillNames {
+  Doom = "Doom",
+  Singularity = "Singularity"
 }
 
 export class MythicRod extends MagicSystem<MythicRodSkillNames> {
@@ -24,11 +25,11 @@ export class MythicRod extends MagicSystem<MythicRodSkillNames> {
 
   castSpell(mode: MythicRodSkillNames, chargeTime: number): void {
     switch (mode) {
-      case 0:
+      case MythicRodSkillNames.Doom:
         this.castFirstSpell(chargeTime);
         break;
 
-      case 1:
+      case MythicRodSkillNames.Singularity:
         this.castSecondSpell(chargeTime);
         break;
     }

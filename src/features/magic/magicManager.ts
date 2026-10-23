@@ -1,10 +1,11 @@
 import type * as Types from "@bloxd";
 import { MagicSystem } from "./magicSystem";
-import { MoltenMagmaRod } from "./rods/moltenMagmaRod";
-import { DraugrRod } from "./rods/draugrRod";
-import { CursedRod } from "./rods/cursedRod";
-import { SpeedRod } from "./rods/speedRod";
+import { MoltenMagmaRod, MoltenMagmaRodSkillNames } from "./rods/moltenMagmaRod";
+import { DraugrRod, DraugrRodSkillNames } from "./rods/draugrRod";
+import { CursedRod, CursedRodSkillNames } from "./rods/cursedRod";
+import { SpeedRod, SpeedRodSkillNames } from "./rods/speedRod";
 import { CustomButtonManager } from "../../core/managers/KeyManager";
+import { IMagicSystem } from "./IMagicSystem";
 
 export const magicButtonKeyIds = {
   switchMagic: "switchmagic_X",
@@ -16,7 +17,7 @@ export type MagicButtonKeyId = typeof magicButtonKeyIds[keyof typeof magicButton
 export class MagicManager {
   protected readonly playerId: Types.PlayerId;
   protected readonly keyManager: CustomButtonManager;
-  protected magicSystem: MagicSystem | null;
+  protected magicSystem: IMagicSystem | null;
 
   constructor(playerId: Types.PlayerId, keyManager: CustomButtonManager) {
     this.playerId = playerId;
@@ -27,7 +28,9 @@ export class MagicManager {
 
   onPlayerJoin = (playerId: Types.PlayerId): void => {
     api.setClientOption(playerId, "canFish", false);
+
     this.updateMagic(playerId);
+    this.handleRegisterKeys();
   }
 
   onPlayerLeave = (playerId: Types.PlayerId): void => {
@@ -100,25 +103,34 @@ export class MagicManager {
     this.magicSystem.onPlayerPressedButton(buttonId);
   }
 
+  private handleRegisterKeys(): void {
+    this.keyManager.add({
+      keycode: "KeyX",
+      icon: "arrows-rotate",
+      id: magicButtonKeyIds.switchMagic,
+      description: `Change spell: ${this.magicSystem.getNextSpellName()}`
+    });
+  }
+
   private updateMagic(id: Types.PlayerId, slot?: number): void {
     const item = slot === undefined
       ? api.getHeldItem(id)
       : api.getItemSlot(id, slot);
 
-    let magic: MagicSystem | undefined;
+    let magic: IMagicSystem  | undefined;
 
     switch (item?.name) {
       case "Molten Magma Rod":
-        magic = new MoltenMagmaRod(id, 0, this.keyManager);
+        magic = new MoltenMagmaRod(id, MoltenMagmaRodSkillNames.MagmaBarrage, this.keyManager);
         break;
       case "Draugr Rod":
-        magic = new DraugrRod(id, 0, this.keyManager);
+        magic = new DraugrRod(id, DraugrRodSkillNames.FrostBurial, this.keyManager);
         break;
       case "Cursed Rod":
-        magic = new CursedRod(id, 0, this.keyManager);
+        magic = new CursedRod(id, CursedRodSkillNames.WraithChain, this.keyManager);
         break;
       case "Speed Rod":
-        magic = new SpeedRod(id, 0, this.keyManager);
+        magic = new SpeedRod(id, SpeedRodSkillNames.Flashstep, this.keyManager);
         break;
     }
 
@@ -130,5 +142,6 @@ export class MagicManager {
 
     this.magicSystem = magic;
     magic.onEquip();
+    this.handleRegisterKeys();
   }
 }

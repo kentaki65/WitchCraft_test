@@ -3,9 +3,9 @@ import { MagicSystem, RodSettings } from "../magicSystem";
 
 type Vec3 = [number, number, number];
 
-enum SpeedRodSkillNames {
-  Flashstep,
-  Overdrive,
+export enum SpeedRodSkillNames {
+  Flashstep = "Flashstep",
+  Overdrive = "Overdrive",
 }
 
 export class SpeedRod extends MagicSystem<SpeedRodSkillNames> {
@@ -30,11 +30,11 @@ export class SpeedRod extends MagicSystem<SpeedRodSkillNames> {
 
   castSpell(mode: SpeedRodSkillNames, chargeTime: number): void {
     switch (mode) {
-      case 0:
+      case SpeedRodSkillNames.Flashstep:
         this.castFirstSpell(chargeTime);
         break;
 
-      case 1:
+      case SpeedRodSkillNames.Overdrive:
         this.castSecondSpell(chargeTime);
         break;
     }

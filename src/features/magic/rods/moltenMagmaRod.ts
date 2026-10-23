@@ -4,9 +4,9 @@ import { RodTypes } from "../../../core/types";
 import type * as Types from "@bloxd";
 import { tickToMs } from "../../../utils/math";
 
-enum MoltenMagmaRodSkillNames {
-  MagmaBarrage,
-  Eruption,
+export enum MoltenMagmaRodSkillNames {
+  MagmaBarrage = "MagmaBarrage",
+  Eruption = "Eruption",
 }
 
 export class MoltenMagmaRod extends MagicSystem<MoltenMagmaRodSkillNames> {
@@ -60,11 +60,11 @@ export class MoltenMagmaRod extends MagicSystem<MoltenMagmaRodSkillNames> {
   
   castSpell(mode: MoltenMagmaRodSkillNames, chargeTime: number): void {
     switch (mode) {
-      case 0:
+      case MoltenMagmaRodSkillNames.MagmaBarrage:
         this.castFirstSpell(chargeTime);
         break;
 
-      case 1:
+      case MoltenMagmaRodSkillNames.Eruption:
         this.castSecondSpell(chargeTime);
         break;
     }

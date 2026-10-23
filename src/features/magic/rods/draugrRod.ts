@@ -2,8 +2,8 @@ import { tickToMs } from "../../../utils/math";
 import { MagicSystem, RodSettings } from "../magicSystem";
 import { setInterval, clearInterval, setTimeout, TimeoutId, clearTimeout } from "@plugins/helpers";
 
-enum DraugrRodSkillNames {
-  "FrostBurial", "AbsoluteZero"
+export enum DraugrRodSkillNames {
+  FrostBurial = "FrostBurial", AbsoluteZero = "AbsoluteZero"
 }
 
 export class DraugrRod extends MagicSystem<DraugrRodSkillNames> {
@@ -54,11 +54,11 @@ export class DraugrRod extends MagicSystem<DraugrRodSkillNames> {
   }
   castSpell(mode: DraugrRodSkillNames, chargeTime: number): void {
     switch (mode) {
-      case 0:
+      case DraugrRodSkillNames.FrostBurial:
         this.castFirstSpell(chargeTime);
         break;
 
-      case 1:
+      case DraugrRodSkillNames.AbsoluteZero:
         this.castSecondSpell(chargeTime);
         break;
     }

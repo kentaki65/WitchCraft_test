@@ -5,8 +5,8 @@ import type * as Types from "@bloxd";
 
 type Vec3 = [number, number, number];
 
-enum CursedRodSkillNames {
-  "WraithChain", "SoulHex"
+export enum CursedRodSkillNames {
+  WraithChain = "WraithChain", SoulHex = "SoulHex"
 }
 
 export class CursedRod extends MagicSystem<CursedRodSkillNames> {
@@ -35,11 +35,11 @@ export class CursedRod extends MagicSystem<CursedRodSkillNames> {
 
   castSpell(mode: CursedRodSkillNames, chargeTime: number): void {
     switch (mode) {
-      case 0:
+      case CursedRodSkillNames.WraithChain:
         this.castFirstSpell(chargeTime);
         break;
 
-      case 1:
+      case CursedRodSkillNames.SoulHex:
         this.castSecondSpell(chargeTime);
         break;
     }

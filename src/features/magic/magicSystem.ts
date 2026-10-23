@@ -3,6 +3,7 @@ import { setInterval, clearInterval, setTimeout, TimeoutId, clearTimeout, Interv
 import { asyncAnimate } from "../../core/api/animateHelper";
 import { CustomButtonManager } from "../../core/managers/KeyManager";
 import { MagicButtonKeyId, magicButtonKeyIds } from "./magicManager";
+import { IMagicSystem } from "./IMagicSystem";
 
 //子が絶対持ってるものは abstractで
 //持ってるやつと持ってないやつがあるのは空実装にしてoverrideする
@@ -19,7 +20,9 @@ export type RodSettings =
     minCharge: number;
   };
 
-export abstract class MagicSystem<TSkill extends number = number> {
+export abstract class MagicSystem<
+  TSkill extends string | number | symbol = number
+> implements IMagicSystem {
   protected playerId: Types.PlayerId;
 
   public timeoutId: TimeoutId;
@@ -409,6 +412,13 @@ export abstract class MagicSystem<TSkill extends number = number> {
       [{ icon: this.itemName }]
     );
   }
+  
+  public getNextSpellName(): string {
+    const index = this.skills.indexOf(this.currentMode);
+    const nextIndex = (index + 1) % this.skills.length;
+
+    return this.skills[nextIndex] as string;
+  }
 
   public onPlayerDeath(): void {
     this.cancelCharging();
@@ -468,8 +478,8 @@ export abstract class MagicSystem<TSkill extends number = number> {
       api.setClientOption(this.playerId, `walkingSpeed`, 2);
     }
   }
-
-  abstract castSpell(mode: TSkill, chargeTime: number): void;
-  abstract castFirstSpell(chargeTime: number): void;
-  abstract castSecondSpell(chargeTime: number): void;
+  
+  protected abstract castSpell(mode: TSkill, chargeTime: number): void;
+  protected abstract castFirstSpell(chargeTime: number): void;
+  protected abstract castSecondSpell(chargeTime: number): void;
 }
