@@ -48,13 +48,7 @@ export abstract class MagicSystem<TSkill extends number = number> {
   }
 
   public deactivate(): void {
-    api.log("what is this?");
-    
-    api.log("1: cancelCharging start");
     this.cancelCharging();
-    api.log("2: cancelCharging end");
-
-    api.log("3: animateEntity start");
     api.animateEntity(this.playerId, {
       loop: false,
       animationDurationMs: 1,
@@ -72,16 +66,12 @@ export abstract class MagicSystem<TSkill extends number = number> {
         }
       }
     });
-    api.log("4: animateEntity end");
-
     this.clearTimers();
-    api.log("5: clearTimers end");
   }
 
   protected switchMode(): void {
     const index = this.skills.indexOf(this.currentMode);
     const nextIndex = (index + 1) % this.skills.length;
-
     this.currentMode = this.skills[nextIndex];
   }
 
@@ -97,15 +87,6 @@ export abstract class MagicSystem<TSkill extends number = number> {
   calcDamage(chargeTime: number): number {
     const damage = Math.min(100, 10 + Math.floor(chargeTime / 1000) * 5);
     return damage;
-  }
-
-  protected updateCrouching(): void {
-    const crouching = this.isCrouching();
-    if (crouching && !this.crouching) {
-      this.switchMode();
-    }
-
-    this.crouching = crouching;
   }
 
   protected getChargeColor(chargeTime: number): string {
@@ -125,7 +106,6 @@ export abstract class MagicSystem<TSkill extends number = number> {
   }
 
   protected resetMovement(): void {
-    api.log("remove movement")
     api.setClientOption(this.playerId, "runningSpeed", 7);
     api.setClientOption(this.playerId, "walkingSpeed", 4);
   }
@@ -399,9 +379,8 @@ export abstract class MagicSystem<TSkill extends number = number> {
   }
 
   protected clearTimers(): void {
-    api.log("cleared timers")
-    //if (this.timeoutId) clearTimeout(this.timeoutId);
-    //if (this.intervalId) clearInterval(this.intervalId);
+    if (this.timeoutId) clearTimeout(this.timeoutId);
+    if (this.intervalId) clearInterval(this.intervalId);
   }
 
   protected stopCharging(): number | undefined {
@@ -416,7 +395,6 @@ export abstract class MagicSystem<TSkill extends number = number> {
   public cancelCharging(): void {
     if (!this.charging) return;
 
-    api.log("cancel charging")
     this.charging = false;
     api.removeMiddleScreenBar(this.playerId);
     this.resetMovement();
@@ -439,6 +417,7 @@ export abstract class MagicSystem<TSkill extends number = number> {
   }
 
   onPlayerPressedButton(buttonId: string): void {
+    api.log(buttonId);
     if (buttonId === magicButtonKeyIds.switchMagic) this.switchMode();
   }
 
@@ -450,8 +429,7 @@ export abstract class MagicSystem<TSkill extends number = number> {
     const chargeTime = this.stopCharging();
     if (chargeTime === undefined || chargeTime < (this.rodSettings[this.currentMode]?.minCharge || 0)) return;
 
-    if (!this.crouching) this.castFirstSpell(chargeTime);
-    else this.castSecondSpell(chargeTime);
+    this.castSpell(this.currentMode, chargeTime);
   }
 
   onPlayerAltAction(): void {
@@ -465,13 +443,11 @@ export abstract class MagicSystem<TSkill extends number = number> {
       const chargeTime = this.stopCharging();
       if (chargeTime === undefined || chargeTime < (this.rodSettings[this.currentMode]?.minCharge || 0)) return;
 
-      if (!this.crouching) this.castFirstSpell(chargeTime);
-      else this.castSecondSpell(chargeTime);
+      this.castSpell(this.currentMode, chargeTime);
     }
   }
 
   tick(): void {
-    this.updateCrouching();
     if (!this.charging) return;
 
     const chargeTime = this.diffCharging();
@@ -484,8 +460,7 @@ export abstract class MagicSystem<TSkill extends number = number> {
     ], 0, 100)
 
     if (chargeTime > 5000) {
-      if (!this.crouching) this.castFirstSpell(chargeTime);
-      else this.castSecondSpell(chargeTime);
+      this.castSpell(this.currentMode, chargeTime);
 
       this.chargeStart = api.now();
       api.initiateMiddleScreenBar(this.playerId, 5000, true, 0)
@@ -494,6 +469,7 @@ export abstract class MagicSystem<TSkill extends number = number> {
     }
   }
 
+  abstract castSpell(mode: TSkill, chargeTime: number): void;
   abstract castFirstSpell(chargeTime: number): void;
   abstract castSecondSpell(chargeTime: number): void;
 }
