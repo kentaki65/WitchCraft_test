@@ -49,7 +49,7 @@ export class CursedRod extends MagicSystem<CursedRodSkillNames> {
     const chainIntervalId = setInterval(() => {
       try {
         let targetPos = api.getPosition(targetId);
-        const points: Vec3[] = divideVec(fromPos, targetPos, this.segments);
+        const points: Vec3[] | undefined = divideVec(fromPos, targetPos, this.segments);
 
         if (!points) {
           clearInterval(chainIntervalId);

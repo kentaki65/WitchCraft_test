@@ -2,7 +2,7 @@
   "compilerOptions": {
     "allowJs": true,
     "checkJs": false,
-    "strict": false,
+    "strict": true,
     "module": "ESNext",
     "moduleResolution": "bundler",
     "target": "ES2015",
@@ -24,7 +24,7 @@
   },
   "include": [
     "src/**/*.ts", 
-    "src/index.ts"  
+    "index.ts"  
   ],
   "exclude": [
     "node_modules",

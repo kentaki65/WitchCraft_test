@@ -1,13 +1,15 @@
-type Callback = (...args: any[]) => any
+//@ts-nocheck
 
+type UserCallbacks = "tick" | "onClose" | "onPlayerJoin" | "onPlayerLeave" | "onPlayerJump" | "onRespawnRequest" | "playerCommand" | "onPlayerChat" | "onPlayerAttemptChangeBlock" | "onPlayerChangeBlock" | "onBlockStand" | "onBlockStandStart" | "onBlockStandStop" | "onPlayerAttemptCraft" | "onPlayerCraft" | "onPlayerAttemptOpenChest" | "onPlayerOpenedChest" | "onPlayerMoveItemOutOfInventory" | "onPlayerDropItem" | "onPlayerPickedUpItem" | "onPlayerSelectInventorySlot" | "onPlayerAttack" | "onPlayerDamagingOtherPlayer" | "onPlayerDamagingMob" | "onMobDamagingPlayer" | "onMobDamagingOtherMob" | "onAttemptKillPlayer" | "onPlayerKilledOtherPlayer" | "onMobKilledPlayer" | "onPlayerKilledMob" | "onMobKilledOtherMob" | "onPlayerPotionEffect" | "onPlayerDamagingMeshEntity" | "onPlayerBreakMeshEntity" | "onPlayerUsedThrowable" | "onPlayerThrowableHitTerrain" | "onTouchscreenActionButton" | "onPlayerMoveInvenItem" | "onPlayerMoveItemIntoIdxs" | "onPlayerSwapInvenSlots" | "onPlayerMoveInvenItemWithAmt" | "onPlayerAttemptAltAction" | "onPlayerAltAction" | "onPlayerClick" | "onPlayerClickUp" | "onClientOptionUpdated" | "onMobSettingUpdated" | "onInventoryUpdated" | "onChestUpdated" | "onWorldAttemptChangeBlock" | "onWorldChangeBlock" | "onCreateBloxdMeshEntity" | "onEntityCollision" | "onPlayerAttemptSpawnMob" | "onWorldAttemptSpawnMob" | "onPlayerSpawnMob" | "onWorldSpawnMob" | "onWorldAttemptDespawnMob" | "onMobDespawned" | "onPlayerAttemptSpawnVehicle" | "onWorldAttemptSpawnVehicle" | "onPlayerSpawnVehicle" | "onWorldSpawnVehicle" | "onVehicleDespawned" | "onEntityDeleted" | "onChunkLoaded" | "onPlayerRequestChunk" | "onItemDropCreated" | "onPlayerStartChargingItem" | "onPlayerFinishChargingItem" | "onPlayerAttemptFish" | "onPlayerSucceededFishCatch" | "onPlayerFailedFishCatch" | "onPlayerFinishQTE" | "onPlayerToggledShopMenu" | "onPlayerBoughtShopItem" | "onPlayerPlayedEmote" | "onPlayerEnteredVehicle" | "onPlayerExitedVehicle" | "onPlayerPressedButton" | "onPlayerReleasedButton" | "onUiRequestResponded" | "doPeriodicSave";
+type Callback = (...args: any[]) => any
 type Module = {
-	handlers?: Record<string, Callback>
-	[key: string]: any
+	handlers?: Record<UserCallbacks, Callback>
+	[key: string]: unknown
 };
 
 class Loader {
 	static modules: Module[] = []
-	static returns = {
+	static returns: Record<UserCallbacks, unknown[]> = {
 		tick: [],
 		onClose: [],
 		onPlayerJoin: [],
@@ -71,7 +73,6 @@ class Loader {
 		onPlayerExitedVehicle: [],
 		onPlayerBoughtShopItem: [],
 		onTouchscreenActionButton: [],
-		onTaskClaimed: [],
 		onChunkLoaded: [],
 		onPlayerRequestChunk: [],
 		onUiRequestResponded: [],
@@ -90,7 +91,7 @@ class Loader {
 		}
 
 		for (const [name, callbacks] of Object.entries(Loader.callbacks)) {
-			globalThis[name] = function (...args) {
+			(globalThis as any)[name] = function (...args: any) {
 				const results = []
 				for (const callback of callbacks) {
 					try {

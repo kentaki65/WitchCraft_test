@@ -15,6 +15,8 @@ setInterval(() => {
     }
     const mobType = api.getEntityType(mId);
     const meta = api.getMobSetting(mId, "metaInfo") || "";
+
+    if(!mobType) return;
     if (meta === "igniath") return;
 
     const metaParts = meta.split("/");
@@ -173,6 +175,7 @@ export function handleMobAttackingPlayer(attackingMob: Types.MobId, damagedPlaye
     const badEffects = ["Poisoned", "Slowness", "Weakness", "Brain Rot"];
 
     const randomEffect = randomOnePick(badEffects);
+    if(!randomEffect) return;
 
     if (!effects || effects.length === 0) {
       api.applyEffect(damagedPlayer, randomEffect, 5000, { inbuiltLevel: 1 })

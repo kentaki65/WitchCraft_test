@@ -25,6 +25,7 @@ export function onPlayerBoughtShopItem(playerId: Types.PlayerId, categoryKey: Ty
   if (!isAchievementKey(itemKey)) return;
 
   const data = getData(playerId, "achievement");
+  if(!data) return;
 
   if (data.claimedAchievements.includes(itemKey)) return;
   data.claimedAchievements.push(itemKey);

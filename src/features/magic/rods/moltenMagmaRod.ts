@@ -4,6 +4,17 @@ import { RodTypes } from "../../../core/types";
 import type * as Types from "@bloxd";
 import { tickToMs } from "../../../utils/math";
 
+interface spawnProjectileProps {
+  x: number;
+  y: number;
+  z: number;
+  dx: number;
+  dy: number;
+  dz: number;
+  dist: number;
+  damage: number;
+}
+
 export enum MoltenMagmaRodSkillNames {
   MagmaBarrage = "MagmaBarrage",
   Eruption = "Eruption",
@@ -29,7 +40,7 @@ export class MoltenMagmaRod extends MagicSystem<MoltenMagmaRodSkillNames> {
     }
   }
 
-  protected spawnProjectile({ x, y, z, dx, dy, dz, dist, damage }) {
+  protected spawnProjectile({ x, y, z, dx, dy, dz, dist, damage }: spawnProjectileProps) {
     let px = x + dx * dist;
     let py = y + dy * dist;
     let pz = z + dz * dist;

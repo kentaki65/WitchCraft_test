@@ -25,8 +25,8 @@ export abstract class MagicSystem<
 > implements IMagicSystem {
   protected playerId: Types.PlayerId;
 
-  public timeoutId: TimeoutId;
-  public intervalId: IntervalId;
+  public timeoutId: TimeoutId | undefined = undefined;
+  public intervalId: IntervalId | undefined = undefined;
 
   protected abstract readonly itemName: string;
   protected abstract readonly rodSettings: Record<TSkill, RodSettings>;
@@ -421,7 +421,6 @@ export abstract class MagicSystem<
   }
 
   onPlayerPressedButton(buttonId: string): void {
-    api.log(buttonId);
     if (buttonId === magicButtonKeyIds.switchMagic) this.switchMode();
   }
 

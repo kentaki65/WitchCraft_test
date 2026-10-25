@@ -47,7 +47,7 @@ export function handleSpawning(mobId: Types.MobId, mobType: Types.MobType, x: nu
       api.setHealth(mobId, 500, undefined, true);
       api.setMobSetting(mobId, "attackDamage", 24);
       api.setMobSetting(mobId, "metaInfo", meta + "/initHealth");
-    } catch (e) { api.log("initHealth failed:" + e.message); }
+    } catch (e: any) { api.log("initHealth failed:" + e.message); }
   }
 
   const abilityText = abilityList.join(", ");

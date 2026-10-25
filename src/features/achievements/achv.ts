@@ -4,7 +4,7 @@ import { Achievement, AchievementKeys, AchievementSlot } from "../../core/types"
 import type * as Types from "@bloxd";
 
 const createdItems = new Set<string>();
-const prevStateCache = new Map <string, Types.ShopItem>();
+const prevStateCache = new Map<string, Types.ShopItem>();
 
 function showAchieve(playerId: Types.PlayerId, achievement: Achievement) {
   const { description, isSecret, isGoal, icon } = achievement;
@@ -31,26 +31,30 @@ export function progressChecker(playerId: Types.PlayerId, achievementId: Achieve
 
   const parentId = achievement.parent;
   const data = getData(playerId, "achievement");
-  if (data.unlockedAchievements.includes(achievementId)) return false;
+  if (!data) return;
+
+  if (data?.unlockedAchievements.includes(achievementId)) return false;
 
   if (parentId) {
     const data = getData(playerId, "achievement");
 
-    if (!data.unlockedAchievements.includes(parentId)) {
+    if (!data?.unlockedAchievements.includes(parentId)) {
       return false;
     }
   }
 
   data.unlockedAchievements.push(achievementId);
+
   setData(playerId, "achievement", data);
   updateAchievement(playerId);
-  showAchieve(playerId, achievement);  
+  showAchieve(playerId, achievement);
   return true;
 }
 
 export function updateAchievement(playerId: Types.PlayerId) {
   const names = Object.keys(achievementData) as AchievementKeys[];
   const data = getData(playerId, "achievement");
+  if (!data) return;
 
   const unlocked = new Set(data.unlockedAchievements);
   const claimed = new Set(data.claimedAchievements);
@@ -81,7 +85,7 @@ export function updateAchievement(playerId: Types.PlayerId) {
 
     const key = `${playerId}:${name}`;
 
-    const state = {
+    const state: Types.ShopItem = {
       image: achievement.icon,
       canBuy,
       buyButtonText: buttonText,
@@ -108,14 +112,18 @@ export function updateAchievement(playerId: Types.PlayerId) {
       return;
     }
 
-    const changes = {};
-
-    for (const property in state) {
-      if (previous[property] !== state[property]) {
-        changes[property] = state[property];
-      }
-    }
-
+    const changes = Object.fromEntries(
+      Object.keys(state)
+        .filter((property) => {
+          const typedProperty = property as keyof Types.ShopItem;
+          return previous[typedProperty] !== state[typedProperty];
+        })
+        .map((property) => [
+          property,
+          state[property as keyof Types.ShopItem],
+        ]),
+    ) as Partial<Types.ShopItem>;
+    
     if (Object.keys(changes).length > 0) {
       api.updateShopItemForPlayer(playerId, "実績", name, changes);
       prevStateCache.set(key, state);

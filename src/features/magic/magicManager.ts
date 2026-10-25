@@ -1,5 +1,4 @@
 import type * as Types from "@bloxd";
-import { MagicSystem } from "./magicSystem";
 import { MoltenMagmaRod, MoltenMagmaRodSkillNames } from "./rods/moltenMagmaRod";
 import { DraugrRod, DraugrRodSkillNames } from "./rods/draugrRod";
 import { CursedRod, CursedRodSkillNames } from "./rods/cursedRod";

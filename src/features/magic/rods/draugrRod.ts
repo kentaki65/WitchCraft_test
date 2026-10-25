@@ -6,6 +6,18 @@ export enum DraugrRodSkillNames {
   FrostBurial = "FrostBurial", AbsoluteZero = "AbsoluteZero"
 }
 
+interface spawnProjectileProps {
+  x: number;
+  y: number;
+  z: number;
+  dx: number;
+  dy: number;
+  dz: number;
+  dist: number;
+  damage: number;
+  chargeTime: number;
+}
+
 export class DraugrRod extends MagicSystem<DraugrRodSkillNames> {
   protected readonly itemName: string = "Draugr Rod";
 
@@ -26,7 +38,7 @@ export class DraugrRod extends MagicSystem<DraugrRodSkillNames> {
     }
   };
 
-  protected spawnProjectile({ x, y, z, dx, dy, dz, dist, damage, chargeTime }) {
+  protected spawnProjectile({ x, y, z, dx, dy, dz, dist, damage, chargeTime }: spawnProjectileProps) {
     let px = x + dx * dist;
     let py = y + dy * dist;
     let pz = z + dz * dist;
