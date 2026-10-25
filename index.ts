@@ -3,7 +3,7 @@ type Callback = (...args: any[]) => any
 type Module = {
 	handlers?: Record<string, Callback>
 	[key: string]: any
-}
+};
 
 class Loader {
 	static modules: Module[] = []

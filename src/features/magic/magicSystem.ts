@@ -37,17 +37,13 @@ export abstract class MagicSystem<
   protected chargeStart = 0;
   protected cooldown = 0;
   protected currentMode: TSkill;
-  protected crouching = false;
   protected keyManager: CustomButtonManager;
 
   constructor(playerId: Types.PlayerId, initialMode: TSkill, keyManager: CustomButtonManager) {
     this.currentMode = initialMode;
     this.playerId = playerId;
     this.keyManager = keyManager;
-  }
-
-  public deactiveButton(id: MagicButtonKeyId): void {
-    this.keyManager.delete(id);
+    
   }
 
   public deactivate(): void {
@@ -75,11 +71,11 @@ export abstract class MagicSystem<
   protected switchMode(): void {
     const index = this.skills.indexOf(this.currentMode);
     const nextIndex = (index + 1) % this.skills.length;
-    this.currentMode = this.skills[nextIndex];
-  }
 
-  protected isCrouching(): boolean {
-    return api.isPlayerCrouching(this.playerId);
+    this.currentMode = this.skills[nextIndex];
+
+    const nextName = this.getNextSpellName();
+    if(nextName) this.keyManager.edit(magicButtonKeyIds.switchMagic, "description", `Change spell ${nextName}`);
   }
 
   calcPoint(chargeTime: number): number {
@@ -404,8 +400,6 @@ export abstract class MagicSystem<
   }
 
   public onEquip(): void {
-    this.deactiveButton(magicButtonKeyIds.switchMagic);
-
     api.setClientOption(
       this.playerId,
       "touchscreenActionButton",
@@ -478,7 +472,7 @@ export abstract class MagicSystem<
       api.setClientOption(this.playerId, `walkingSpeed`, 2);
     }
   }
-  
+
   protected abstract castSpell(mode: TSkill, chargeTime: number): void;
   protected abstract castFirstSpell(chargeTime: number): void;
   protected abstract castSecondSpell(chargeTime: number): void;

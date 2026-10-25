@@ -1,0 +1,22 @@
+{
+  "name": "witchcraft_test",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/kentaki65/WitchCraft_test#readme",
+  "bugs": {
+    "url": "https://github.com/kentaki65/WitchCraft_test/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kentaki65/WitchCraft_test.git"
+  },
+  "license": "ISC",
+  "author": "kentaki_js",
+  "type": "module",
+  "main": "./src/index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "check": "tsc --noEmit"
+  },
+  "devDependencies": {}
+}

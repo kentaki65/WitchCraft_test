@@ -1,8 +1,8 @@
 import type * as Types from "@bloxd";
 
 export class CustomButtonManager {
-  protected playerId: Types.PlayerId;
-  protected customButtons: Map<string, Types.CustomButtonType>;
+  private playerId: Types.PlayerId;
+  private customButtons: Map<string, Types.CustomButtonType>;
 
   constructor(playerId: Types.PlayerId) {
     this.playerId = playerId;
@@ -12,6 +12,17 @@ export class CustomButtonManager {
   add(newSetting: Types.CustomButtonType): void {
     this.customButtons.set(newSetting.id, newSetting);
     this.update();
+  }
+
+  edit<K extends keyof Types.CustomButtonType>(
+    id: string,
+    key: K, 
+    newValue: Types.CustomButtonType[K]
+  ): void {
+    const oldValue = this.customButtons.get(id);
+    if(oldValue !== undefined) {
+      this.add({...oldValue, [key]: newValue});
+    }
   }
 
   update() {

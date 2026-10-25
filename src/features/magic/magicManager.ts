@@ -9,7 +9,6 @@ import { IMagicSystem } from "./IMagicSystem";
 
 export const magicButtonKeyIds = {
   switchMagic: "switchmagic_X",
-  skill1: "magic_skill1",
 } as const;
 
 export type MagicButtonKeyId = typeof magicButtonKeyIds[keyof typeof magicButtonKeyIds];
@@ -28,9 +27,7 @@ export class MagicManager {
 
   onPlayerJoin = (playerId: Types.PlayerId): void => {
     api.setClientOption(playerId, "canFish", false);
-
     this.updateMagic(playerId);
-    this.handleRegisterKeys();
   }
 
   onPlayerLeave = (playerId: Types.PlayerId): void => {
@@ -41,8 +38,8 @@ export class MagicManager {
   onPlayerSelectInventorySlot = (
     playerId: Types.PlayerId,
     slot: number
-  ) => {    
-    if(this.magicSystem) this.magicSystem.deactivate()
+  ) => {
+    if (this.magicSystem) this.magicSystem.deactivate()
     this.updateMagic(playerId, slot);
   };
 
@@ -57,12 +54,14 @@ export class MagicManager {
   }
 
   onPlayerDropItem = (playerId: Types.PlayerId, x: number, y: number, z: number, item: string, amount: number, slot: number): void => {
-    this.magicSystem?.deactivate();
     const selectedSlot = api.getSelectedInventorySlotI(playerId);
 
-    if (selectedSlot !== slot) {
-      this.magicSystem?.onEquip();
-    } else {
+    // 選択中のスロットからアイテムを落とした場合
+    if (selectedSlot === slot) {
+      this.magicSystem?.deactivate();
+      this.magicSystem = null;
+      this.cancelRegisteredKeys();
+
       api.setClientOptionToDefault(
         playerId,
         "touchscreenActionButton"
@@ -100,48 +99,71 @@ export class MagicManager {
   };
 
   onPlayerPressedButton = (playerId: Types.PlayerId, buttonId: string) => {
-    this.magicSystem.onPlayerPressedButton(buttonId);
+    this.magicSystem?.onPlayerPressedButton(buttonId);
   }
 
   private handleRegisterKeys(): void {
+    if (!this.magicSystem) return;
+
+    api.log("registering!!");
+
     this.keyManager.add({
       keycode: "KeyX",
       icon: "arrows-rotate",
       id: magicButtonKeyIds.switchMagic,
-      description: `Change spell: ${this.magicSystem.getNextSpellName()}`
+      description: `Change spell: ${this.magicSystem?.getNextSpellName()}`
     });
   }
 
+  private cancelRegisteredKeys(): void {
+    Object.keys(magicButtonKeyIds).forEach(id => {
+      this.keyManager.delete(id);
+    })
+  }
+
   private updateMagic(id: Types.PlayerId, slot?: number): void {
+    this.cancelRegisteredKeys();
+
     const item = slot === undefined
       ? api.getHeldItem(id)
       : api.getItemSlot(id, slot);
 
-    let magic: IMagicSystem  | undefined;
+    let magic: IMagicSystem | undefined;
 
     switch (item?.name) {
       case "Molten Magma Rod":
-        magic = new MoltenMagmaRod(id, MoltenMagmaRodSkillNames.MagmaBarrage, this.keyManager);
+        magic = new MoltenMagmaRod(
+          id, MoltenMagmaRodSkillNames.MagmaBarrage, this.keyManager
+        );
         break;
+
       case "Draugr Rod":
-        magic = new DraugrRod(id, DraugrRodSkillNames.FrostBurial, this.keyManager);
+        magic = new DraugrRod(
+          id, DraugrRodSkillNames.FrostBurial, this.keyManager
+        );
         break;
+
       case "Cursed Rod":
-        magic = new CursedRod(id, CursedRodSkillNames.WraithChain, this.keyManager);
+        magic = new CursedRod(
+          id, CursedRodSkillNames.WraithChain, this.keyManager
+        );
         break;
+
       case "Speed Rod":
-        magic = new SpeedRod(id, SpeedRodSkillNames.Flashstep, this.keyManager);
+        magic = new SpeedRod(
+          id, SpeedRodSkillNames.Flashstep, this.keyManager
+        );
         break;
     }
 
+    this.magicSystem = magic ?? null;
+
     if (!magic) {
-      this.magicSystem = null;
       api.setClientOptionToDefault(id, "touchscreenActionButton");
       return;
     }
 
-    this.magicSystem = magic;
-    magic.onEquip();
     this.handleRegisterKeys();
+    magic.onEquip();
   }
 }
