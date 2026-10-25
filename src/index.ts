@@ -136,10 +136,10 @@ class Loader {
 	}
 }
 
-import * as $0 from "./src/features/achievements/index"
-import * as $1 from "./src/features/infernalMobs/index"
-import * as $2 from "./src/features/onDeath/index";
-import * as $3 from "./src/core/managers/index";
+import * as $0 from "./features/achievements/index"
+import * as $1 from "./features/infernalMobs/index"
+import * as $2 from "./features/onDeath/index";
+import * as $3 from "./core/managers/index";
 
 Loader.modules = [$0, $1, $2, $3];
 Loader.INIT()
