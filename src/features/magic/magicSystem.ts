@@ -1,9 +1,12 @@
 import type * as Types from "@bloxd";
+
 import { setInterval, clearInterval, setTimeout, TimeoutId, clearTimeout, IntervalId } from "@plugins/helpers";
 import { asyncAnimate } from "../../core/api/animateHelper";
 import { CustomButtonManager } from "../../core/managers/KeyManager";
 import { MagicButtonKeyId, magicButtonKeyIds } from "./magicManager";
 import { IMagicSystem } from "./IMagicSystem";
+import { Vec3 } from "src/core/types";
+import { dot, NormalizedVec3, subtractVec } from "src/utils/math";
 
 //子が絶対持ってるものは abstractで
 //持ってるやつと持ってないやつがあるのは空実装にしてoverrideする
@@ -11,12 +14,12 @@ import { IMagicSystem } from "./IMagicSystem";
 export type RodSettings =
   | {
     useThirdParsonView: boolean;
-    needCharge: false;
+    canCharge: false;
     minCharge?: number;
   }
   | {
     useThirdParsonView: boolean;
-    needCharge: true;
+    canCharge: true;
     minCharge: number;
   };
 
@@ -43,7 +46,7 @@ export abstract class MagicSystem<
     this.currentMode = initialMode;
     this.playerId = playerId;
     this.keyManager = keyManager;
-    
+
   }
 
   public deactivate(): void {
@@ -75,7 +78,7 @@ export abstract class MagicSystem<
     this.currentMode = this.skills[nextIndex];
 
     const nextName = this.getNextSpellName();
-    if(nextName) this.keyManager.edit(magicButtonKeyIds.switchMagic, "description", `Change spell ${nextName}`);
+    if (nextName) this.keyManager.edit(magicButtonKeyIds.switchMagic, "description", `Change spell ${nextName}`);
   }
 
   calcPoint(chargeTime: number): number {
@@ -93,15 +96,21 @@ export abstract class MagicSystem<
     return ["white", "white", "lime", "lime", "yellow", "yellow", "orange", "orange", "red"][level];
   }
 
-  protected startCharging(useThirdParsonView: boolean): void {
+  protected startCharging(rodSettings: RodSettings): void {
     if (this.charging) return;
+
+    if (!rodSettings.canCharge) {
+      this.castSpell(this.currentMode, 0);
+      return;
+    }
 
     this.charging = true;
     this.chargeStart = api.now();
-    this.startChargingAnimation(useThirdParsonView);
+    this.startChargingAnimation(rodSettings.useThirdParsonView);
+
     api.initiateMiddleScreenBar(this.playerId, 5000, true, 0);
-    api.setClientOption(this.playerId, `runningSpeed`, 2);
-    api.setClientOption(this.playerId, `walkingSpeed`, 2)
+    api.setClientOption(this.playerId, "runningSpeed", 2);
+    api.setClientOption(this.playerId, "walkingSpeed", 2);
   }
 
   protected resetMovement(): void {
@@ -110,8 +119,10 @@ export abstract class MagicSystem<
   }
 
   protected startChargingAnimation(useThirdParsonView: boolean) {
-    api.setCameraZoom(this.playerId, 1);
-    api.setClientOption(this.playerId, "cameraPositionOffset", [0, 1, 0]);
+    if (useThirdParsonView) {
+      api.setCameraZoom(this.playerId, 1);
+      api.setClientOption(this.playerId, "cameraPositionOffset", [0, 1, 0]);
+    }
 
     asyncAnimate(this.playerId, {
       loop: false,
@@ -406,12 +417,40 @@ export abstract class MagicSystem<
       [{ icon: this.itemName }]
     );
   }
-  
+
   public getNextSpellName(): string {
     const index = this.skills.indexOf(this.currentMode);
     const nextIndex = (index + 1) % this.skills.length;
 
     return this.skills[nextIndex] as string;
+  }
+
+  public getMobsInSight(
+    playerPos: Vec3,
+    dir: NormalizedVec3,
+    maxDistance: number,
+    maxRadius: number = 2
+  ): Types.MobId[] {
+    const entities = api.getEntitiesInRect(
+      playerPos.map(n => n - maxDistance),
+      playerPos.map(n => n + maxDistance)
+    );
+
+    return entities.filter(id => {
+      if (id === this.playerId) return false;
+
+      const mobPos = api.getPosition(id);
+      const toMob = subtractVec(mobPos, playerPos);
+      const forwardDist = dot(toMob, dir);
+
+      if (forwardDist < 0 || forwardDist > maxDistance) return false;
+
+      const projected = dir.map(n => n * forwardDist) as Vec3;
+      const lateral = subtractVec(toMob, projected);
+      const lateralDist = Math.sqrt(dot(lateral, lateral));
+
+      return lateralDist <= maxRadius;
+    });
   }
 
   public onPlayerDeath(): void {
@@ -425,7 +464,7 @@ export abstract class MagicSystem<
   }
 
   onPlayerClick(): void {
-    this.startCharging(this.rodSettings[this.currentMode].useThirdParsonView);
+    this.startCharging(this.rodSettings[this.currentMode]);
   }
 
   onPlayerClickUp(): void {
@@ -436,12 +475,12 @@ export abstract class MagicSystem<
   }
 
   onPlayerAltAction(): void {
-    this.startCharging(this.rodSettings[this.currentMode].useThirdParsonView);
+    this.startCharging(this.rodSettings[this.currentMode]);
   }
 
   onTouchscreenActionButton(playerId: Types.PlayerId, touchDown: boolean): void {
     if (touchDown) {
-      this.startCharging(this.rodSettings[this.currentMode].useThirdParsonView);
+      this.startCharging(this.rodSettings[this.currentMode]);
     } else {
       const chargeTime = this.stopCharging();
       if (chargeTime === undefined || chargeTime < (this.rodSettings[this.currentMode]?.minCharge || 0)) return;
@@ -452,6 +491,7 @@ export abstract class MagicSystem<
 
   tick(): void {
     if (!this.charging) return;
+    if (!this.rodSettings[this.currentMode].canCharge) return;
 
     const chargeTime = this.diffCharging();
     const color = this.getChargeColor(chargeTime);
@@ -473,6 +513,4 @@ export abstract class MagicSystem<
   }
 
   protected abstract castSpell(mode: TSkill, chargeTime: number): void;
-  protected abstract castFirstSpell(chargeTime: number): void;
-  protected abstract castSecondSpell(chargeTime: number): void;
 }

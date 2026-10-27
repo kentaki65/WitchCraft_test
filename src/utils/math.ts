@@ -1,7 +1,14 @@
-type Vec3 = [number, number, number];
-type Target = {
+import { Vec3 } from "src/core/types";
+
+declare const normalizedBrand: unique symbol;
+
+export type NormalizedVec3 = Vec3 & {
+  readonly [normalizedBrand]: true;
+};
+
+interface Target {
   id: string;
-  position: [number, number, number];
+  position: Vec3;
 };
 
 export function toYMDHMS(timestamp: number, timezone = 9) {
@@ -134,7 +141,7 @@ export function divideVec(a: Vec3, b: Vec3, x: number): Vec3[] | undefined{
   return points;
 }
 
-export function normalize(arr: Vec3): Vec3 {
+export function normalize(arr: Vec3): NormalizedVec3 {
   const len = Math.hypot(...arr);
 
   if (len === 0) return [0, 0, 0];

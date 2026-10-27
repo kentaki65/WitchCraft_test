@@ -104,8 +104,6 @@ export class MagicManager {
   private handleRegisterKeys(): void {
     if (!this.magicSystem) return;
 
-    api.log("registering!!");
-
     this.keyManager.add({
       keycode: "KeyX",
       icon: "arrows-rotate",

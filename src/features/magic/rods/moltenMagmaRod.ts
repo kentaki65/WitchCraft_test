@@ -30,12 +30,12 @@ export class MoltenMagmaRod extends MagicSystem<MoltenMagmaRodSkillNames> {
   protected readonly rodSettings: Record<MoltenMagmaRodSkillNames, RodSettings> = {
     [MoltenMagmaRodSkillNames.MagmaBarrage]: {
       useThirdParsonView: true,
-      needCharge: true,
+      canCharge: true,
       minCharge: 2000
     },
     [MoltenMagmaRodSkillNames.Eruption]: {
       useThirdParsonView: true,
-      needCharge: true,
+      canCharge: true,
       minCharge: 500
     }
   }

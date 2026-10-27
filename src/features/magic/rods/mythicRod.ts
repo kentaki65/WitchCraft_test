@@ -10,12 +10,12 @@ export class MythicRod extends MagicSystem<MythicRodSkillNames> {
   protected readonly rodSettings: Record<MythicRodSkillNames, RodSettings> = {
     [MythicRodSkillNames.Doom]: {
       useThirdParsonView: true,
-      needCharge: true,
+      canCharge: true,
       minCharge: 2500
     },
     [MythicRodSkillNames.Singularity]: {
       useThirdParsonView: true,
-      needCharge: true,
+      canCharge: true,
       minCharge: 2500
     }
   };

@@ -14,11 +14,11 @@ export class SpeedRod extends MagicSystem<SpeedRodSkillNames> {
   protected readonly rodSettings: Record<SpeedRodSkillNames, RodSettings> = {
     [SpeedRodSkillNames.Flashstep]: {
       useThirdParsonView: true,
-      needCharge: false,
+      canCharge: false,
     },
     [SpeedRodSkillNames.Overdrive]: {
       useThirdParsonView: false,
-      needCharge: false,
+      canCharge: false,
     }
   };
 

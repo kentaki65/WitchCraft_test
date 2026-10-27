@@ -2,8 +2,7 @@ import { divideVec, findNearest, subtractVec, dot, normalize, tickToMs } from ".
 import { MagicSystem, RodSettings } from "../magicSystem";
 import { setInterval, clearInterval, setTimeout, TimeoutId, clearTimeout } from "@plugins/helpers";
 import type * as Types from "@bloxd";
-
-type Vec3 = [number, number, number];
+import { Vec3 } from "src/core/types";
 
 export enum CursedRodSkillNames {
   WraithChain = "WraithChain", SoulHex = "SoulHex"
@@ -18,12 +17,12 @@ export class CursedRod extends MagicSystem<CursedRodSkillNames> {
   protected readonly rodSettings: Record<CursedRodSkillNames, RodSettings> = {
     [CursedRodSkillNames.WraithChain]: {
       useThirdParsonView: true,
-      needCharge: true,
+      canCharge: true,
       minCharge: 2000
     },
     [CursedRodSkillNames.SoulHex]: {
       useThirdParsonView: false,
-      needCharge: false,
+      canCharge: false,
     }
   }
 
@@ -179,41 +178,12 @@ export class CursedRod extends MagicSystem<CursedRodSkillNames> {
       }
     }, this.reachms);
   }
-
-  getMobsInSight(
-    playerPos: Vec3,
-    dir: Vec3,
-    maxDistance: number,
-    maxRadius: number = 2
-  ): Types.MobId[] {
-    const entities = api.getEntitiesInRect(
-      playerPos.map(n => n - maxDistance),
-      playerPos.map(n => n + maxDistance)
-    );
-
-    return entities.filter(id => {
-      if (id === this.playerId) return false;
-
-      const mobPos = api.getPosition(id);
-      const toMob = subtractVec(mobPos, playerPos);
-      const forwardDist = dot(toMob, dir);
-
-      if (forwardDist < 0 || forwardDist > maxDistance) return false;
-
-      const projected = dir.map(n => n * forwardDist) as Vec3;
-      const lateral = subtractVec(toMob, projected);
-      const lateralDist = Math.sqrt(dot(lateral, lateral));
-
-      return lateralDist <= maxRadius;
-    });
-  }
-
+  
   castSecondSpell(chargeTime: number): void {
     const playerPos = api.getPosition(this.playerId);
     const dir = normalize(api.getPlayerFacingInfo(this.playerId).dir ?? [0, 0, 1]);
 
-    const point = this.calcPoint(chargeTime);
-    const mobs = this.getMobsInSight(playerPos, dir, 20).splice(0, point);
+    const mobs = this.getMobsInSight(playerPos, dir, 20);
 
     let intervalId: TimeoutId | null = null;
 

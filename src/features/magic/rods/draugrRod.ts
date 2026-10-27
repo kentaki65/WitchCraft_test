@@ -28,12 +28,12 @@ export class DraugrRod extends MagicSystem<DraugrRodSkillNames> {
   protected readonly rodSettings: Record<DraugrRodSkillNames, RodSettings> = {
     [DraugrRodSkillNames.FrostBurial]: {
       useThirdParsonView: true,
-      needCharge: true,
+      canCharge: true,
       minCharge: 2000
     },
     [DraugrRodSkillNames.AbsoluteZero]: {
       useThirdParsonView: true,
-      needCharge: true,
+      canCharge: true,
       minCharge: 2000
     }
   };
