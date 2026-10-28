@@ -9,8 +9,8 @@ export interface IMagicSystem {
   onPlayerDeath(): void;
 
   onPlayerAltAction(): void;
-  onPlayerClick(): void;
-  onPlayerClickUp(): void;
+  onPlayerClick(wasAltClick: boolean): void;
+  onPlayerClickUp(wasAltClick: boolean): void;
 
   onTouchscreenActionButton(
     playerId: Types.PlayerId,
@@ -20,4 +20,5 @@ export interface IMagicSystem {
   onPlayerPressedButton(buttonId: string): void;
 
   getNextSpellName(): string;
+  onMagicUpdated(nextMagicName: string | undefined): void;
 }

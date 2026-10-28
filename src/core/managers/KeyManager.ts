@@ -29,10 +29,6 @@ export class CustomButtonManager {
     api.setClientOption(this.playerId, "customButtons", Array.from(this.customButtons.values()))
   }
 
-  handleOnPressKey(pressedKeyId: string): void {
-    const button = this.customButtons.get(pressedKeyId);
-  }
-
   delete(id: string): boolean {
     const deleted = this.customButtons.delete(id);
     if (deleted) this.update();

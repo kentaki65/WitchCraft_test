@@ -5,6 +5,7 @@ import { CursedRod, CursedRodSkillNames } from "./rods/cursedRod";
 import { SpeedRod, SpeedRodSkillNames } from "./rods/speedRod";
 import { CustomButtonManager } from "../../core/managers/KeyManager";
 import { IMagicSystem } from "./IMagicSystem";
+import { BlackIceRod, BlackIceSkillNames } from "./rods/blackIce";
 
 export const magicButtonKeyIds = {
   switchMagic: "switchmagic_X",
@@ -85,12 +86,12 @@ export class MagicManager {
     this.magicSystem?.onPlayerAltAction();
   };
 
-  onPlayerClick = (playerId: Types.PlayerId, ...args: any[]) => {
-    this.magicSystem?.onPlayerClick();
+  onPlayerClick = (playerId: Types.PlayerId, wasAltClick: boolean, ...args: any[]) => {
+    this.magicSystem?.onPlayerClick(wasAltClick);
   }
 
-  onPlayerClickUp = (playerId: Types.PlayerId, ...args: any[]) => {
-    this.magicSystem?.onPlayerClickUp();
+  onPlayerClickUp = (playerId: Types.PlayerId, wasAltClick: boolean, ...args: any[]) => {
+    this.magicSystem?.onPlayerClickUp(wasAltClick);
   };
 
   onTouchscreenActionButton = (playerId: Types.PlayerId, touchDown: boolean) => {
@@ -103,7 +104,8 @@ export class MagicManager {
 
   private handleRegisterKeys(): void {
     if (!this.magicSystem) return;
-
+    
+    //TODO: 改行が使えるということで魔法の紹介も入れちゃいましょう
     this.keyManager.add({
       keycode: "KeyX",
       icon: "arrows-rotate",
@@ -151,6 +153,12 @@ export class MagicManager {
           id, SpeedRodSkillNames.Flashstep, this.keyManager
         );
         break;
+
+      case "Black Ice Rod": 
+        magic = new BlackIceRod(
+          id, BlackIceSkillNames.sacrifice, this.keyManager
+        );
+        break;
     }
 
     this.magicSystem = magic ?? null;
@@ -160,6 +168,9 @@ export class MagicManager {
       return;
     }
 
+    const nextMagicName = this.magicSystem?.getNextSpellName();
+    this.magicSystem?.onMagicUpdated(nextMagicName);
+    
     this.handleRegisterKeys();
     magic.onEquip();
   }

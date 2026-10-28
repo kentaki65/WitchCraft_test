@@ -40,13 +40,15 @@ export abstract class MagicSystem<
   protected chargeStart = 0;
   protected cooldown = 0;
   protected currentMode: TSkill;
+
   protected keyManager: CustomButtonManager;
+  protected summonedMobs: Set<Types.MobId>;
 
   constructor(playerId: Types.PlayerId, initialMode: TSkill, keyManager: CustomButtonManager) {
     this.currentMode = initialMode;
     this.playerId = playerId;
     this.keyManager = keyManager;
-
+    this.summonedMobs = new Set();
   }
 
   public deactivate(): void {
@@ -96,17 +98,19 @@ export abstract class MagicSystem<
     return ["white", "white", "lime", "lime", "yellow", "yellow", "orange", "orange", "red"][level];
   }
 
-  protected startCharging(rodSettings: RodSettings): void {
+  protected startCharging(): void {
+    const rodSetting = this.rodSettings[this.currentMode];
     if (this.charging) return;
 
-    if (!rodSettings.canCharge) {
+    if (!rodSetting.canCharge) {
+      this.finishChargingAnimation();
       this.castSpell(this.currentMode, 0);
       return;
     }
 
     this.charging = true;
     this.chargeStart = api.now();
-    this.startChargingAnimation(rodSettings.useThirdParsonView);
+    this.startChargingAnimation(rodSetting.useThirdParsonView);
 
     api.initiateMiddleScreenBar(this.playerId, 5000, true, 0);
     api.setClientOption(this.playerId, "runningSpeed", 2);
@@ -379,8 +383,10 @@ export abstract class MagicSystem<
         }
       }
     }).then(() => {
-      api.setCameraZoom(this.playerId, 0);
-      api.setClientOptionToDefault(this.playerId, "cameraPositionOffset");
+      if(this.rodSettings[this.currentMode].useThirdParsonView){
+        api.setCameraZoom(this.playerId, 0);
+        api.setClientOptionToDefault(this.playerId, "cameraPositionOffset");        
+      }
     })
   }
 
@@ -429,8 +435,10 @@ export abstract class MagicSystem<
     playerPos: Vec3,
     dir: NormalizedVec3,
     maxDistance: number,
-    maxRadius: number = 2
+    maxRadius: number = 2,
+    exclude: Set<Types.MobId> | null = this.summonedMobs,
   ): Types.MobId[] {
+
     const entities = api.getEntitiesInRect(
       playerPos.map(n => n - maxDistance),
       playerPos.map(n => n + maxDistance)
@@ -450,6 +458,9 @@ export abstract class MagicSystem<
       const lateralDist = Math.sqrt(dot(lateral, lateral));
 
       return lateralDist <= maxRadius;
+    }).filter(id => {
+      if(!exclude) true; //そもそもなかったら何も消さない
+      return !exclude?.has(id) 
     });
   }
 
@@ -459,12 +470,14 @@ export abstract class MagicSystem<
     this.cooldown = api.now();
   }
 
+  onMagicUpdated(nextMagicName: string): void { };
+
   onPlayerPressedButton(buttonId: string): void {
     if (buttonId === magicButtonKeyIds.switchMagic) this.switchMode();
   }
 
-  onPlayerClick(): void {
-    this.startCharging(this.rodSettings[this.currentMode]);
+  onPlayerClick(wasAltClick: boolean): void {
+    this.startCharging();
   }
 
   onPlayerClickUp(): void {
@@ -475,12 +488,12 @@ export abstract class MagicSystem<
   }
 
   onPlayerAltAction(): void {
-    this.startCharging(this.rodSettings[this.currentMode]);
+    this.startCharging();
   }
 
   onTouchscreenActionButton(playerId: Types.PlayerId, touchDown: boolean): void {
     if (touchDown) {
-      this.startCharging(this.rodSettings[this.currentMode]);
+      this.startCharging();
     } else {
       const chargeTime = this.stopCharging();
       if (chargeTime === undefined || chargeTime < (this.rodSettings[this.currentMode]?.minCharge || 0)) return;

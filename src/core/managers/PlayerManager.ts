@@ -50,12 +50,12 @@ export class PlayerManager {
     this.magicManager.onPlayerAltAction(this.playerId, args);
   };
 
-  onPlayerClick = (_: Types.PlayerId, ...args: any[]) => {
-    this.magicManager.onPlayerClick(this.playerId, args);
+  onPlayerClick = (_: Types.PlayerId, wasAltClick: boolean, ...args: any[]) => {
+    this.magicManager.onPlayerClick(this.playerId, wasAltClick, args);
   }
   
-  onPlayerClickUp = (_: Types.PlayerId, ...args: any[]) => {
-    this.magicManager.onPlayerClickUp(this.playerId, args);
+  onPlayerClickUp = (_: Types.PlayerId, wasAltClick: boolean, ...args: any[]) => {
+    this.magicManager.onPlayerClickUp(this.playerId, wasAltClick, args);
   };
 
   onTouchscreenActionButton = (_: Types.PlayerId, touchDown: boolean) => {
