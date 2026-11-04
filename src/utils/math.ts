@@ -141,16 +141,16 @@ export function divideVec(a: Vec3, b: Vec3, x: number): Vec3[] | undefined{
   return points;
 }
 
-export function normalize(arr: Vec3): NormalizedVec3 {
+export function normalize(arr: Vec3): NormalizedVec3 | null{
   const len = Math.hypot(...arr);
 
-  if (len === 0) return [0, 0, 0];
+  if (len === 0) return [0, 0, 0] as NormalizedVec3;
 
   return [
     arr[0] / len,
     arr[1] / len,
     arr[2] / len,
-  ];
+  ] as NormalizedVec3;
 }
 
 export function dot(a: number[], b: number[]): number {

@@ -177,6 +177,7 @@ export class BlackIceRod extends MagicSystem<BlackIceSkillNames> {
   castFirstSpell(chargeTime: number): void {
     const playerPos = api.getPosition(this.playerId);
     const dir = normalize(api.getPlayerFacingInfo(this.playerId).dir ?? [0, 0, 1]);
+    if(!dir) return;
 
     const [mob] = this.getMobsInSight(playerPos, dir, 20);
 
@@ -336,8 +337,10 @@ export class BlackIceRod extends MagicSystem<BlackIceSkillNames> {
       } else {
         const playerPos = api.getPosition(this.playerId);
         const dir = normalize(api.getPlayerFacingInfo(this.playerId).dir ?? [0, 0, 1]);
+        if(!dir) return;
 
         const [mob] = this.getMobsInSight(playerPos, dir, 20, 5, null);
+
         const mobPos = api.getPosition(mob);
 
         if (this.summonedMobs.has(mob)) {
@@ -352,6 +355,8 @@ export class BlackIceRod extends MagicSystem<BlackIceSkillNames> {
   castSecondSpell(chargeTime: number): void {
     const playerPos = api.getPosition(this.playerId);
     const dir = normalize(api.getPlayerFacingInfo(this.playerId).dir ?? [0, 0, 1]);
+    if(!dir) return;
+    
     const [mob] = this.getMobsInSight(playerPos, dir, 20, 5);
 
     api.updateEntityNodeMeshAttachment(

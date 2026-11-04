@@ -16,4 +16,5 @@ export const handlers = {
   onPlayerAltAction: gameManager.onPlayerAltAction,
   onPlayerPressedButton: gameManager.onPlayerPressedButton,
   onTouchscreenActionButton: gameManager.onTouchscreenActionButton,
+  onPlayerFinishChargingItem: gameManager.onPlayerFinishChargingItem,
 };

@@ -1,6 +1,6 @@
 import { getData, setData } from "../../core/api/dbHelper";
 import { achievementData } from "./data";
-import { Achievement, AchievementKeys, AchievementSlot } from "../../core/types";
+import { Achievement, AchievementKeys } from "../../core/types";
 import type * as Types from "@bloxd";
 
 const createdItems = new Set<string>();
@@ -25,29 +25,80 @@ function showAchieve(playerId: Types.PlayerId, achievement: Achievement) {
   ]);
 }
 
-export function progressChecker(playerId: Types.PlayerId, achievementId: AchievementKeys) {
+function getAchievementContext(
+  playerId: Types.PlayerId,
+  achievementId: AchievementKeys,
+) {
   const achievement = achievementData[achievementId];
-  if (!achievement) return false;
+  if (!achievement) return null;
 
-  const parentId = achievement.parent;
   const data = getData(playerId, "achievement");
-  if (!data) return;
+  if (!data) return null;
 
-  if (data?.unlockedAchievements.includes(achievementId)) return false;
+  const unlockedAchievements = data.unlockedAchievements;
+  let parentUnlocked: boolean;
 
-  if (parentId) {
-    const data = getData(playerId, "achievement");
-
-    if (!data?.unlockedAchievements.includes(parentId)) {
-      return false;
-    }
+  if (Array.isArray(achievement.parent)) {
+    parentUnlocked = !achievement.parent || achievement.parent.every(e => unlockedAchievements.includes(e));
+  } else {
+    parentUnlocked = !achievement.parent || unlockedAchievements.includes(achievement.parent);
   }
 
-  data.unlockedAchievements.push(achievementId);
+  return {
+    achievement,
+    data,
+    unlockedAchievements,
+    parentUnlocked,
+  };
+}
+
+export function isUnlocked(
+  playerId: Types.PlayerId,
+  achievementId: AchievementKeys,
+): boolean {
+  const context = getAchievementContext(playerId, achievementId);
+  if (!context) return false;
+
+  const { unlockedAchievements, parentUnlocked } = context;
+
+  return (
+    parentUnlocked &&
+    unlockedAchievements.includes(achievementId)
+  );
+}
+
+export function progressChecker(
+  playerId: Types.PlayerId,
+  achievementId: AchievementKeys,
+): boolean {
+  const context = getAchievementContext(playerId, achievementId);
+  if (!context) {
+    api.log("return 1");
+    return false
+  };
+
+  const {
+    achievement,
+    data,
+    unlockedAchievements,
+    parentUnlocked,
+  } = context;
+
+  if (unlockedAchievements.includes(achievementId)) {
+    updateAchievement(playerId);
+    return false;
+  }
+  if (!parentUnlocked) {
+    updateAchievement(playerId);
+    return false
+  };
+
+  unlockedAchievements.push(achievementId);
 
   setData(playerId, "achievement", data);
   updateAchievement(playerId);
   showAchieve(playerId, achievement);
+
   return true;
 }
 
@@ -59,11 +110,7 @@ export function updateAchievement(playerId: Types.PlayerId) {
   const unlocked = new Set(data.unlockedAchievements);
   const claimed = new Set(data.claimedAchievements);
 
-  const visible = names.filter(name => {
-    const achievement = achievementData[name];
-
-    return !achievement.parent || unlocked.has(achievement.parent);
-  });
+  const visible = names.filter(name => isUnlocked(playerId, name));
 
   visible.forEach((name, index) => {
     const achievement = achievementData[name];
@@ -123,7 +170,7 @@ export function updateAchievement(playerId: Types.PlayerId) {
           state[property as keyof Types.ShopItem],
         ]),
     ) as Partial<Types.ShopItem>;
-    
+
     if (Object.keys(changes).length > 0) {
       api.updateShopItemForPlayer(playerId, "実績", name, changes);
       prevStateCache.set(key, state);

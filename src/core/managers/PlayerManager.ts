@@ -1,16 +1,21 @@
-import type * as Types from "@bloxd";
+import * as Types from "@bloxd";
 import { CustomButtonManager } from "./KeyManager";
 import { MagicManager } from "../../features/magic/magicManager";
+import { SurvivalManager } from "../../features/health/SurvivalManager";
+import { Parameters } from "../types";
 
+type effectNames = "Damage" | "Speed" | "Damage Reduction" | "Invisible" | "Jump Boost" | "Knockback" | "Poisoned" | "Slowness" | "Weakness" | "Cleansed" | "Instant Damage" | "Health Regen" | "Healing Pulse" | "Instant Health" | "Haste" | "Shield" | "Double Jump" | "Heat Resistance" | "Thief" | "X-Ray Vision" | "Mining Yield" | "Brain Rot" | "Aura" | "Wall Climbing" | "Air Walk" | "Pickpocketer" | "Lifesteal" | "Bounciness" | "Blindness" | "Poopy" | "Glowing" | "Night Vision" | "Hydrated";
 export class PlayerManager {
   readonly playerId: Types.PlayerId;
   readonly magicManager: MagicManager;
   readonly customKeyManager: CustomButtonManager;
+  readonly healthManager: SurvivalManager;
 
   constructor (playerId: Types.PlayerId){
     this.playerId = playerId;
     this.customKeyManager = new CustomButtonManager(playerId);
     this.magicManager = new MagicManager(playerId, this.customKeyManager);
+    this.healthManager = new SurvivalManager(playerId);
     this.onPlayerJoin();
   }
 
@@ -46,8 +51,9 @@ export class PlayerManager {
     this.magicManager.tick();
   };
 
-  onPlayerAltAction = (_: Types.PlayerId, ...args: any[]) => {
-    this.magicManager.onPlayerAltAction(this.playerId, args);
+  onPlayerAltAction = (playerId: string, x: number, y: number, z: number, block: string, targetEId: string | null) => {
+    this.healthManager.onPlayerAltAction(this.playerId, x, y, z, block, targetEId);
+    this.magicManager.onPlayerAltAction(this.playerId);
   };
 
   onPlayerClick = (_: Types.PlayerId, wasAltClick: boolean, ...args: any[]) => {
@@ -64,5 +70,13 @@ export class PlayerManager {
 
   onPlayerPressedButton = (_: Types.PlayerId, buttonId: string) => {
     this.magicManager.onPlayerPressedButton(this.playerId, buttonId);
+  }
+  
+  onPlayerFinishChargingItem = (_: Types.PlayerId, used: boolean, itemName: string, duration: number) => {
+    this.healthManager.onPlayerFinishChargingItem(this.playerId, used, itemName, duration);
+  }
+
+  onPlayerPotionEffect = (...args: Parameters<typeof onPlayerPotionEffect>) => {
+    this.healthManager.onPlayerPotionEffect(args);
   }
 }

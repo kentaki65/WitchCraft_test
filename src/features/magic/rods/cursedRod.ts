@@ -182,7 +182,8 @@ export class CursedRod extends MagicSystem<CursedRodSkillNames> {
   castSecondSpell(chargeTime: number): void {
     const playerPos = api.getPosition(this.playerId);
     const dir = normalize(api.getPlayerFacingInfo(this.playerId).dir ?? [0, 0, 1]);
-
+    if(!dir) return;
+    
     const mobs = this.getMobsInSight(playerPos, dir, 20);
 
     let intervalId: TimeoutId | null = null;

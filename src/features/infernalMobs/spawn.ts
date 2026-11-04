@@ -17,6 +17,7 @@ function applyMobsettings(mobId: Types.MobId, settings: [Types.MobSetting, any][
 
 export function handleSpawning(mobId: Types.MobId, mobType: Types.MobType, x: number, y: number, z: number, mobHerdId: Types.MobHerdId){
   if (EXCLUDE_NAMES.includes(mobType)) return;
+
   if(prevSpawnedId && mobHerdId === prevSpawnedId) return;
   prevSpawnedId = mobHerdId;
 

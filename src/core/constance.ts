@@ -1,0 +1,22 @@
+export const biomeNames = [
+  "Jungle",
+  "Desert",
+  "FrozenBadlandsPlains",
+  "CactusDesert",
+  "RedDesert",
+  "Plains",
+  "MaplePlains",
+  "TallGrassPlains",
+  "SnowyPlains",
+  "Forest",
+  "CherryForest",
+  "PearForest",
+  "AutumnForest",
+  "PumpkinForest",
+  "FrozenBadlandsForest",
+  "PineForest",
+  "SnowyPineForest",
+  "RollingHills",
+  "SnowyMountains",
+  "BlueForest"
+]

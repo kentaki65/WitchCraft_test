@@ -1,5 +1,6 @@
 import type * as Types from "@bloxd";
 import { PlayerManager } from "./PlayerManager";
+import { Parameters } from "../types";
 
 export class GameManager {
   private players = new Map<Types.PlayerId, PlayerManager>();
@@ -65,16 +66,16 @@ export class GameManager {
     this.players.get(playerId)?.onAttemptKillPlayer(playerId);
   };
 
-  onPlayerAltAction = (playerId: Types.PlayerId, ...args: any[]) => {
-    this.players.get(playerId)?.onPlayerAltAction(playerId, ...args);
+  onPlayerAltAction = (playerId: string, x: number, y: number, z: number, block: string, targetEId: string | null) => {
+    this.players.get(playerId)?.onPlayerAltAction(playerId, x, y, z, block, targetEId);
   };
 
-  onPlayerClick = (playerId: Types.PlayerId, ...args: any[]) => {
-    this.players.get(playerId)?.onPlayerClick(playerId, ...args);
+  onPlayerClick = (playerId: Types.PlayerId, wasAltClick: boolean, ...args: any[]) => {
+    this.players.get(playerId)?.onPlayerClick(playerId, wasAltClick, ...args);
   };
 
-  onPlayerClickUp = (playerId: Types.PlayerId, ...args: any[]) => {
-    this.players.get(playerId)?.onPlayerClickUp(playerId, ...args);
+  onPlayerClickUp = (playerId: Types.PlayerId, wasAltClick: boolean, ...args: any[]) => {
+    this.players.get(playerId)?.onPlayerClickUp(playerId, wasAltClick, ...args);
   };
 
   onTouchscreenActionButton = (
@@ -86,5 +87,13 @@ export class GameManager {
 
   onPlayerPressedButton = (playerId: Types.PlayerId, buttonId: string) => {
     this.players.get(playerId)?.onPlayerPressedButton(playerId, buttonId)
+  }
+
+  onPlayerFinishChargingItem = (playerId: string, used: boolean, itemName: string, duration: number) => {
+    this.players.get(playerId)?.onPlayerFinishChargingItem(playerId, used, itemName, duration);
+  }
+
+  onPlayerPotionEffect = (...args: Parameters<typeof onPlayerPotionEffect>) => {
+    this.players.get(args[0])?.onPlayerPotionEffect(...args);
   }
 }

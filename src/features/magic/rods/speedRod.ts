@@ -41,7 +41,9 @@ export class SpeedRod extends MagicSystem<SpeedRodSkillNames> {
   }
 
   castFirstSpell(chargeTime: number): void {
-    const dir: Vec3 = normalize(api.getPlayerFacingInfo(this.playerId).dir ?? [0, 0, 1]);
+    const dir = normalize(api.getPlayerFacingInfo(this.playerId).dir ?? [0, 0, 1]);
+    if(!dir) return;
+    
     const max = 75;
     const value = max * (1 - Math.exp(-chargeTime / 500));
     api.applyImpulse(this.playerId, ...dir.map(n => n * value) as Vec3)
