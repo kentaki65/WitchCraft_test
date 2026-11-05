@@ -1,5 +1,4 @@
 //@ts-nocheck
-
 import { World } from "./types";
 
 // src/lru.ts
@@ -1176,13 +1175,49 @@ function buildRects(cell) {
   return Float64Array.from(r);
 }
 
-// src/world.ts
 function normalizeBounds(b) {
+  if (
+    b === null || b === void 0 ||
+    b.min === null || b.min === void 0 || b.max === null || b.max === void 0 ||
+    !Number.isFinite(b.min[0]) || !Number.isFinite(b.min[1]) ||
+    !Number.isFinite(b.max[0]) || !Number.isFinite(b.max[1])
+  ) {
+    throw new Error("Invalid bounds: " + JSON.stringify(b));
+  }
   const minX = Math.floor(b.min[0]);
   const minZ = Math.floor(b.min[1]);
   const sizeX = Math.floor(b.max[0]) - minX + 1;
   const sizeZ = Math.floor(b.max[1]) - minZ + 1;
-  return sizeX > 0 && sizeZ > 0 ? { minX, minZ, sizeX, sizeZ } : { minX, minZ, sizeX: 0, sizeZ: 0 };
+  return sizeX > 0 && sizeZ > 0
+    ? { minX, minZ, sizeX, sizeZ }
+    : { minX, minZ, sizeX: 0, sizeZ: 0 };
+}
+
+/** 1 回の tick() に使える時間予算 (ms)。超えたら残りジョブは次の tick に回す */
+var TICK_BUDGET_MS = 8;
+
+let jobs = [];
+let tickScheduled = false;
+
+function tick() {
+  tickScheduled = false;
+  var deadline = Date.now() + TICK_BUDGET_MS;
+  while (jobs.length > 0 && Date.now() < deadline) {
+    var job = jobs.shift();
+    var done = false;
+    try {
+      done = job();
+    } catch (err) {
+      job.reject(err);
+      continue;
+    }
+    if (done) {
+      job.resolve(job.value);
+    } else {
+      jobs.push(job); // 未完了は後ろに回して他のジョブに譲る
+    }
+  }
+  if (jobs.length > 0) scheduleTick();
 }
 
 function createWorld(options?): World{
@@ -1191,7 +1226,52 @@ function createWorld(options?): World{
   const terrain = new TerrainNoise(seed);
   const column = new ColumnField(biomes, terrain, new WaterField(seed, biomes, terrain));
   const blocks = new TerrainBlocks(seed, biomes, column);
-  
+
+  function scheduleTick() {
+    if (tickScheduled) return;
+    tickScheduled = true;
+    try { setTimeout(tick, 0) } catch (e) { api.log(e.message) };
+  }
+
+  /** ジョブをキューに積み、完了時に結果を返す Promise を作る */
+  function enqueue(job) {
+    return new Promise(function (resolve, reject) {
+      job.resolve = resolve;
+      job.reject = reject;
+      jobs.push(job);
+      scheduleTick();
+    });
+  }
+
+  /**
+   * map 系ジョブのひな形。1 ステップで x = s.x の 1 行（z 方向）だけ処理する。
+   */
+  function makeMapJob(bounds, makeOut, fillRow) {
+    return function job() {
+      if (job.state === void 0) {
+        var b = normalizeBounds(bounds); // 不正な bounds はここで throw -> reject
+        job.state = {
+          minX: b.minX, minZ: b.minZ, sizeX: b.sizeX, sizeZ: b.sizeZ,
+          x: b.minX,
+          i: 0,
+          out: makeOut(b.sizeX * b.sizeZ)
+        };
+      }
+      var s = job.state;
+      if (s.sizeX === 0 || s.sizeZ === 0) {
+        job.value = s.out; // 正規化後に空になった場合は空配列で即完了
+        return true;
+      }
+      s.i = fillRow(s.x, s.i, s.out, s);
+      s.x++;
+      if (s.x >= s.minX + s.sizeX) {
+        job.value = s.out;
+        return true;
+      }
+      return false; // まだ x 行が残っている
+    };
+  }
+
   return {
     getBiome(x, z) {
       return BIOME_NAMES[biomes.biomeId(Math.floor(x), Math.floor(z))];
@@ -1228,9 +1308,56 @@ function createWorld(options?): World{
     },
     getBlockId(pos) {
       return blocks.blockAt(Math.floor(pos[0]), Math.floor(pos[1]), Math.floor(pos[2]));
+    },
+    async: {
+      getBiome: function (x, z) {
+        return enqueue(function job() {
+          job.value = BIOME_NAMES[biomes.biomeId(Math.floor(x), Math.floor(z))];
+          return true;
+        });
+      },
+      getBiomeMap: function (bounds) {
+        return enqueue(makeMapJob(bounds, function (n) { return new Array(n); },
+          function (x, i, out, s) {
+            for (var z = s.minZ; z < s.minZ + s.sizeZ; z++) {
+              out[i++] = BIOME_NAMES[biomes.biomeId(x, z)];
+            }
+            return i;
+          }));
+      },
+      getHeight: function (x, z) {
+        return enqueue(function job() {
+          column.load(Math.floor(x), Math.floor(z));
+          job.value = column.ground;
+          return true;
+        });
+      },
+      getHeightMap: function (bounds) {
+        return enqueue(makeMapJob(bounds, function (n) { return new Int32Array(n); },
+          function (x, i, out, s) {
+            for (var z = s.minZ; z < s.minZ + s.sizeZ; z++) {
+              column.compute(x, z); // 元実装どおりキャッシュなし
+              out[i++] = column.ground;
+            }
+            return i;
+          }));
+      },
+      getColumn: function (x, z) {
+        return enqueue(function job() {
+          job.value = blocks.columnAt(Math.floor(x), Math.floor(z));
+          return true;
+        });
+      },
+      getBlockId: function (pos) {
+        return enqueue(function job() {
+          job.value = blocks.blockAt(Math.floor(pos[0]), Math.floor(pos[1]), Math.floor(pos[2]));
+          return true;
+        });
+      }
     }
   };
 }
+
 export {
   createWorld
 };

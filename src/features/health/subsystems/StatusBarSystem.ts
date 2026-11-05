@@ -71,7 +71,7 @@ export class StatusBarSystem implements ITickable {
     const { min, max } = this.playerState.stateRange.temp;
 
     const idx = Math.round(
-      (min - temp) /
+      (max - temp) /
       ((max - min) / (this.snowBallIcons.length - 1))
     );
 
@@ -86,7 +86,7 @@ export class StatusBarSystem implements ITickable {
     ], 0, 250);
   }
 
-  tick(){
+  tick() {
     this.updateUI()
   };
 }

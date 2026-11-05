@@ -68,6 +68,14 @@ export interface World {
    * @returns バイオーム名の配列
    */
   getBiomeMap(bounds: Bounds2D): Biome[];
+
+  async: {
+    getBlockId(pos: Vec3): PromiseConstructorLike<number>;
+    getHeight(x: number, z: number): PromiseConstructorLike<number>;
+    getBiome(x: number, z: number): PromiseConstructorLike<Biome>;
+    getHeightMap(bounds: Bounds2D): PromiseConstructorLike<Int32Array>;
+    getBiomeMap(bounds: Bounds2D): PromiseConstructorLike<Biome[]>;
+  }
 }
 
 /**
