@@ -1,10 +1,10 @@
 import type * as Types from "@bloxd";
 import { PlayerStates } from "../PlayerStates";
-import { ISurvivalManager } from "../SurvivalManager";
+import { ITickable } from "../SurvivalManager";
 import { normalize } from "src/utils/math";
 import { createTickInterval } from "src/utils/loop";
 
-export class ThirstSystem implements ISurvivalManager {
+export class ThirstSystem implements ITickable {
   private readonly playerId: Types.PlayerId;
   private readonly playerState: PlayerStates;
 

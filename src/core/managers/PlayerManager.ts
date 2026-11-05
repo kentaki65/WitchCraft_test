@@ -49,6 +49,7 @@ export class PlayerManager {
 
   tick = () => {
     this.magicManager.tick();
+    this.healthManager.tick();
   };
 
   onPlayerAltAction = (playerId: string, x: number, y: number, z: number, block: string, targetEId: string | null) => {

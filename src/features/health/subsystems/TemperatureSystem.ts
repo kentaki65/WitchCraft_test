@@ -1,11 +1,12 @@
 import type * as Types from "@bloxd";
 import { PlayerStates } from "../PlayerStates";
-import { ISurvivalManager } from "../SurvivalManager";
+import { ITickable } from "../SurvivalManager";
 import { Biome } from "src/core/worldgen/types";
 import { world } from "src/core/managers/worldGenerator";
 import { createTickInterval } from "src/utils/loop";
+import { setTimeout } from "@plugins/helpers"
 
-export class TemperatureSystem implements ISurvivalManager {
+export class TemperatureSystem implements ITickable {
   private readonly playerId: Types.PlayerId;
   private readonly playerState: PlayerStates;
   private readonly biomeTemperature: Record<Biome, number> = {
@@ -51,7 +52,7 @@ export class TemperatureSystem implements ISurvivalManager {
 
     const difference = targetTemp - currentTemp;
 
-    if (Math.abs(difference) < 0.1) this.playerState.update("temp", targetTemp);
+    if (Math.abs(difference) < 0.1) this.playerState.set("temp", targetTemp);
     else this.playerState.update("temp", difference * 0.1);
   }
 
@@ -110,7 +111,7 @@ export class TemperatureSystem implements ISurvivalManager {
   
   onPlayerPotionEffect(effectName: string){
     if(effectName === "Hydrated"){
-      api.applyEffect(this.playerId, "Hydrated", 720000, {});
+      setTimeout(() => api.applyEffect(this.playerId, "Hydrated", 720000, {}), 100);
     }
   }
   

@@ -17,7 +17,8 @@
   "scripts": {
     "check": "tsc --noEmit",
     "build": "esbuild src/index.ts --bundle --outfile=dist/index.js --platform=browser --format=esm --target=es2015 --external:@plugins/helpers --charset=utf8",
-    "watch": "esbuild src/index.ts --bundle --outfile=dist/index.js --platform=browser --format=esm --target=es2015 --external:@plugins/helpers --charset=utf8 --watch"
+    "watch": "esbuild src/index.ts --bundle --outfile=dist/index.js --platform=browser --format=esm --target=es2015 --external:@plugins/helpers --charset=utf8 --watch",
+    "minify": "esbuild src/index.ts --bundle --outfile=dist/index.js --platform=browser --format=esm --target=es2015 --external:@plugins/helpers --charset=utf8 --minify"
   },
   "devDependencies": {}
 }

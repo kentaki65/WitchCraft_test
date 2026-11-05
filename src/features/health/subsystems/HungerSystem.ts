@@ -1,6 +1,6 @@
 import type * as Types from "@bloxd";
 import { PlayerStates } from "../PlayerStates";
-import { ISurvivalManager } from "../SurvivalManager";
+import { ITickable } from "../SurvivalManager";
 import { getDistance } from "src/utils/math";
 import { Vec3 } from "src/core/types";
 import { createTickInterval } from "src/utils/loop";
@@ -15,7 +15,7 @@ function isNonBlockMetadata(
   return "eatable" in meta;
 }
 
-export class HungerSystem implements ISurvivalManager {
+export class HungerSystem implements ITickable {
   private readonly hungerDistance = 250;
 
   private readonly playerId: Types.PlayerId;
@@ -53,7 +53,7 @@ export class HungerSystem implements ISurvivalManager {
   }
 
   onPlayerFinishChargingItem(...args: Parameters<typeof onPlayerFinishChargingItem>) {
-    const [playerId, used, itemName] = args;
+    const [_, used, itemName] = args;
     if (!used) return;
 
     const meta = api.getInitialItemMetadata(itemName);
@@ -62,8 +62,8 @@ export class HungerSystem implements ISurvivalManager {
     const { eatHealAmt } = meta;
 
     if (eatHealAmt !== undefined) {
-      const health = api.getHealth(playerId);
-      if (health !== 100) api.applyHealthChange(playerId, -eatHealAmt);
+      const health = api.getHealth(this.playerId);
+      if (health !== 100) api.applyHealthChange(this.playerId, -eatHealAmt);
       this.playerState.update("hunger", 1);
     }
   }
