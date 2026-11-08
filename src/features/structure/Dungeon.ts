@@ -1,4 +1,4 @@
-import { SchematicName, Vec3 } from "src/core/types";
+import { SchematicPath, Vec3 } from "src/core/types";
 import { Biome } from "src/core/worldgen/types";
 
 interface DungeonConfig {
@@ -7,15 +7,17 @@ interface DungeonConfig {
   biomes: Biome[];
   weight: number;
   minDistance: number;
+  onPlaced: (origin: Vec3) => void
 }
 
-type DungeonSource =
+export type DungeonSource =
   | {
       type: "schematic";
-      path: string;
+      path: SchematicPath;
     }
   | {
       type: "copy";
+      size: Vec3;
       origin: Vec3;
     };
 
@@ -27,6 +29,11 @@ export class Dungeon {
   readonly weight: number;
   readonly minDistance: number;
 
+  public chestPositions: Vec3[] | undefined;
+  public spawnerPositions: Vec3[] | undefined;
+
+  readonly onPlaced: (origin: Vec3) => void;
+  
   constructor(config: DungeonConfig){
     if(config.y % 32 !== 0){
       throw new Error("Dungeon Y must be a multiple of 32")
@@ -36,5 +43,6 @@ export class Dungeon {
     this.biomes = config.biomes;
     this.weight = config.weight;
     this.minDistance = config.minDistance;
+    this.onPlaced = config.onPlaced;
   }
 }

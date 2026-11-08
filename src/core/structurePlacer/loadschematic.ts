@@ -3,7 +3,7 @@ import { PolyfillPromise, PromiseLike as CustomPromiseLike } from "../api/promis
 import { forceLoadChunk, setTimeout } from "@plugins/helpers";
 import { TICK_CONFIG } from "../constance";
 import { world } from "../managers/worldGenerator";
-import { SchematicName } from "../types";
+import { SchematicPath } from "../types";
 
 type Vec3 = [number, number, number];
 
@@ -39,7 +39,7 @@ function pagedValue(pages: Int32Array[], index: number, pageSize: number): numbe
   return pages[Math.floor(index / pageSize)][index % pageSize];
 }
 
-function loadChunk(x: number, y: number, z: number): CustomPromiseLike<void> {
+export function loadChunk(x: number, y: number, z: number): CustomPromiseLike<void> {
   return new Promise<void>((resolve, reject) => {
     try {
       forceLoadChunk(x, y, z, resolve);
@@ -463,7 +463,7 @@ function placeSchematicChunks(path: string, origin: Vec3, dimensions: Vec3): Cus
 }
 
 export function loadSchematic(
-  path: SchematicName,
+  path: SchematicPath,
   origin: Vec3,
   terrainDepth = DEFAULT_TERRAIN_DEPTH,
 ): PolyfillPromise<void> {

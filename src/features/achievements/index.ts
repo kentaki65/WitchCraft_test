@@ -1,4 +1,4 @@
-import { getData, setData } from "../../core/api/dbHelper";
+import { getPlayerData, setPlayerData } from "../../core/api/dbHelper";
 import { achievementData } from "./data";
 import { AchievementKeys, AchievementSlot, ReachedBiomes, Vec3 } from "../../core/types";
 import type * as Types from "@bloxd";
@@ -14,15 +14,15 @@ function isAchievementKey(key: string): key is AchievementKeys {
 }
 
 function onPlayerJoin(playerId: Types.PlayerId) {
-  const data = getData(playerId, "achievement");
+  const data = getPlayerData(playerId, "achievement");
   if (data === undefined) {
     const initialData: AchievementSlot = {
       unlockedAchievements: [],
       claimedAchievements: [],
     }
     const initialReachedBiome: ReachedBiomes = [];
-    setData(playerId, "achievement", initialData);
-    setData(playerId, "reachedBiomes", initialReachedBiome);
+    setPlayerData(playerId, "achievement", initialData);
+    setPlayerData(playerId, "reachedBiomes", initialReachedBiome);
   }
   progressChecker(playerId, "Hello_Bloxd");
 }
@@ -41,11 +41,11 @@ function onBlockStandStart(playerId: Types.PlayerId, x: number, y: number, z: nu
   const distance = getDistance(pos, prevPos);
 
   if (distance > threshold) {
-    const reachedBiomes = getData(playerId, "reachedBiomes");
+    const reachedBiomes = getPlayerData(playerId, "reachedBiomes");
     const biome = world.getBiome(pos[0], pos[2]) as Biome;
 
     if (!reachedBiomes?.includes(biome)) {
-      setData(playerId, "reachedBiomes", [...reachedBiomes ?? [], biome]);
+      setPlayerData(playerId, "reachedBiomes", [...reachedBiomes ?? [], biome]);
       prevPlayerMovedMap.set(playerId, pos);
       return
     };
@@ -59,14 +59,14 @@ function onBlockStandStart(playerId: Types.PlayerId, x: number, y: number, z: nu
 function onPlayerBoughtShopItem(playerId: Types.PlayerId, categoryKey: Types.ShopCategoryKey, itemKey: Types.ShopItemKey) {
   if (!isAchievementKey(itemKey)) return;
 
-  const data = getData(playerId, "achievement");
+  const data = getPlayerData(playerId, "achievement");
   if (!data) return;
 
   const slot = data.claimedAchievements;
   if (slot.includes(itemKey)) return;
 
   slot.push(itemKey);
-  setData(playerId, "achievement", data);
+  setPlayerData(playerId, "achievement", data);
 
   api.updateShopItemForPlayer(playerId, categoryKey, itemKey, {
     buyButtonText: "受け取り済み",

@@ -1,4 +1,4 @@
-import { getData, setData } from "../../core/api/dbHelper";
+import { getPlayerData, setPlayerData } from "../../core/api/dbHelper";
 import { achievementData } from "./data";
 import { Achievement, AchievementKeys } from "../../core/types";
 import type * as Types from "@bloxd";
@@ -32,7 +32,7 @@ function getAchievementContext(
   const achievement = achievementData[achievementId];
   if (!achievement) return null;
 
-  const data = getData(playerId, "achievement");
+  const data = getPlayerData(playerId, "achievement");
   if (!data) return null;
 
   const unlockedAchievements = data.unlockedAchievements;
@@ -95,7 +95,7 @@ export function progressChecker(
 
   unlockedAchievements.push(achievementId);
 
-  setData(playerId, "achievement", data);
+  setPlayerData(playerId, "achievement", data);
   updateAchievement(playerId);
   showAchieve(playerId, achievement);
 
@@ -104,7 +104,7 @@ export function progressChecker(
 
 export function updateAchievement(playerId: Types.PlayerId) {
   const names = Object.keys(achievementData) as AchievementKeys[];
-  const data = getData(playerId, "achievement");
+  const data = getPlayerData(playerId, "achievement");
   if (!data) return;
 
   const unlocked = new Set(data.unlockedAchievements);

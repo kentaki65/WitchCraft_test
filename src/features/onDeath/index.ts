@@ -1,18 +1,18 @@
 import { DeadPlayer } from "../../core/types";
 import { toYMDHMS } from "../../utils/math";
-import { setData, getData } from "../../core/api/dbHelper";
+import { setPlayerData, getPlayerData } from "../../core/api/dbHelper";
 import type * as Types from "@bloxd";
 
 function onJoin(playerId: Types.PlayerId){
   api.setClientOption(playerId, "lightingOverride", true);
-  const data = getData(playerId, "deadPlayer")
+  const data = getPlayerData(playerId, "deadPlayer")
 
   if (!data || !data.lastDiedPos) {
     const initialDatas: DeadPlayer = {
       lastDiedPos: null,
       lastDiedTime: null,
     }
-    setData(playerId, "deadPlayer", initialDatas);
+    setPlayerData(playerId, "deadPlayer", initialDatas);
     return;
   }
 
@@ -50,7 +50,7 @@ function onDeath(victim: Types.PlayerId): void {
     lastDiedTime: time
   };
 
-  setData(victim, "deadPlayer", deadData);
+  setPlayerData(victim, "deadPlayer", deadData);
 }
 
 function onMobKilledPlayer(

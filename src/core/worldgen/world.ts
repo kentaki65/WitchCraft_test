@@ -115,7 +115,7 @@ var ColumnField = class {
 };
 
 // src/rng.ts
-var SeededRandom = class {
+export var SeededRandom = class {
   constructor(seed) {
     let hash = 2166136261;
     for (let i = 0; i < seed.length; i++) {
