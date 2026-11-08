@@ -3,7 +3,7 @@ import { PolyfillPromise, PromiseLike as CustomPromiseLike } from "../api/promis
 import { forceLoadChunk, setTimeout } from "@plugins/helpers";
 import { TICK_CONFIG } from "../constance";
 import { world } from "../managers/worldGenerator";
-import { Awaited, SchematicName } from "../types";
+import { SchematicName } from "../types";
 
 type Vec3 = [number, number, number];
 

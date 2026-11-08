@@ -9,7 +9,7 @@ export type AchievementKeys =
 
 type Path = ""
 type SchematicUnion = ""
-export type SchematicName = `${Path}/${SchematicUnion}`;
+export type SchematicName = `${Path}/${SchematicUnion}.bloxdschem`;
 
 export type RodTypes = "Molten Magma Rod" | "Draugr Rod";
 export type Vec2 = [number, number];
