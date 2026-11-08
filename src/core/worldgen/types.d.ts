@@ -1,3 +1,16 @@
+interface TerrainBlocksLike {
+  constructor(seed: string, biomes: any, column: any);
+  blockAt(x: any, y: any, z: any): any;
+  generateBlock(x: any, y: any, z: any, groundY: any): any;
+  createColumnGenerator(x: any, z: any, groundY: any): (y: any) => any;
+  columnAt(x: any, z: any): Int32Array<ArrayBuffer>;
+  blockIn(x: any, y: any, z: any, gh: any, wh: any, biomeId: any): any;
+  topsoil(biomeId: any, gh: any): any;
+  lowsoil(biomeId: any, y: any, gh: any): any;
+  stoneAt(x: any, z: any): any;
+  riverbed(x: any, z: any): any;
+  clayCell(cx: any, cz: any): any;
+}
 
 export type Vec2 = [number, number];
 export type Vec3 = [number, number, number];
@@ -76,6 +89,8 @@ export interface World {
     getHeightMap(bounds: Bounds2D): PromiseConstructorLike<Int32Array>;
     getBiomeMap(bounds: Bounds2D): PromiseConstructorLike<Biome[]>;
   }
+
+  TerrainBlocks: TerrainBlocksLike
 }
 
 /**

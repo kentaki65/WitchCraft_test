@@ -7,6 +7,10 @@ export type FontAwesomes = "angle-down" | "angle-up" | "angles-up" | "arrow-up-r
 export type AchievementKeys =
   "Hello_Bloxd" | "mine_stone" | "upgrade_tools" | "smelt_iron" | "obtain_armor" | "iron_tools" | "mine_diamond" | "shiny_gear" | "Get_Moonstone" | "adventure" | "shoot_arrow" | "from_zero" | "TryingAgainAndAgain" | "husbandry" | "plant_seed" | "nightmare" | "beyond_the_nightmare" | "nightmareIsNotOverYet" | "frozenInquisitor" | "melting" | `${Biome}_achv` | "adventure_time";
 
+type Path = ""
+type SchematicUnion = ""
+export type SchematicName = `${Path}/${SchematicUnion}`;
+
 export type RodTypes = "Molten Magma Rod" | "Draugr Rod";
 export type Vec2 = [number, number];
 export type Vec3 = [number, number, number];

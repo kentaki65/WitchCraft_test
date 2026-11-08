@@ -1,5 +1,8 @@
 //@ts-nocheck
+import Promise from "src/promise/promise";
 import { World } from "./types";
+import { setTimeout } from "@plugins/helpers";
+import { TICK_CONFIG } from "../tickConfig";
 
 // src/lru.ts
 var BoundedCache = class {
@@ -371,6 +374,24 @@ var TerrainBlocks = class {
     const col = this.column;
     col.load(x, z);
     return this.blockIn(x, y, z, col.ground, col.water, col.biomeId);
+  }
+  /** 地表高度を指定して1ブロック生成する。水面・河床の特殊処理は適用しない。 */
+  generateBlock(x, y, z, groundY) {
+    if (y < MIN_Y) return 0;
+    this.biomes.blend(x, z);
+    return this.blockIn(x, y, z, groundY, NO_WATER, this.biomes.blendIds[0]);
+  }
+  /** 同じ列の地形ブロックを生成するときにバイオーム計算を再利用する。 */
+  createColumnGenerator(x, z, groundY) {
+    let biomeId = -1;
+    return (y) => {
+      if (y < MIN_Y) return 0;
+      if (biomeId < 0) {
+        this.biomes.blend(x, z);
+        biomeId = this.biomes.blendIds[0];
+      }
+      return this.blockIn(x, y, z, groundY, NO_WATER, biomeId);
+    };
   }
   /**
    * 1 列分のブロック ID。要素 i は y = MIN_Y + i。上端は max(地表, 水面, 岩盤 y=-100)（それより上は全て空気なので含めない）。
@@ -1019,28 +1040,59 @@ var WaterField = class {
     }
     cell.linked = true;
   }
-  /** 上流セルの一覧と合計流量（上流へ再帰。高さが厳密に下る DAG なので有限） */
+  /** 上流セルの一覧と合計流量。明示スタックで深い集水域でも再帰しない。 */
   fillUps(cell, cx, cz) {
     if (cell.ups !== null) return;
-    this.link(cell, cx, cz);
-    const found = [];
-    let total = 0;
-    for (let dx = -1; dx <= 1; dx++) {
-      for (let dz = -1; dz <= 1; dz++) {
-        if (Math.abs(dx) + Math.abs(dz) !== 1) continue;
-        const nx = cx + dx;
-        const nz = cz + dz;
-        const n = this.getCell(nx, nz);
-        this.link(n, nx, nz);
-        if (n.hasDown && n.downCx === cx && n.downCz === cz) {
-          this.fillUps(n, nx, nz);
-          found.push(n.ox, n.oz, n.h, n.incoming);
-          total += n.incoming + SELF_FLUX;
-        }
+    const stack = [{
+      cell,
+      cx,
+      cz,
+      nextNeighbor: 0,
+      found: [],
+      total: 0,
+      waitingFor: null
+    }];
+    const neighbors = [[-1, 0], [0, -1], [0, 1], [1, 0]];
+
+    while (stack.length > 0) {
+      const frame = stack[stack.length - 1];
+      if (frame.waitingFor !== null) {
+        const upstream = frame.waitingFor;
+        frame.found.push(upstream.ox, upstream.oz, upstream.h, upstream.incoming);
+        frame.total += upstream.incoming + SELF_FLUX;
+        frame.waitingFor = null;
+      }
+
+      if (frame.nextNeighbor >= neighbors.length) {
+        frame.cell.ups = Float64Array.from(frame.found);
+        frame.cell.incoming = frame.total;
+        stack.pop();
+        continue;
+      }
+
+      const [dx, dz] = neighbors[frame.nextNeighbor++];
+      const nx = frame.cx + dx;
+      const nz = frame.cz + dz;
+      const upstream = this.getCell(nx, nz);
+      this.link(upstream, nx, nz);
+      if (!upstream.hasDown || upstream.downCx !== frame.cx || upstream.downCz !== frame.cz) continue;
+
+      if (upstream.ups === null) {
+        frame.waitingFor = upstream;
+        stack.push({
+          cell: upstream,
+          cx: nx,
+          cz: nz,
+          nextNeighbor: 0,
+          found: [],
+          total: 0,
+          waitingFor: null
+        });
+      } else {
+        frame.found.push(upstream.ox, upstream.oz, upstream.h, upstream.incoming);
+        frame.total += upstream.incoming + SELF_FLUX;
       }
     }
-    cell.ups = Float64Array.from(found);
-    cell.incoming = total;
   }
   fillLake(cell) {
     if (cell.hasDown || cell.lakeDone) return;
@@ -1193,15 +1245,18 @@ function normalizeBounds(b) {
     : { minX, minZ, sizeX: 0, sizeZ: 0 };
 }
 
-/** 1 回の tick() に使える時間予算 (ms)。超えたら残りジョブは次の tick に回す */
-var TICK_BUDGET_MS = 8;
-
 let jobs = [];
 let tickScheduled = false;
 
-function tick() {
+function scheduleTick() {
+  if (tickScheduled) return;
+  tickScheduled = true;
+  setTimeout(handleTick, 0);
+}
+
+function handleTick() {
   tickScheduled = false;
-  var deadline = Date.now() + TICK_BUDGET_MS;
+  var deadline = Date.now() + TICK_CONFIG.executionBudgetMs;
   while (jobs.length > 0 && Date.now() < deadline) {
     var job = jobs.shift();
     var done = false;
@@ -1214,7 +1269,7 @@ function tick() {
     if (done) {
       job.resolve(job.value);
     } else {
-      jobs.push(job); // 未完了は後ろに回して他のジョブに譲る
+      jobs.push(job);
     }
   }
   if (jobs.length > 0) scheduleTick();
@@ -1227,13 +1282,6 @@ function createWorld(options?): World{
   const column = new ColumnField(biomes, terrain, new WaterField(seed, biomes, terrain));
   const blocks = new TerrainBlocks(seed, biomes, column);
 
-  function scheduleTick() {
-    if (tickScheduled) return;
-    tickScheduled = true;
-    try { setTimeout(tick, 0) } catch (e) { api.log(e.message) };
-  }
-
-  /** ジョブをキューに積み、完了時に結果を返す Promise を作る */
   function enqueue(job) {
     return new Promise(function (resolve, reject) {
       job.resolve = resolve;
@@ -1243,32 +1291,38 @@ function createWorld(options?): World{
     });
   }
 
-  /**
-   * map 系ジョブのひな形。1 ステップで x = s.x の 1 行（z 方向）だけ処理する。
-   */
-  function makeMapJob(bounds, makeOut, fillRow) {
+  function makeMapJob(bounds, makeOut, fillRange) {
     return function job() {
       if (job.state === void 0) {
-        var b = normalizeBounds(bounds); // 不正な bounds はここで throw -> reject
+        var b = normalizeBounds(bounds);
         job.state = {
           minX: b.minX, minZ: b.minZ, sizeX: b.sizeX, sizeZ: b.sizeZ,
           x: b.minX,
+          z: b.minZ,
           i: 0,
           out: makeOut(b.sizeX * b.sizeZ)
         };
       }
       var s = job.state;
       if (s.sizeX === 0 || s.sizeZ === 0) {
-        job.value = s.out; // 正規化後に空になった場合は空配列で即完了
+        job.value = s.out;
         return true;
       }
-      s.i = fillRow(s.x, s.i, s.out, s);
-      s.x++;
+      const endZ = Math.min(
+        s.z + TICK_CONFIG.heightMapCellsPerStep,
+        s.minZ + s.sizeZ,
+      );
+      s.i = fillRange(s.x, s.z, endZ, s.i, s.out, s);
+      s.z = endZ;
+      if (s.z >= s.minZ + s.sizeZ) {
+        s.x++;
+        s.z = s.minZ;
+      }
       if (s.x >= s.minX + s.sizeX) {
         job.value = s.out;
         return true;
       }
-      return false; // まだ x 行が残っている
+      return false;
     };
   }
 
@@ -1309,6 +1363,7 @@ function createWorld(options?): World{
     getBlockId(pos) {
       return blocks.blockAt(Math.floor(pos[0]), Math.floor(pos[1]), Math.floor(pos[2]));
     },
+    terrainBlocks: blocks,
     async: {
       getBiome: function (x, z) {
         return enqueue(function job() {
@@ -1318,8 +1373,8 @@ function createWorld(options?): World{
       },
       getBiomeMap: function (bounds) {
         return enqueue(makeMapJob(bounds, function (n) { return new Array(n); },
-          function (x, i, out, s) {
-            for (var z = s.minZ; z < s.minZ + s.sizeZ; z++) {
+          function (x, startZ, endZ, i, out) {
+            for (var z = startZ; z < endZ; z++) {
               out[i++] = BIOME_NAMES[biomes.biomeId(x, z)];
             }
             return i;
@@ -1334,9 +1389,9 @@ function createWorld(options?): World{
       },
       getHeightMap: function (bounds) {
         return enqueue(makeMapJob(bounds, function (n) { return new Int32Array(n); },
-          function (x, i, out, s) {
-            for (var z = s.minZ; z < s.minZ + s.sizeZ; z++) {
-              column.compute(x, z); // 元実装どおりキャッシュなし
+          function (x, startZ, endZ, i, out) {
+            for (var z = startZ; z < endZ; z++) {
+              column.compute(x, z);
               out[i++] = column.ground;
             }
             return i;
@@ -1359,5 +1414,10 @@ function createWorld(options?): World{
 }
 
 export {
-  createWorld
+  createWorld,
+  TerrainBlocks
 };
+
+export const handlers = { 
+  tick: handleTick,
+}

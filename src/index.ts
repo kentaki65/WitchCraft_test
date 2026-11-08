@@ -141,6 +141,7 @@ import * as $0 from "./features/achievements/index"
 import * as $1 from "./features/infernalMobs/index"
 import * as $2 from "./features/onDeath/index";
 import * as $3 from "./core/managers/index";
+import * as $4 from "./core/worldgen/world";
 
 Loader.modules = [$0, $1, $2, $3];
 Loader.INIT()
