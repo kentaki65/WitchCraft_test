@@ -23,6 +23,7 @@ const methodNames = [
   "onTouchscreenActionButton",
   "onPlayerFinishChargingItem",
   "onPlayerPotionEffect",
+  "onPlayerRequestChunk"
 ] satisfies MethodNames<GameManager>[];
 
 export const handlers = Object.fromEntries(

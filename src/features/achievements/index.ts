@@ -4,7 +4,7 @@ import { AchievementKeys, AchievementSlot, ReachedBiomes, Vec3 } from "../../cor
 import type * as Types from "@bloxd";
 import { progressChecker } from "./achv";
 import { getDistance } from "src/utils/math";
-import { world } from "src/core/managers/worldGenerator";
+import { world } from "src/core/api/worldGenerator";
 import { Biome } from "src/core/worldgen/types";
 
 const prevPlayerMovedMap = new Map<Types.PlayerId, Vec3>();

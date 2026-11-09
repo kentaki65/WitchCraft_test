@@ -1,8 +1,8 @@
 //@ts-nocheck
-import Promise from "src/promise/promise";
 import { World } from "./types";
 import { setTimeout } from "@plugins/helpers";
-import { TICK_CONFIG } from "../tickConfig";
+import { Promise } from "../api/promise";
+import { TICK_CONFIG } from "../constance";
 
 // src/lru.ts
 var BoundedCache = class {

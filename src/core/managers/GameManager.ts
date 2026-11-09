@@ -6,7 +6,7 @@ export class GameManager {
   private players = new Map<Types.PlayerId, PlayerManager>();
 
   tick = () => {
-    for(const callbacks of this.players.values()){
+    for (const callbacks of this.players.values()) {
       callbacks?.tick();
     }
   }
@@ -95,5 +95,9 @@ export class GameManager {
 
   onPlayerPotionEffect = (...args: Parameters<typeof onPlayerPotionEffect>) => {
     this.players.get(args[0])?.onPlayerPotionEffect(...args);
+  }
+
+  onPlayerRequestChunk = (...args: Parameters<typeof onPlayerRequestChunk>) => {
+    this.players.get(args[0])?.onPlayerRequestChunk(...args);
   }
 }

@@ -7,12 +7,12 @@ export class DungeonEntrance extends Dungeon {
         type: "schematic",
         path: "dungeonEntrance.bloxdschem"
       },
-      biomes: [],
+      biomes: ["Plains"],
       y: 0,
       weight: 10,
       minDistance: 500,
       onPlaced: (origin) => {
-
+        api.log("placed");
       }
     });
 

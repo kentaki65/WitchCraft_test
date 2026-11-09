@@ -23,8 +23,8 @@ export const biomeNames = [
 
 export const TICK_CONFIG = {
   executionBudgetMs: 20,
-  preparationItemsPerTick: 512,
-  terrainBlocksPerTick: 1024,
-  terrainRectanglesPerTick: 64,
+  preparationItemsPerTick: 256,
+  terrainBlocksPerTick: 256,
+  terrainRectanglesPerTick: 256,
   heightMapCellsPerStep: 256,
 } as const;

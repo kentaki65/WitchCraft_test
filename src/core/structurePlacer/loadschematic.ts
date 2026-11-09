@@ -1,9 +1,9 @@
 import Promise from "../api/promise";
 import { PolyfillPromise, PromiseLike as CustomPromiseLike } from "../api/promise";
 import { forceLoadChunk, setTimeout } from "@plugins/helpers";
-import { TICK_CONFIG } from "../constance";
-import { world } from "../managers/worldGenerator";
+import { world } from "../api/worldGenerator";
 import { SchematicPath } from "../types";
+import { TICK_CONFIG } from "../constance";
 
 type Vec3 = [number, number, number];
 
@@ -341,7 +341,7 @@ function regenerateTerrain(
     columnZ = minZ + mapIndex % sizeZ;
     columnMaxY = pagedValue(columns.maxHeights, columnIndex, DATA_PAGE_SIZE);
     y = minY;
-    columnGenerator = world.TerrainBlocks.createColumnGenerator(
+    columnGenerator = world.terrainBlocks.createColumnGenerator(
       columnX,
       columnZ,
       pagedValue(columns.newHeights, columnIndex, DATA_PAGE_SIZE),
@@ -493,33 +493,33 @@ export function loadSchematic(
 
       world.async.getHeightMap({ min: [minX, minZ], max: [maxX, maxZ] })
         .then((heights: Int32Array) => {
-        const sizeZ = maxZ - minZ + 1;
-        return terrainColumns(
-          origin,
-          width,
-          schemaDepth,
-          targetY,
-          terrainDepth,
-          heights,
-          minX,
-          minZ,
-          sizeZ,
-        ).then(columns => {
-          return makeChunkCopies(columns, minX, minZ, sizeZ, targetY - terrainDepth).then(({ copies }) =>
-            copyChunks(copies, false)
-              .then(() => regenerateTerrain(
-                columns,
-                copies.minChunk,
-                minX,
-                minZ,
-                sizeZ,
-                targetY - terrainDepth,
-              ))
-              .then(() => copyChunks(copies, true))
-              .then(() => placeSchematicChunks(path, origin, dimensions)),
-          );
-        });
-      })
+          const sizeZ = maxZ - minZ + 1;
+          return terrainColumns(
+            origin,
+            width,
+            schemaDepth,
+            targetY,
+            terrainDepth,
+            heights,
+            minX,
+            minZ,
+            sizeZ,
+          ).then(columns => {
+            return makeChunkCopies(columns, minX, minZ, sizeZ, targetY - terrainDepth).then(({ copies }) =>
+              copyChunks(copies, false)
+                .then(() => regenerateTerrain(
+                  columns,
+                  copies.minChunk,
+                  minX,
+                  minZ,
+                  sizeZ,
+                  targetY - terrainDepth,
+                ))
+                .then(() => copyChunks(copies, true))
+                .then(() => placeSchematicChunks(path, origin, dimensions)),
+            );
+          });
+        })
         .then(resolve, reject);
     } catch (error: unknown) {
       reject(error);

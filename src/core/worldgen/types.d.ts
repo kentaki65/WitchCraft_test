@@ -90,7 +90,7 @@ export interface World {
     getBiomeMap(bounds: Bounds2D): PromiseConstructorLike<Biome[]>;
   }
 
-  TerrainBlocks: TerrainBlocksLike
+  terrainBlocks: TerrainBlocksLike
 }
 
 /**

@@ -20,6 +20,7 @@ export class DungeonGenerator {
 
     switch (source.type) {
       case "schematic":
+        api.log("loadschematic", origin)
         promise = loadSchematic(source.path, origin, 32);
         break;
 
@@ -31,7 +32,7 @@ export class DungeonGenerator {
     return promise.then(() => {
       this.dungeonType.onPlaced(origin);
       this._saveGeneratedChunk(regionKey);
-    });
+    })
   }
 
   private _placeDungeonWithCopyChunk(
@@ -90,7 +91,9 @@ export class DungeonGenerator {
   private _saveGeneratedChunk(regionKey: string) {
     //`${regionX}|${regionZ}`のような形式が返ってくる
     const generatedChunks = getWorldData("generatedChunkKeys");
-    if (!generatedChunks) return;
+    if (!generatedChunks) {
+      setWorldData("generatedChunkKeys", regionKey);
+    };
 
     setWorldData("generatedChunkKeys", `${generatedChunks},${regionKey}`);
   }

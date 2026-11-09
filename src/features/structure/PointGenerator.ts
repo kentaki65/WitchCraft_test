@@ -1,5 +1,5 @@
 import type * as Types from "@bloxd";
-import { world } from "src/core/managers/worldGenerator";
+import { world } from "src/core/api/worldGenerator";
 import { DungeonEntrance } from "./dungeons/dungeonEntrance";
 import { Dungeon } from "./Dungeon";
 import { SeededRandom } from "src/core/worldgen/world";
@@ -10,6 +10,7 @@ export class PointGenerator {
   private readonly dungeons: Dungeon[] = [
     new DungeonEntrance(),
   ];
+  private generating: boolean = false;
 
   isGenerated(regionKey: string): boolean{
     const generatedChunks = getWorldData("generatedChunkKeys");
@@ -63,7 +64,14 @@ export class PointGenerator {
 
     if (chosenDungeon) {
       const generator = new DungeonGenerator(chosenDungeon);
-      generator.placeDungeon(regionKey, [x, chosenDungeon.y, z]);
+      if(!this.generating){
+        this.generating = true;
+        generator.placeDungeon(regionKey, [Math.floor(x / 32) * 32, chosenDungeon.y, Math.floor(z / 32) * 32]).then(() => {
+          this.generating = false;
+        }).catch((error: any) => {
+          api.log(error.message, error.stack);
+        });
+      }
     }
   }
 }

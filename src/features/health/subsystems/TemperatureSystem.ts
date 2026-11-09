@@ -2,7 +2,7 @@ import type * as Types from "@bloxd";
 import { PlayerStates } from "../PlayerStates";
 import { ITickable } from "../SurvivalManager";
 import { Biome } from "src/core/worldgen/types";
-import { world } from "src/core/managers/worldGenerator";
+import { world } from "src/core/api/worldGenerator";
 import { createTickInterval } from "src/utils/loop";
 import { setTimeout } from "@plugins/helpers"
 
