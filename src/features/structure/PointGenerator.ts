@@ -5,12 +5,24 @@ import { Dungeon } from "./Dungeon";
 import { SeededRandom } from "src/core/worldgen/world";
 import { DungeonGenerator } from "./dungeonGenerator";
 import { getWorldData } from "src/core/api/dbHelper";
+import { Vec3 } from "src/core/types";
 
 export class PointGenerator {
   private readonly dungeons: Dungeon[] = [
     new DungeonEntrance(),
   ];
   private generating: boolean = false;
+
+  private _toWorldXY(num: number){
+    return Math.floor(num / 32) * 32; 
+  }
+
+  private _findSuitablePoint(x: number, z: number, targetY: number): Vec3 | null {
+    const height = world.getHeight(x, z);
+    const heightDiff = Math.abs(height - targetY);
+
+    return heightDiff <= 5 ? [this._toWorldXY(x), targetY, this._toWorldXY(z)] : null
+  }
 
   isGenerated(regionKey: string): boolean{
     const generatedChunks = getWorldData("generatedChunkKeys");
@@ -63,10 +75,13 @@ export class PointGenerator {
     }
 
     if (chosenDungeon) {
+      const point = this._findSuitablePoint(x, z, chosenDungeon.y);
+      if (!point) return;
+
       const generator = new DungeonGenerator(chosenDungeon);
       if(!this.generating){
         this.generating = true;
-        generator.placeDungeon(regionKey, [Math.floor(x / 32) * 32, chosenDungeon.y, Math.floor(z / 32) * 32]).then(() => {
+        generator.placeDungeon(regionKey, point).then(() => {
           this.generating = false;
         }).catch((error: any) => {
           api.log(error.message, error.stack);
