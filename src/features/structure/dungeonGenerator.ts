@@ -4,6 +4,8 @@ import { DungeonSource } from "./Dungeon";
 import { Vec3 } from "src/core/types";
 import Promise, { PolyfillPromise } from "src/core/api/promise";
 import { getWorldData, setWorldData } from "src/core/api/dbHelper";
+import { getLootChestContents } from "../lootchest/LootChest";
+import { Rarity } from "../lootchest/types";
 
 export type DungeonType = DungeonEntrance;
 
@@ -31,6 +33,8 @@ export class DungeonGenerator {
 
     return promise.then(() => {
       this.dungeonType.onPlaced(origin);
+      this._placeChestContents(origin);
+
       this._saveGeneratedChunk(regionKey);
     })
   }
@@ -96,5 +100,40 @@ export class DungeonGenerator {
     };
 
     setWorldData("generatedChunkKeys", `${generatedChunks},${regionKey}`);
+  }
+
+  private _placeChestContents(origin: Vec3) {
+    if (!this.dungeonType.chestPositions) return;
+    const chest = this.dungeonType.chestPositions;
+
+    for (const { position, overrides } of chest) {
+      const worldPos: Vec3 = [
+        position[0] + origin[0],
+        position[1] + origin[1],
+        position[2] + origin[2],
+      ];
+
+      const block = api.getBlock(worldPos);
+
+      if (block === "Chest") {
+        api.setBlock(worldPos, "Chest")
+      }
+
+      api.setBlockData(...worldPos, {
+        persisted: {
+          chestStr: JSON.stringify(getLootChestContents({ pos: worldPos, quality: Rarity.EPIC }))
+        }
+      });
+
+      for(const override of overrides){
+        Object.entries(override).forEach(([index, attr]) => {
+          api.setStandardChestItemSlot(worldPos, Number(index), attr.itemName, 1, undefined, {
+            customDisplayName: attr.customDisplayName,
+            customDescription: attr.customDescription,
+            customAttributes: attr.customAttributes
+          })
+        })
+      }
+    }
   }
 }

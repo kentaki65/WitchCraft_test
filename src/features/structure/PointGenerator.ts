@@ -21,7 +21,7 @@ export class PointGenerator {
     const height = world.getHeight(x, z);
     const heightDiff = Math.abs(height - targetY);
 
-    return heightDiff <= 5 ? [this._toWorldXY(x), targetY, this._toWorldXY(z)] : null
+    return heightDiff <= 32 ? [this._toWorldXY(x), targetY, this._toWorldXY(z)] : null
   }
 
   isGenerated(regionKey: string): boolean{

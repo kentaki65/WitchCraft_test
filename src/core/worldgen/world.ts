@@ -115,7 +115,7 @@ var ColumnField = class {
 };
 
 // src/rng.ts
-export var SeededRandom = class {
+export class SeededRandom {
   constructor(seed) {
     let hash = 2166136261;
     for (let i = 0; i < seed.length; i++) {
@@ -130,6 +130,7 @@ export var SeededRandom = class {
     return ((state ^ state >>> 14) >>> 0) / 4294967296;
   }
 };
+
 function selectWeightedIndex(frequencies, total, rng) {
   const target = rng.next() * total;
   let cumulative = 0;

@@ -79,6 +79,21 @@ export const randomNumber = (min: number, max: number): number => {
   return Math.floor(Math.random() * (max - min + 1)) + min
 }
 
+export const randomUniqueNumber = (min: number, max: number): () => number => {
+  const mentionedNumber: number[] = [];
+
+  return function() {
+    while (true) {
+      const random = Math.floor(Math.random() * (max - min + 1)) + min;
+
+      if (!mentionedNumber.includes(random)) {
+        mentionedNumber.push(random);
+        return random;
+      }
+    }
+  };
+};
+
 export const randomOnePick = <T>(arr: T[]): T | undefined => {
   if (!arr || arr.length === 0) return undefined;
   return arr[Math.floor(Math.random() * arr.length)];
