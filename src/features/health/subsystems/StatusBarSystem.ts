@@ -36,7 +36,7 @@ export class StatusBarSystem implements ITickable {
     this.emptyLineHunger = this.makeRepeatString("\n", isMobile ? mobile_hunger : pc_hunger)
     this.spaceWater = this.makeRepeatString("\u3000", isMobile ? space_mobile : space_pc);
 
-    this.updateUI = createTickInterval(4, () => this._updateUI());
+    this.updateUI = createTickInterval(20, () => this._updateUI());
 
   }
 
@@ -65,7 +65,7 @@ export class StatusBarSystem implements ITickable {
       { str: "\n" },
       ...foodIcons,
       this.spaceWater,
-    ], 0, 250);
+    ], 0, 1000);
 
     const temp = this.playerState.get("temp");
     const { min, max } = this.playerState.stateRange.temp;
@@ -83,7 +83,7 @@ export class StatusBarSystem implements ITickable {
       this.emptyLineHunger,
       { str: "\u3000\u3000" + Math.trunc(temp) + "\u2103\n", style: { fontSize: "20px" } },
       { icon: iconName, style: { fontSize: "120px" } },
-    ], 0, 250);
+    ], 0, 1000);
   }
 
   tick() {

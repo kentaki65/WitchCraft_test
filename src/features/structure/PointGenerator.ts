@@ -6,6 +6,7 @@ import { SeededRandom } from "src/core/worldgen/world";
 import { DungeonGenerator } from "./dungeonGenerator";
 import { getWorldData } from "src/core/api/dbHelper";
 import { Vec3 } from "src/core/types";
+import { biomeNames } from "src/core/constance";
 
 export class PointGenerator {
   private readonly dungeons: Dungeon[] = [
@@ -13,8 +14,8 @@ export class PointGenerator {
   ];
   private generating: boolean = false;
 
-  private _toWorldXY(num: number){
-    return Math.floor(num / 32) * 32; 
+  private _toWorldXY(num: number) {
+    return Math.floor(num / 32) * 32;
   }
 
   private _findSuitablePoint(x: number, z: number, targetY: number): Vec3 | null {
@@ -24,7 +25,7 @@ export class PointGenerator {
     return heightDiff <= 32 ? [this._toWorldXY(x), targetY, this._toWorldXY(z)] : null
   }
 
-  isGenerated(regionKey: string): boolean{
+  isGenerated(regionKey: string): boolean {
     const generatedChunks = getWorldData("generatedChunkKeys");
     if (!generatedChunks) return false;
 
@@ -37,8 +38,8 @@ export class PointGenerator {
     const regionZ = Math.floor(chunkZ / 16);
     const regionKey = `${regionX}|${regionZ}`;
 
-    if(this.isGenerated(regionKey)) return;
-    
+    if (this.isGenerated(regionKey)) return;
+
     const rng = new SeededRandom(regionKey);
     const regionOriginX = regionX * 512;
     const regionOriginZ = regionZ * 512;
@@ -48,9 +49,12 @@ export class PointGenerator {
 
     //バイオームチェック
     const biome = world.getBiome(x, z);
-    const placeable = this.dungeons.filter(
-      n => n.biomes.includes(biome)
-    );
+    const placeable: Dungeon[] = this.dungeons
+      .map((n): Dungeon => ({
+        ...n,
+        biomes: n.biomes.length === 0 ? biomeNames : n.biomes
+      }))
+      .filter(n => n.biomes.includes(biome));
 
     const weightSum = placeable.reduce((prev, curr) => {
       return prev + curr.weight
@@ -73,13 +77,13 @@ export class PointGenerator {
         break;
       }
     }
-
+    
     if (chosenDungeon) {
       const point = this._findSuitablePoint(x, z, chosenDungeon.y);
       if (!point) return;
 
       const generator = new DungeonGenerator(chosenDungeon);
-      if(!this.generating){
+      if (!this.generating) {
         this.generating = true;
         generator.placeDungeon(regionKey, point).then(() => {
           this.generating = false;

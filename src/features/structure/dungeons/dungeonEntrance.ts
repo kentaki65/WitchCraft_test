@@ -21,7 +21,7 @@ export class DungeonEntrance extends Dungeon {
       const random = randomUniqueNumber(0, 45);
       
       return [{
-        position: [-21, 0, -15],
+        position: [-21, 1, -15],
         overrides: [
           {
             [random()]: {

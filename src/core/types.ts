@@ -40,6 +40,8 @@ export interface WorldData {
 
 export interface PlayerData {
   deadPlayer: DeadPlayer;
+  playerLevel: number;
+  foundDungeons: number;
   reachedBiomes: ReachedBiomes;
   achievement: AchievementSlot;
 }

@@ -4,6 +4,7 @@ import { MagicManager } from "../../features/magic/magicManager";
 import { SurvivalManager } from "../../features/health/SurvivalManager";
 import { Parameters } from "../types";
 import { DungeonManager } from "src/features/structure/DungeonManager";
+import { RightTextManager } from "../../features/RightInfoTextManager";
 
 type effectNames = "Damage" | "Speed" | "Damage Reduction" | "Invisible" | "Jump Boost" | "Knockback" | "Poisoned" | "Slowness" | "Weakness" | "Cleansed" | "Instant Damage" | "Health Regen" | "Healing Pulse" | "Instant Health" | "Haste" | "Shield" | "Double Jump" | "Heat Resistance" | "Thief" | "X-Ray Vision" | "Mining Yield" | "Brain Rot" | "Aura" | "Wall Climbing" | "Air Walk" | "Pickpocketer" | "Lifesteal" | "Bounciness" | "Blindness" | "Poopy" | "Glowing" | "Night Vision" | "Hydrated";
 export class PlayerManager {
@@ -12,12 +13,14 @@ export class PlayerManager {
   readonly customKeyManager: CustomButtonManager;
   readonly healthManager: SurvivalManager;
   readonly dungeonManager: DungeonManager;
+  readonly rightInfoTextManager: RightTextManager;
 
   constructor (playerId: Types.PlayerId){
     this.playerId = playerId;
     this.customKeyManager = new CustomButtonManager(playerId);
     this.magicManager = new MagicManager(playerId, this.customKeyManager);
     this.healthManager = new SurvivalManager(playerId);
+    this.rightInfoTextManager = new RightTextManager(playerId);
     this.dungeonManager = new DungeonManager();
     this.onPlayerJoin();
   }
@@ -53,6 +56,7 @@ export class PlayerManager {
   tick = () => {
     this.magicManager.tick();
     this.healthManager.tick();
+    this.rightInfoTextManager.tick();
   };
 
   onPlayerAltAction = (playerId: string, x: number, y: number, z: number, block: string, targetEId: string | null) => {

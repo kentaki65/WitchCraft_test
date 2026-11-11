@@ -1,4 +1,4 @@
-import { Vec3 } from "src/core/types";
+import { Vec3, Vec2 } from "src/core/types";
 
 declare const normalizedBrand: unique symbol;
 
@@ -82,7 +82,7 @@ export const randomNumber = (min: number, max: number): number => {
 export const randomUniqueNumber = (min: number, max: number): () => number => {
   const mentionedNumber: number[] = [];
 
-  return function() {
+  return function () {
     while (true) {
       const random = Math.floor(Math.random() * (max - min + 1)) + min;
 
@@ -100,6 +100,7 @@ export const randomOnePick = <T>(arr: T[]): T | undefined => {
 }
 
 export const getDistance = (p1: Vec3, p2: Vec3) => Math.hypot(p2[0] - p1[0], p2[1] - p1[1], p2[2] - p1[2]);
+export const getDistance2D = (p1: Vec2, p2: Vec2) => Math.hypot(p2[1] - p1[1], p2[0] - p2[0]);
 
 export const randomPicks = <T>(arr: T[], count: number): T[] => {
   if (!arr || arr.length === 0) return [];
@@ -108,7 +109,7 @@ export const randomPicks = <T>(arr: T[], count: number): T[] => {
 }
 
 export function findNearest(points: string[], target: Vec3): string | undefined {
-  if(points.some(e => !api.checkValid(e))) return undefined;
+  if (points.some(e => !api.checkValid(e))) return undefined;
 
   const targets: Target[] = points.map(id => ({ id, position: api.getPosition(id) }));
 
@@ -140,11 +141,11 @@ export function subtractVec(a: Vec3, b: Vec3): Vec3 {
   ];
 }
 
-export function divideVec(a: Vec3, b: Vec3, x: number): Vec3[] | undefined{
-  if(x <= 1) return;
+export function divideVec(a: Vec3, b: Vec3, x: number): Vec3[] | undefined {
+  if (x <= 1) return;
   const points: Vec3[] = [];
 
-  for(let k = 1; k < x; k++){
+  for (let k = 1; k < x; k++) {
     // 内分点の公式: ((x - k) * a + k * b) / x
     const targetX = ((x - k) * a[0] + k * b[0]) / x;
     const targetY = ((x - k) * a[1] + k * b[1]) / x;
@@ -156,7 +157,7 @@ export function divideVec(a: Vec3, b: Vec3, x: number): Vec3[] | undefined{
   return points;
 }
 
-export function normalize(arr: Vec3): NormalizedVec3 | null{
+export function normalize(arr: Vec3): NormalizedVec3 | null {
   const len = Math.hypot(...arr);
 
   if (len === 0) return [0, 0, 0] as NormalizedVec3;

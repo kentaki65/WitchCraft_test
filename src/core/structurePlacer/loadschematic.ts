@@ -25,7 +25,7 @@ const TERRAIN_MARGIN = 16;
 const DEFAULT_TERRAIN_DEPTH = 32;
 const DATA_PAGE_SIZE = 4096;
 
-let placementInProgress = false;
+export let placementInProgress = false;
 
 function chunkStart(coordinate: number): number {
   return Math.floor(coordinate / 32) * 32;

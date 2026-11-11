@@ -21,7 +21,7 @@ export class PlayerStates {
     "temp": { min: -30, max: 50 },
   }
 
-  private clamp<K extends keyof PlayerState>(key: K, value: PlayerState[K]): PlayerState[K] {
+  private _clamp<K extends keyof PlayerState>(key: K, value: PlayerState[K]): PlayerState[K] {
     return Math.min(this.stateRange[key].max, Math.max(this.stateRange[key].min, value));
   }
 
@@ -30,7 +30,7 @@ export class PlayerStates {
   }
 
   set<K extends keyof PlayerState>(key: K, value: PlayerState[K]): void {
-    this.playerState[key] = this.clamp(key, value);
+    this.playerState[key] = this._clamp(key, value);
   }
 
   update<K extends keyof PlayerState>(key: K, diff: PlayerState[K]): void {

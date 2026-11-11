@@ -1,4 +1,6 @@
-export const biomeNames = [
+import { Biome } from "./worldgen/types";
+
+export const biomeNames: Biome[] = [
   "Jungle",
   "Desert",
   "FrozenBadlandsPlains",

@@ -108,32 +108,37 @@ export class DungeonGenerator {
 
     for (const { position, overrides } of chest) {
       const worldPos: Vec3 = [
-        position[0] + origin[0],
+        origin[0] - position[0],
         position[1] + origin[1],
-        position[2] + origin[2],
+        origin[2] - position[2],
       ];
+      loadChunk(...worldPos).then(() => {
+        const block = api.getBlock(worldPos);
+        api.log(block);
 
-      const block = api.getBlock(worldPos);
-
-      if (block === "Chest") {
-        api.setBlock(worldPos, "Chest")
-      }
-
-      api.setBlockData(...worldPos, {
-        persisted: {
-          chestStr: JSON.stringify(getLootChestContents({ pos: worldPos, quality: Rarity.EPIC }))
+        if (block !== "Chest") {
+          api.log(worldPos);
+          api.setBlock(worldPos, "Chest")
         }
-      });
 
-      for(const override of overrides){
-        Object.entries(override).forEach(([index, attr]) => {
-          api.setStandardChestItemSlot(worldPos, Number(index), attr.itemName, 1, undefined, {
-            customDisplayName: attr.customDisplayName,
-            customDescription: attr.customDescription,
-            customAttributes: attr.customAttributes
+        const chestContents = getLootChestContents({ pos: worldPos, quality: Rarity.EPIC });
+
+        api.setBlockData(...worldPos, {
+          persisted: {
+            chestStr: JSON.stringify(chestContents)
+          }
+        });
+
+        for (const override of overrides) {
+          Object.entries(override).forEach(([index, attr]) => {
+            api.setStandardChestItemSlot(worldPos, Number(index), attr.itemName, 1, undefined, {
+              customDisplayName: attr.customDisplayName,
+              customDescription: attr.customDescription,
+              //customAttributes: attr.customAttributes
+            })
           })
-        })
-      }
+        }
+      })
     }
   }
 }
