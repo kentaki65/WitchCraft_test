@@ -1,7 +1,7 @@
 export class DataManager<T extends object> {
   constructor(
     private data: T,
-    private onUpdated?: (data: T) => void
+    private onUpdated: (data: T) => void = () => {},
   ) {}
 
   get(): T {
@@ -10,11 +10,11 @@ export class DataManager<T extends object> {
 
   set(data: T): void {
     this.data = data;
-    this.onUpdated?.(this.data);
+    this.onUpdated(this.data);
   }
 
   update(data: Partial<T>): void {
     Object.assign(this.data, data);
-    this.onUpdated?.(this.data);
+    this.onUpdated(this.data);
   }
 }
