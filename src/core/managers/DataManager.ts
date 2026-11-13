@@ -1,7 +1,7 @@
 export class DataManager<T extends object> {
   constructor(
     private data: T,
-    private onUpdated: (data: T) => void
+    private onUpdated: (data: T) => void = () => {},
   ) {}
 
   get(): T {
