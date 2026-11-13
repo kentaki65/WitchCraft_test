@@ -2,3 +2,4 @@
 
 【開発者】
 - kentakidayo :D
+- Ryokuryu
