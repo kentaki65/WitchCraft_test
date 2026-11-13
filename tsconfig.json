@@ -1,45 +1,76 @@
+
 {
-	"compilerOptions": {
-		"allowJs": true,
-		"checkJs": false,
-		"strict": false,
-		"module": "ESNext",
-		"moduleResolution": "bundler",
-		"target": "ES2015",
-		"noEmit": true,
-		"noLib": true,
-		"skipLibCheck": true,
-		"ignoreDeprecations": "6.0",
-		"baseUrl": ".",
-		"paths": {
-			"@bloxd": [
-				"./node_modules/@bloxd/index.d.ts"
-			],
-			"@plugins/debug": [
-				"./node_modules/@plugins/debug/index.d.ts"
-			],
-			"@plugins/dialogue": [
-				"./node_modules/@plugins/dialogue/index.d.ts"
-			],
-			"@plugins/helpers": [
-				"./node_modules/@plugins/helpers/index.d.ts"
-			],
-			"@plugins/sessionBasedGame": [
-				"./node_modules/@plugins/sessionBasedGame/index.d.ts"
-			]
-		}
-	},
-	"include": [
-		"./**/*.ts",
-		"./**/*.js",
-		"./**/*.d.ts"
-	],
-	"files": [
-		"node_modules/@bloxd/globals.d.ts",
-		"node_modules/@bloxd/lib.d.ts",
-		"node_modules/@plugins/helpers/chunk.ts",
-		"node_modules/@plugins/helpers/index.ts",
-		"node_modules/@plugins/helpers/random.ts",
-		"node_modules/@plugins/helpers/timers.ts"
-	]
+  "compilerOptions": {
+    /* JavaScript */
+    "allowJs": true,
+    "checkJs": false,
+
+    /* TypeScript */
+    "strict": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "forceConsistentCasingInFileNames": true,
+
+    /* Module */
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+
+    /* Target */
+    "target": "ES2015",
+    "noEmit": true,
+
+    /* Bloxd */
+    "noLib": true,
+    "skipLibCheck": true,
+
+    /* Import aliases */
+    "paths": {
+      "core/*": ["./core/*"],
+      "features/*": ["./features/*"],
+      "utils/*": ["./utils/*"],
+      "procgen/*": ["./procgen/*"],
+      "structures/*": ["./structures/*"],
+
+      "@bloxd": [
+        "./node_modules/@bloxd/index.d.ts"
+      ],
+      "@plugins/debug": [
+        "./node_modules/@plugins/debug/index.d.ts"
+      ],
+      "@plugins/dialogue": [
+        "./node_modules/@plugins/dialogue/index.d.ts"
+      ],
+      "@plugins/helpers": [
+        "./node_modules/@plugins/helpers/index.d.ts"
+      ],
+      "@plugins/sessionBasedGame": [
+        "./node_modules/@plugins/sessionBasedGame/index.d.ts"
+      ]
+    }
+  },
+
+  "include": [
+    "**/*.ts",
+    "**/*.js",
+    "**/*.d.ts"
+  ],
+
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build"
+  ],
+
+  "files": [
+    "node_modules/@bloxd/globals.d.ts",
+    "node_modules/@bloxd/lib.d.ts",
+    "node_modules/@plugins/helpers/chunk.ts",
+    "node_modules/@plugins/helpers/index.ts",
+    "node_modules/@plugins/helpers/random.ts",
+    "node_modules/@plugins/helpers/timers.ts"
+  ]
 }
