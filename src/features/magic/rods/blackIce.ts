@@ -37,12 +37,12 @@ export class BlackIceRod extends MagicSystem<BlackIceSkillNames> {
 
   castSpell(mode: BlackIceSkillNames, chargeTime: number): void {
     switch (mode) {
-      case BlackIceSkillNames.markTarget:
-        this.castSecondSpell(chargeTime);
-        break;
-
       case BlackIceSkillNames.bloodNeedle:
         this.castFirstSpell(chargeTime);
+        break;
+
+      case BlackIceSkillNames.markTarget:
+        this.castSecondSpell(chargeTime);
         break;
     }
   }
