@@ -14,13 +14,17 @@ export class EventRegister {
   ];
 
   private count = 0;
-  private readonly maxInterval = 120000;
+  private readonly maxInterval = 120000; //20分
 
   private nextEventTime: number | undefined;
   private nextEventEndTime: number | undefined;
   private runningEvent: IRegistrableEvent | undefined;
 
   private lastTriggered = new Map<IRegistrableEvent, number>();
+
+  constructor() {
+    this.scheduleNextEvent();
+  }
 
   private scheduleNextEvent() {
     const now = tickToMs(this.count);
@@ -52,6 +56,7 @@ export class EventRegister {
     event.register();
 
     this.runningEvent = event;
+    this.nextEventTime = undefined;
     this.nextEventEndTime = tickToMs(this.count) + randomNumber(event.minDuration, event.maxDuration);
     this.lastTriggered.set(event, tickToMs(this.count));
   }
@@ -59,19 +64,22 @@ export class EventRegister {
   tick() {
     const now = tickToMs(++this.count);
     if (this.nextEventTime !== undefined && now >= this.nextEventTime) {
-      const avaliableEvents = this.getAvailableEvents();
-      const event = this.chooseNextEvent(avaliableEvents);
+      const availableEvents = this.getAvailableEvents();
+      const event = this.chooseNextEvent(availableEvents);
       if (event) {
         this.triggerEvent(event);
+      } else {
+        this.scheduleNextEvent();
       };
     }
 
     if (this.nextEventEndTime !== undefined && now >= this.nextEventEndTime) {
       this.runningEvent?.terminate();
-      this.scheduleNextEvent();
 
       this.runningEvent = undefined;
       this.nextEventEndTime = undefined;
+
+      this.scheduleNextEvent();
     }
   }
 }
