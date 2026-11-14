@@ -28,7 +28,6 @@
     "skipLibCheck": true,
 
     /* Import aliases */
-    "baseUrl": ".",
     "paths": {
       "core/*": ["./core/*"],
       "features/*": ["./features/*"],
