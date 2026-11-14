@@ -8,8 +8,7 @@ import type { Vec2 } from "../core/types";
 import { getPlayerData } from "../core/api/dbHelper";
 import { createTickInterval } from "../utils/loop";
 import { getDistance2D } from "../utils/math";
-
-type Weather = "sunny" | "rainy" | "snowy";
+import type { WeatherManager, WeatherType } from "./worldEvents/WeatherManager";
 
 type RightTextContent = Partial<{
   biome: Biome;
@@ -17,7 +16,7 @@ type RightTextContent = Partial<{
   playerLevel: number;
   unlockedAchv: number;
   foundDungeons: number;
-  weather: Weather;
+  weather: WeatherType;
 }>
 
 class RightTextData extends DataManager<RightTextContent> { };
@@ -25,10 +24,12 @@ class RightTextData extends DataManager<RightTextContent> { };
 export class RightTextManager {
   private playerId: Types.PlayerId;
   private rightTextData: RightTextData;
+  private weather: WeatherManager;
   private onTick: () => void;
 
-  constructor(playerId: Types.PlayerId) {
+  constructor(playerId: Types.PlayerId, weather: WeatherManager) {
     this.playerId = playerId;
+    this.weather = weather;
     this.rightTextData = new RightTextData({}, (data) => {
       api.setClientOption(this.playerId, "RightInfoText", this._serialize())
     })
@@ -41,7 +42,7 @@ export class RightTextManager {
       const playerLevel = getPlayerData(this.playerId, "playerLevel") ?? 0;
       const unlockedAchv = getPlayerData(this.playerId, "achievement")?.unlockedAchievements?.length ?? 0;
       const foundDungeons = getPlayerData(this.playerId, "foundDungeons") ?? 0;
-      const weather: Weather = "sunny";
+      const weather = this.weather.getCurrentWeather();
 
       this.rightTextData.update({
         biome,
@@ -69,7 +70,7 @@ export class RightTextManager {
     const toStyledText = (
       text: RightTextContent[keyof RightTextContent]
     ): Types.StyledText => {
-      return { str: text == null ? "" : String(text), style: {} };
+      return { str: text == null ? "" : String(text) + "\n", style: {} };
     };
 
     return [

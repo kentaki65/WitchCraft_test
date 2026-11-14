@@ -1,4 +1,4 @@
-import { divideVec, findNearest, subtractVec, dot, normalize, tickToMs } from "../../../utils/math";
+import { divideVec, findNearest, subtractVec, dot, normalize, tickToSeconds } from "../../../utils/math";
 import { MagicSystem, type RodSettings } from "../magicSystem";
 import { setInterval, clearInterval, setTimeout, type TimeoutId, clearTimeout } from "@plugins/helpers";
 import type * as Types from "@bloxd";
@@ -12,7 +12,7 @@ export class CursedRod extends MagicSystem<CursedRodSkillNames> {
   protected readonly itemName = "Cursed Rod";
   protected readonly chainInterval = 2;
   protected readonly segments = 5;
-  protected readonly reachms = tickToMs(this.chainInterval * this.segments);
+  protected readonly reachms = tickToSeconds(this.chainInterval * this.segments);
 
   protected readonly rodSettings: Record<CursedRodSkillNames, RodSettings> = {
     [CursedRodSkillNames.WraithChain]: {

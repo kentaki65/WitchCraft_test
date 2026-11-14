@@ -1,10 +1,12 @@
-import * as Types from "@bloxd";
+import type * as Types from "@bloxd"
 import { CustomButtonManager } from "./KeyManager";
 import { MagicManager } from "../../features/magic/magicManager";
 import { SurvivalManager } from "../../features/health/SurvivalManager";
 import type { Parameters } from "../types";
 import { RightTextManager } from "../../features/RightInfoTextManager";
 import { DungeonManager } from "../../features/structure/DungeonManager";
+import type { EventRegister } from "../../features/worldEvents/eventRegister";
+import type { WeatherManager } from "src/features/worldEvents/WeatherManager";
 
 type effectNames = "Damage" | "Speed" | "Damage Reduction" | "Invisible" | "Jump Boost" | "Knockback" | "Poisoned" | "Slowness" | "Weakness" | "Cleansed" | "Instant Damage" | "Health Regen" | "Healing Pulse" | "Instant Health" | "Haste" | "Shield" | "Double Jump" | "Heat Resistance" | "Thief" | "X-Ray Vision" | "Mining Yield" | "Brain Rot" | "Aura" | "Wall Climbing" | "Air Walk" | "Pickpocketer" | "Lifesteal" | "Bounciness" | "Blindness" | "Poopy" | "Glowing" | "Night Vision" | "Hydrated";
 export class PlayerManager {
@@ -14,14 +16,16 @@ export class PlayerManager {
   readonly healthManager: SurvivalManager;
   readonly dungeonManager: DungeonManager;
   readonly rightInfoTextManager: RightTextManager;
+  private readonly worldEvents: EventRegister;
 
-  constructor (playerId: Types.PlayerId){
+  constructor (playerId: Types.PlayerId, worldEvent: EventRegister, wetherManager: WeatherManager){
     this.playerId = playerId;
     this.customKeyManager = new CustomButtonManager(playerId);
     this.magicManager = new MagicManager(playerId, this.customKeyManager);
     this.healthManager = new SurvivalManager(playerId);
-    this.rightInfoTextManager = new RightTextManager(playerId);
+    this.rightInfoTextManager = new RightTextManager(playerId, wetherManager);
     this.dungeonManager = new DungeonManager();
+    this.worldEvents = worldEvent;
     this.onPlayerJoin();
   }
 
