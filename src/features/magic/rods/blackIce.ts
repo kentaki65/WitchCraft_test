@@ -1,9 +1,10 @@
-import { Vec3 } from "src/core/types";
 import type * as Types from "@bloxd";
-import { MagicSystem, RodSettings } from "../magicSystem";
+import { MagicSystem, type RodSettings } from "../magicSystem";
 import { setTimeout } from "@plugins/helpers";
-import { normalize } from "src/utils/math";
-import { asyncAnimate } from "src/core/api/animateHelper";
+import type { Vec3 } from "../../../core/types";
+import { normalize } from "../../../utils/math";
+import { asyncAnimate } from "../../../core/api/animateHelper";
+
 
 export enum BlackIceSkillNames {
   bloodNeedle = "bloodNeedle", sacrifice = "sacrifice", markTarget = "markTarget"
@@ -58,7 +59,7 @@ export class BlackIceRod extends MagicSystem<BlackIceSkillNames> {
       const horizontalRadius =
         radius * Math.sqrt(1 - elevation * elevation);
 
-      const offset = [
+      const offset: Vec3 = [
         Math.cos(angle) * horizontalRadius,
         radius * elevation,
         Math.sin(angle) * horizontalRadius,
@@ -180,7 +181,8 @@ export class BlackIceRod extends MagicSystem<BlackIceSkillNames> {
     if(!dir) return;
 
     const [mob] = this.getMobsInSight(playerPos, dir, 20);
-
+    if(mob === undefined) return;
+    
     const [x, y, z] = api.getPosition(mob);
     this.playEffect(mob, [x, y + 2.5, z]);
   }
@@ -340,6 +342,7 @@ export class BlackIceRod extends MagicSystem<BlackIceSkillNames> {
         if(!dir) return;
 
         const [mob] = this.getMobsInSight(playerPos, dir, 20, 5, null);
+        if(mob === undefined) return;
 
         const mobPos = api.getPosition(mob);
 
@@ -358,6 +361,7 @@ export class BlackIceRod extends MagicSystem<BlackIceSkillNames> {
     if(!dir) return;
     
     const [mob] = this.getMobsInSight(playerPos, dir, 20, 5);
+    if(mob === undefined) return;
 
     api.updateEntityNodeMeshAttachment(
       mob,

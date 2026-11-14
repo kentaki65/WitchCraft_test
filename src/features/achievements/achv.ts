@@ -1,6 +1,6 @@
 import { getPlayerData, setPlayerData } from "../../core/api/dbHelper";
 import { achievementData } from "./data";
-import { Achievement, AchievementKeys } from "../../core/types";
+import type { Achievement, AchievementKeys } from "../../core/types";
 import type * as Types from "@bloxd";
 
 const createdItems = new Set<string>();

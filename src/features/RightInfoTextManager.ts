@@ -1,13 +1,13 @@
 //バイオーム、危険度、レベル、解除した実績数、発見したダンジョン数、天気？
 
 import type * as Types from "@bloxd";
-import { Biome } from "../core/worldgen/types";
+import type { Biome } from "../core/worldgen/types";
 import { DataManager } from "../core/managers/DataManager";
-import { createTickInterval } from "src/utils/loop";
 import { world } from "../core/api/worldGenerator";
-import { Vec2 } from "../core/types";
+import type { Vec2 } from "../core/types";
 import { getPlayerData } from "../core/api/dbHelper";
-import { getDistance2D } from "src/utils/math";
+import { createTickInterval } from "../utils/loop";
+import { getDistance2D } from "../utils/math";
 
 type Weather = "sunny" | "rainy" | "snowy";
 

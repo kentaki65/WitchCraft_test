@@ -4,7 +4,7 @@ import { DraugrRod, DraugrRodSkillNames } from "./rods/draugrRod";
 import { CursedRod, CursedRodSkillNames } from "./rods/cursedRod";
 import { SpeedRod, SpeedRodSkillNames } from "./rods/speedRod";
 import { CustomButtonManager } from "../../core/managers/KeyManager";
-import { IMagicSystem } from "./IMagicSystem";
+import type { IMagicSystem } from "./IMagicSystem";
 import { BlackIceRod, BlackIceSkillNames } from "./rods/blackIce";
 
 export const magicButtonKeyIds = {

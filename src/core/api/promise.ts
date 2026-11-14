@@ -1,6 +1,14 @@
-import { Awaited } from "../types";
 import { setTimeout } from "@plugins/helpers";
 
+export type Awaited<T> =
+  T extends null | undefined
+  ? T
+  : T extends object & { then(onfulfilled: infer F, ...args: any[]): any }
+  ? F extends (value: infer V, ...args: any[]) => any
+  ? Awaited<V>
+  : never
+  : T;
+  
 export interface PromiseLike<T> {
   then<TResult1 = T, TResult2 = never>(
     onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | null,

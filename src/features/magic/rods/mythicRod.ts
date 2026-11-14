@@ -1,4 +1,4 @@
-import { MagicSystem, RodSettings } from "../magicSystem";
+import { MagicSystem, type RodSettings } from "../magicSystem";
 
 export enum MythicRodSkillNames {
   Doom = "Doom",

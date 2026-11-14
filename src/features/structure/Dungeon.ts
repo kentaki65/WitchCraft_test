@@ -1,6 +1,7 @@
-import { SchematicPath, Vec3 } from "src/core/types";
-import { Biome } from "src/core/worldgen/types";
-import { ItemAttributes } from "../lootchest/types";
+
+import type { SchematicPath, Vec3 } from "../../core/types";
+import type { Biome } from "../../core/worldgen/types";
+import { type ItemAttributes } from "../lootchest/types";
 
 interface DungeonConfig {
   source: DungeonSource,

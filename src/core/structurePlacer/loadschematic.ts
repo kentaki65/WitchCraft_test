@@ -1,8 +1,8 @@
 import Promise from "../api/promise";
-import { PolyfillPromise, PromiseLike as CustomPromiseLike } from "../api/promise";
+import type { PolyfillPromise, PromiseLike as CustomPromiseLike } from "../api/promise";
 import { forceLoadChunk, setTimeout } from "@plugins/helpers";
 import { world } from "../api/worldGenerator";
-import { SchematicPath } from "../types";
+import type { SchematicPath } from "../types";
 import { TICK_CONFIG } from "../constance";
 
 type Vec3 = [number, number, number];
@@ -35,8 +35,24 @@ function chunkKey(x: number, y: number, z: number): string {
   return `${x},${y},${z}`;
 }
 
-function pagedValue(pages: Int32Array[], index: number, pageSize: number): number {
-  return pages[Math.floor(index / pageSize)][index % pageSize];
+function pagedValue(
+  pages: Int32Array[],
+  index: number,
+  pageSize: number
+): number {
+  const page = pages[Math.floor(index / pageSize)];
+
+  if (!page) {
+    throw new Error(`Page not found: ${Math.floor(index / pageSize)}`);
+  }
+
+  const value = page[index % pageSize];
+
+  if (value === undefined) {
+    throw new Error(`Value not found at index: ${index}`);
+  }
+
+  return value;
 }
 
 export function loadChunk(x: number, y: number, z: number): CustomPromiseLike<void> {
@@ -59,12 +75,23 @@ function copyChunks(copies: ChunkCopies, reverse: boolean): CustomPromiseLike<vo
       }
 
       const pageIndex = Math.floor(index / DATA_PAGE_SIZE);
-      const positionIndex = index % DATA_PAGE_SIZE * 3;
-      const source: Vec3 = [
-        copies.positions[pageIndex][positionIndex],
-        copies.positions[pageIndex][positionIndex + 1],
-        copies.positions[pageIndex][positionIndex + 2],
-      ];
+      const positionIndex = (index % DATA_PAGE_SIZE) * 3;
+
+      const positionPage = copies.positions[pageIndex];
+
+      if (!positionPage) {
+        throw new Error(`Position page not found: ${pageIndex}`);
+      }
+
+      const x = positionPage[positionIndex];
+      const y = positionPage[positionIndex + 1];
+      const z = positionPage[positionIndex + 2];
+
+      if (x === undefined || y === undefined || z === undefined) {
+        throw new Error(`Invalid position data at index: ${index}`);
+      }
+
+      const source: Vec3 = [x, y, z];
       const temporary: Vec3 = [
         TEMP_ORIGIN[0] + source[0] - copies.minChunk[0],
         TEMP_ORIGIN[1] + source[1] - copies.minChunk[1],
@@ -116,12 +143,24 @@ function terrainColumns(
       try {
         let processed = 0;
         const deadline = Date.now() + TICK_CONFIG.executionBudgetMs;
+
         while (
           x <= maxX &&
           processed < TICK_CONFIG.preparationItemsPerTick &&
           Date.now() < deadline
         ) {
           const originalHeight = heights[(x - minX) * sizeZ + z - minZ];
+
+          if (originalHeight === undefined) {
+            processed++;
+            z++;
+            if (z > maxZ) {
+              z = minZ;
+              x++;
+            }
+            continue;
+          }
+
           const dx = x < originX ? originX - x : x > buildingMaxX ? x - buildingMaxX : 0;
           const dz = z < originZ ? originZ - z : z > buildingMaxZ ? z - buildingMaxZ : 0;
           const distance = Math.sqrt(dx * dx + dz * dz);
@@ -132,14 +171,24 @@ function terrainColumns(
           if (newHeight !== originalHeight && Math.max(originalHeight, newHeight) >= targetY - depth) {
             const pageIndex = Math.floor(count / DATA_PAGE_SIZE);
             const pageOffset = count % DATA_PAGE_SIZE;
+
             if (pageOffset === 0) {
               indexes.push(new Int32Array(DATA_PAGE_SIZE));
               newHeights.push(new Int32Array(DATA_PAGE_SIZE));
               maxHeights.push(new Int32Array(DATA_PAGE_SIZE));
             }
-            indexes[pageIndex][pageOffset] = (x - minX) * sizeZ + z - minZ;
-            newHeights[pageIndex][pageOffset] = newHeight;
-            maxHeights[pageIndex][pageOffset] = Math.max(originalHeight, newHeight);
+
+            const indexPage = indexes[pageIndex];
+            const newHeightPage = newHeights[pageIndex];
+            const maxHeightPage = maxHeights[pageIndex];
+
+            if (!indexPage || !newHeightPage || !maxHeightPage) {
+              throw new Error(`Data page not found: ${pageIndex}`);
+            }
+
+            indexPage[pageOffset] = (x - minX) * sizeZ + z - minZ;
+            newHeightPage[pageOffset] = newHeight;
+            maxHeightPage[pageOffset] = Math.max(originalHeight, newHeight);
             count++;
           }
 
@@ -160,6 +209,7 @@ function terrainColumns(
           });
           return;
         }
+
         setTimeout(processBatch, 0);
       } catch (error: unknown) {
         reject(error);
@@ -284,9 +334,14 @@ function makeChunkCopies(
           const pageIndex = Math.floor(copyIndex / DATA_PAGE_SIZE);
           const pageOffset = copyIndex % DATA_PAGE_SIZE * 3;
           if (pageOffset === 0) positions.push(new Int32Array(DATA_PAGE_SIZE * 3));
-          positions[pageIndex][pageOffset] = source[0];
-          positions[pageIndex][pageOffset + 1] = source[1];
-          positions[pageIndex][pageOffset + 2] = source[2];
+
+          const pos = positions[pageIndex];
+          if (pos === undefined) continue;
+
+          pos[pageOffset] = source[0];
+          pos[pageOffset + 1] = source[1];
+          pos[pageOffset + 2] = source[2];
+
           copyIndex++;
           processed++;
         }

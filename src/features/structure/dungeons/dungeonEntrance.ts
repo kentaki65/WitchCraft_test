@@ -1,4 +1,4 @@
-import { randomNumber, randomUniqueNumber } from "src/utils/math";
+import { randomUniqueNumber } from "../../../utils/math";
 import { Dungeon } from "../Dungeon";
 
 export class DungeonEntrance extends Dungeon {

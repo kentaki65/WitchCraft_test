@@ -1,11 +1,12 @@
 import { getPlayerData, setPlayerData } from "../../core/api/dbHelper";
 import { achievementData } from "./data";
-import { AchievementKeys, AchievementSlot, ReachedBiomes, Vec3 } from "../../core/types";
+import type { AchievementKeys, AchievementSlot, ReachedBiomes, Vec3 } from "../../core/types";
 import type * as Types from "@bloxd";
 import { progressChecker } from "./achv";
-import { getDistance } from "src/utils/math";
-import { world } from "src/core/api/worldGenerator";
-import { Biome } from "src/core/worldgen/types";
+import { getDistance } from "../../utils/math";
+import { world } from "../../core/api/worldGenerator";
+import type { Biome } from "../../core/worldgen/types";
+
 
 const prevPlayerMovedMap = new Map<Types.PlayerId, Vec3>();
 

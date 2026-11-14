@@ -1,4 +1,4 @@
-import { Parameters } from "src/core/types";
+import type { Parameters } from "../../core/types";
 import { PointGenerator } from "./PointGenerator";
 
 export class DungeonManager {

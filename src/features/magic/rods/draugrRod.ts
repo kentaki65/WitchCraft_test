@@ -1,6 +1,6 @@
 import { tickToMs } from "../../../utils/math";
-import { MagicSystem, RodSettings } from "../magicSystem";
-import { setInterval, clearInterval, setTimeout, TimeoutId, clearTimeout } from "@plugins/helpers";
+import { MagicSystem, type RodSettings } from "../magicSystem";
+import { setTimeout } from "@plugins/helpers";
 
 export enum DraugrRodSkillNames {
   FrostBurial = "FrostBurial", AbsoluteZero = "AbsoluteZero"

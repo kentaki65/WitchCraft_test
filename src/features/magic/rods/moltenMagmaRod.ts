@@ -1,6 +1,6 @@
-import { MagicSystem, RodSettings } from "../magicSystem";
-import { setInterval, clearInterval, setTimeout, TimeoutId, clearTimeout } from "@plugins/helpers";
-import { RodTypes } from "../../../core/types";
+import { MagicSystem, type RodSettings } from "../magicSystem";
+import { setTimeout } from "@plugins/helpers";
+import type { RodTypes, Vec3 } from "../../../core/types";
 import type * as Types from "@bloxd";
 import { tickToMs } from "../../../utils/math";
 
@@ -131,7 +131,7 @@ export class MoltenMagmaRod extends MagicSystem<MoltenMagmaRodSkillNames> {
       hideDist: 50
     });
 
-    const dir = [dx, dy, dz];
+    const dir: Vec3 = [dx, dy, dz];
     const hit = new Set<Types.EntityId>();
     const power = Math.min(20, chargeTime / 250);
 

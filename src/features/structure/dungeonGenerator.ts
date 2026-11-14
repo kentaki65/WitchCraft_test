@@ -1,11 +1,11 @@
-import { loadChunk, loadSchematic } from "src/core/structurePlacer/loadschematic";
 import { DungeonEntrance } from "./dungeons/dungeonEntrance";
-import { DungeonSource } from "./Dungeon";
-import { Vec3 } from "src/core/types";
-import Promise, { PolyfillPromise } from "src/core/api/promise";
-import { getWorldData, setWorldData } from "src/core/api/dbHelper";
+import type { DungeonSource } from "./Dungeon";
+import Promise, { type PolyfillPromise } from "../../core/api/promise";
 import { getLootChestContents } from "../lootchest/LootChest";
 import { Rarity } from "../lootchest/types";
+import type { Vec3 } from "../../core/types";
+import { getWorldData, setWorldData } from "../../core/api/dbHelper";
+import { loadChunk, loadSchematic } from "../../core/structurePlacer/loadschematic";
 
 export type DungeonType = DungeonEntrance;
 
@@ -46,7 +46,7 @@ export class DungeonGenerator {
     const size = source.size;
     const fromPos = origin;
 
-    const toPos = [0, 0, 0];
+    const toPos: Vec3 = [0, 0, 0];
 
     return new Promise<void>((resolve, reject) => {
       const fromChunks: Vec3[] = [];
@@ -85,7 +85,10 @@ export class DungeonGenerator {
         ...toChunks.map(pos => loadChunk(...pos))
       ]).then(() => {
         for (let i = 0; i < fromChunks.length; i++) {
-          api.copyChunk(fromChunks[i], toChunks[i]);
+          const fromChunk = fromChunks[i];
+          const toChunk = toChunks[i];
+
+          if(fromChunk && toChunk) api.copyChunk(fromChunk, toChunk);
         }
         resolve();
       }).catch(reject);

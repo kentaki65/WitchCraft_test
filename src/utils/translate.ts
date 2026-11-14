@@ -1,47 +1,62 @@
-export const LANGUAGES = ['ja', 'en', 'zh', 'ko'] as const;
+export const LANGUAGES = ["ja", "en", "zh", "ko"] as const;
+
 export type Lang = typeof LANGUAGES[number];
-
-export type TrObj = Record<Lang,TrStr>;
-export type TrData = Record<string,TrObj>;
-export type TrKey = keyof typeof trData;
 export type TrStr = string;
-
-export const trData :TrData = {
-    // deleteable, not-used
-    "language": {
-        "ja": "日本語",
-        "en": "英語",
-        "zh": "中国語",
-        "ko": "韓国語",
-    },
-
-    "rodEnd": {
-        "ja": "杖",
-        "en": " Wand",
-        "zh": "杖",
-        "ko": " 지팡이"
-    }
-};
-
-export function getTrObj (trKey :TrKey) :TrObj { 
-    return trData[trKey];
-}
-export function getTr (trKey :TrKey, lang: Lang) :TrStr {
-    return trData[trKey][lang];
-}
-
-export function setTr (trKey :TrKey, data: TrObj) {
-    trData[trKey] = data;
-}
-export function setTrs (addTrData :TrData) {
-    Object.assign(trData, addTrData);
-}
+export type TrObj = Record<Lang, TrStr>;
 
 type LangWithBefore = Lang | "before";
-type WandData = Record<LangWithBefore,TrStr>;
+type WandData = Record<LangWithBefore, TrStr>;
+
+const baseTrData = {
+  language: {
+    ja: "日本語",
+    en: "英語",
+    zh: "中国語",
+    ko: "韓国語",
+  },
+  rodEnd: {
+    ja: "杖",
+    en: "Wand",
+    zh: "杖",
+    ko: "지팡이",
+  },
+} satisfies Record<string, TrObj>;
+
+export type TrKey =
+  | keyof typeof baseTrData
+  | (typeof wands)[number]["before"];
+
+export type TrData = Partial<Record<TrKey, TrObj>>;
+
+export const trData: TrData = { ...baseTrData };
+
+export function getTrObj(trKey: TrKey): TrObj {
+  const translateData = trData[trKey];
+
+  if (translateData === undefined) {
+    throw new Error(`${trKey} doesn't exist`);
+  }
+
+  return translateData;
+}
+
+export function getTr(
+  trKey: TrKey,
+  lang: Lang
+): TrStr | undefined {
+  return trData[trKey]?.[lang];
+}
+
+export function setTr(trKey: TrKey, data: TrObj): void {
+  trData[trKey] = data;
+}
+
+export function setTrs(addTrData: TrData): void {
+  Object.assign(trData, addTrData);
+}
 
 // Rodなどの共通部分を削除して後から一括で追加することも可能。
-const wands :WandData[] = [
+const wands = [
   {
     "before": "Rusty Rod",
     "ja": "魔法の木の杖",
@@ -154,8 +169,17 @@ const wands :WandData[] = [
     "zh": "缠绕天使之翼的杖",
     "ko": "천사의 날개를 두른 지팡이"
   }
-];
-wands.forEach((wand)=>{
-    const { before, ...translations } = wand;
-    setTr(before,translations);
+] as const satisfies readonly WandData[];
+
+wands.forEach((wand) => {
+  const { before, ...translations } = wand;
+
+  const data: TrObj = {
+    ja: translations.ja,
+    en: translations.en,
+    zh: translations.zh,
+    ko: translations.ko,
+  };
+
+  setTr(before, data);
 });

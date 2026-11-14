@@ -3,8 +3,8 @@ import { PlayerStates } from "./PlayerStates";
 import { HungerSystem } from "./subsystems/HungerSystem";
 import { TemperatureSystem } from "./subsystems/TemperatureSystem";
 import { ThirstSystem } from "./subsystems/ThirstSystem";
-import { Parameters } from "src/core/types";
 import { StatusBarSystem } from "./subsystems/StatusBarSystem";
+import type { Parameters } from "../../core/types";
 
 export interface ITickable {
   tick: () => void;
