@@ -1,6 +1,4 @@
 import { randomNumber, randomOnePick, tickToSeconds } from "../../utils/math";
-import { WeatherEvent } from "./events/WeatherEvent";
-import type { WeatherManager } from "./WeatherManager";
 
 export interface IRegistrableEvent {
   minInterval: number;
@@ -22,11 +20,8 @@ export class EventRegister {
 
   private lastTriggered = new Map<IRegistrableEvent, number>();
   
-  constructor(weatherManager: WeatherManager) {
-    this.events = [
-      new WeatherEvent(weatherManager, "rain"),
-      new WeatherEvent(weatherManager, "snow"),
-    ];
+  constructor() {
+    this.events = [];
 
     this.scheduleNextEvent();
   }

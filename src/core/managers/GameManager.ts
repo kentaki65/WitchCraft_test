@@ -2,12 +2,10 @@ import type * as Types from "@bloxd";
 import { PlayerManager } from "./PlayerManager";
 import type { Parameters } from "../types";
 import { EventRegister } from "../../features/worldEvents/eventRegister";
-import { WeatherManager } from "src/features/worldEvents/WeatherManager";
 
 export class GameManager {
   private players = new Map<Types.PlayerId, PlayerManager>();
-  private readonly weatherManager = new WeatherManager();
-  private worldEvent = new EventRegister(this.weatherManager);
+  private worldEvent = new EventRegister();
 
   tick = () => {
     this.worldEvent.tick();
@@ -18,7 +16,7 @@ export class GameManager {
   }
 
   onPlayerJoin = (playerId: Types.PlayerId) => {
-    const player = new PlayerManager(playerId,this.worldEvent, this.weatherManager);
+    const player = new PlayerManager(playerId, this.worldEvent);
     this.players.set(playerId, player);
   };
 
