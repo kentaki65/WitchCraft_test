@@ -23,10 +23,12 @@
     "target": "ES2015",
     "noEmit": true,
 
+    /* Type definitions */
     "noLib": false,
     "skipLibCheck": true,
 
     /* Import aliases */
+    "baseUrl": ".",
     "paths": {
       "core/*": ["./core/*"],
       "features/*": ["./features/*"],
@@ -34,21 +36,11 @@
       "procgen/*": ["./procgen/*"],
       "structures/*": ["./structures/*"],
 
-      "@bloxd": [
-        "./node_modules/@bloxd/index.d.ts"
-      ],
-      "@plugins/debug": [
-        "./node_modules/@plugins/debug/index.d.ts"
-      ],
-      "@plugins/dialogue": [
-        "./node_modules/@plugins/dialogue/index.d.ts"
-      ],
-      "@plugins/helpers": [
-        "./node_modules/@plugins/helpers/index.d.ts"
-      ],
-      "@plugins/sessionBasedGame": [
-        "./node_modules/@plugins/sessionBasedGame/index.d.ts"
-      ]
+      "@bloxd": ["./node_modules/@bloxd/index.d.ts"],
+      "@plugins/debug": ["./node_modules/@plugins/debug/index.d.ts"],
+      "@plugins/dialogue": ["./node_modules/@plugins/dialogue/index.d.ts"],
+      "@plugins/helpers": ["./node_modules/@plugins/helpers/index.d.ts"],
+      "@plugins/sessionBasedGame": ["./node_modules/@plugins/sessionBasedGame/index.d.ts"]
     }
   },
 

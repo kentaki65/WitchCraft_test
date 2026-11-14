@@ -1,4 +1,4 @@
-import { tickToMs } from "../../../utils/math";
+import { tickToSeconds } from "../../../utils/math";
 import { MagicSystem, type RodSettings } from "../magicSystem";
 import { setTimeout } from "@plugins/helpers";
 
@@ -124,7 +124,7 @@ export class DraugrRod extends MagicSystem<DraugrRodSkillNames> {
         this.spawnProjectile(
           { x, y, z, dx, dy, dz, dist, damage, chargeTime }
         )
-      }, tickToMs(Math.round((dist * 100) / 50)))
+      }, tickToSeconds(Math.round((dist * 100) / 50)))
     }
   }
 

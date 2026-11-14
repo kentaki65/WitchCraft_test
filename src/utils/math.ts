@@ -172,6 +172,6 @@ export function dot(a: number[], b: number[]): number {
   return a.reduce((sum, value, index) => sum + value * (b[index] ?? 0), 0);
 }
 
-export function tickToMs(tick: number) {
+export function tickToSeconds(tick: number) {
   return Math.floor(tick / 20)
 }

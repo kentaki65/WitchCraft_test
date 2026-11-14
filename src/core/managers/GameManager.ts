@@ -1,18 +1,24 @@
 import type * as Types from "@bloxd";
 import { PlayerManager } from "./PlayerManager";
 import type { Parameters } from "../types";
+import { EventRegister } from "../../features/worldEvents/eventRegister";
+import { WeatherManager } from "src/features/worldEvents/WeatherManager";
 
 export class GameManager {
   private players = new Map<Types.PlayerId, PlayerManager>();
+  private readonly weatherManager = new WeatherManager();
+  private worldEvent = new EventRegister(this.weatherManager);
 
   tick = () => {
+    this.worldEvent.tick();
+
     for (const callbacks of this.players.values()) {
       callbacks?.tick();
     }
   }
 
   onPlayerJoin = (playerId: Types.PlayerId) => {
-    const player = new PlayerManager(playerId);
+    const player = new PlayerManager(playerId,this.worldEvent, this.weatherManager);
     this.players.set(playerId, player);
   };
 

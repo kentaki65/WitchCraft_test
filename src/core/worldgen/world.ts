@@ -1,5 +1,5 @@
 //@ts-nocheck
-import { World } from "./types";
+import { World } from "../types";
 import { setTimeout } from "@plugins/helpers";
 import { Promise } from "../api/promise";
 import { TICK_CONFIG } from "../constance";

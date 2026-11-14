@@ -1,4 +1,6 @@
-import { randomNumber, randomOnePick, tickToMs } from "../../utils/math";
+import { randomNumber, randomOnePick, tickToSeconds } from "../../utils/math";
+import { WeatherEvent } from "./events/WeatherEvent";
+import type { WeatherManager } from "./WeatherManager";
 
 export interface IRegistrableEvent {
   minInterval: number;
@@ -9,32 +11,36 @@ export interface IRegistrableEvent {
 }
 
 export class EventRegister {
-  private readonly events: IRegistrableEvent[] = [
-    //インスタンスを置く
-  ];
+  private readonly events: IRegistrableEvent[];
 
   private count = 0;
-  private readonly maxInterval = 120000; //20分
+  private readonly maxInterval = 200; //テストで10秒 
 
   private nextEventTime: number | undefined;
   private nextEventEndTime: number | undefined;
   private runningEvent: IRegistrableEvent | undefined;
 
   private lastTriggered = new Map<IRegistrableEvent, number>();
+  
+  constructor(weatherManager: WeatherManager) {
+    this.events = [
+      new WeatherEvent(weatherManager, "rain"),
+      new WeatherEvent(weatherManager, "snow"),
+    ];
 
-  constructor() {
     this.scheduleNextEvent();
   }
 
+
   private scheduleNextEvent() {
-    const now = tickToMs(this.count);
-    const waitTime = randomNumber(30000, this.maxInterval);
+    const now = tickToSeconds(this.count);
+    const waitTime = randomNumber(30, this.maxInterval);
 
     this.nextEventTime = now + waitTime;
   }
 
   private getAvailableEvents(): IRegistrableEvent[] {
-    const now = tickToMs(this.count);
+    const now = tickToSeconds(this.count);
 
     return this.events.filter(event => {
       const lastTriggered = this.lastTriggered.get(event);
@@ -52,26 +58,21 @@ export class EventRegister {
     return nextEvent;
   }
 
-  private triggerEvent(event: IRegistrableEvent) {
+  private triggerEvent(event: IRegistrableEvent): void {
+    if (this.runningEvent) return;
+
     event.register();
 
     this.runningEvent = event;
     this.nextEventTime = undefined;
-    this.nextEventEndTime = tickToMs(this.count) + randomNumber(event.minDuration, event.maxDuration);
-    this.lastTriggered.set(event, tickToMs(this.count));
+    this.nextEventEndTime =
+      tickToSeconds(this.count) + randomNumber(event.minDuration, event.maxDuration);
+
+    this.lastTriggered.set(event, tickToSeconds(this.count));
   }
 
-  tick() {
-    const now = tickToMs(++this.count);
-    if (this.nextEventTime !== undefined && now >= this.nextEventTime) {
-      const availableEvents = this.getAvailableEvents();
-      const event = this.chooseNextEvent(availableEvents);
-      if (event) {
-        this.triggerEvent(event);
-      } else {
-        this.scheduleNextEvent();
-      };
-    }
+  tick(): void {
+    const now = tickToSeconds(++this.count);
 
     if (this.nextEventEndTime !== undefined && now >= this.nextEventEndTime) {
       this.runningEvent?.terminate();
@@ -80,6 +81,16 @@ export class EventRegister {
       this.nextEventEndTime = undefined;
 
       this.scheduleNextEvent();
+    }
+
+    if (this.nextEventTime !== undefined && now >= this.nextEventTime) {
+      const event = this.chooseNextEvent(this.getAvailableEvents());
+
+      if (event) {
+        this.triggerEvent(event);
+      } else {
+        this.scheduleNextEvent();
+      }
     }
   }
 }

@@ -2,7 +2,7 @@ import { MagicSystem, type RodSettings } from "../magicSystem";
 import { setTimeout } from "@plugins/helpers";
 import type { RodTypes, Vec3 } from "../../../core/types";
 import type * as Types from "@bloxd";
-import { tickToMs } from "../../../utils/math";
+import { tickToSeconds } from "../../../utils/math";
 
 interface spawnProjectileProps {
   x: number;
@@ -94,7 +94,7 @@ export class MoltenMagmaRod extends MagicSystem<MoltenMagmaRodSkillNames> {
         this.spawnProjectile({
           x, y, z, dx, dy, dz, dist, damage
         });
-      }, tickToMs(Math.round((dist * 100) / 50)));
+      }, tickToSeconds(Math.round((dist * 100) / 50)));
     }
   }
 
