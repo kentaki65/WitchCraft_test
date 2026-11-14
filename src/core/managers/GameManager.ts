@@ -1,6 +1,6 @@
 import type * as Types from "@bloxd";
 import { PlayerManager } from "./PlayerManager";
-import { Parameters } from "../types";
+import type { Parameters } from "../types";
 
 export class GameManager {
   private players = new Map<Types.PlayerId, PlayerManager>();

@@ -1,5 +1,5 @@
-import { SeededRandom } from "src/core/worldgen/world";
-import { ItemAttributes } from "./types";
+import type { SeededRandom } from "../../core/worldgen/world";
+import type { ItemAttributes } from "./types";
 
 const mobNamePrefixes = ["Powerful", "Legendary", "Majestic", "Fearless", "Celestial", "Mythic", "Epic", "Ethereal", "Omniscient", "Omnipotent", "Arcane", "Enigmatic", "Formidable", "Indomitable", "Luminous", "Ferocious", "Astral", "Unyielding", "Celestine", "Ascendant", "Otherworldly", "Runic", "Fabled", "Primordial", "Cosmic", "Enkindled"];
 

@@ -1,10 +1,10 @@
 import type * as Types from "@bloxd";
 import { PlayerStates } from "../PlayerStates";
-import { ITickable } from "../SurvivalManager";
-import { Biome } from "src/core/worldgen/types";
-import { world } from "src/core/api/worldGenerator";
-import { createTickInterval } from "src/utils/loop";
+import type { ITickable } from "../SurvivalManager";
 import { setTimeout } from "@plugins/helpers"
+import type { Biome } from "../../../core/worldgen/types";
+import { createTickInterval } from "../../../utils/loop";
+import { world } from "../../../core/api/worldGenerator";
 
 export class TemperatureSystem implements ITickable {
   private readonly playerId: Types.PlayerId;

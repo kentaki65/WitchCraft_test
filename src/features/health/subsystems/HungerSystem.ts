@@ -1,9 +1,9 @@
 import type * as Types from "@bloxd";
 import { PlayerStates } from "../PlayerStates";
-import { ITickable } from "../SurvivalManager";
-import { getDistance } from "src/utils/math";
-import { Vec3 } from "src/core/types";
-import { createTickInterval } from "src/utils/loop";
+import type { ITickable } from "../SurvivalManager";
+import type { Vec3 } from "../../../core/types";
+import { createTickInterval } from "../../../utils/loop";
+import { getDistance } from "../../../utils/math";
 
 type ItemMetadata =
   | Partial<Types._TypeOf["BlockMetadataItem"]>

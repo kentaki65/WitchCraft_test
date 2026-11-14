@@ -1,4 +1,4 @@
-import { Biome } from "./worldgen/types";
+import type { Biome } from "./worldgen/types";
 
 export const biomeNames: Biome[] = [
   "Jungle",

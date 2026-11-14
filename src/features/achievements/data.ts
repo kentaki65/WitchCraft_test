@@ -1,5 +1,5 @@
-import { biomeNames } from "src/core/constance";
-import { Achievement, AchievementKeys } from "../../core/types";
+import { biomeNames } from "../../core/constance";
+import type { Achievement, AchievementKeys } from "../../core/types";
 
 export const achievementData: Record<AchievementKeys, Achievement> = {
   "Hello_Bloxd": {

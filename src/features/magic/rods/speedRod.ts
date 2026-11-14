@@ -1,5 +1,5 @@
-import { divideVec, findNearest, subtractVec, dot, normalize } from "../../../utils/math";
-import { MagicSystem, RodSettings } from "../magicSystem";
+import { normalize } from "../../../utils/math";
+import { MagicSystem, type RodSettings } from "../magicSystem";
 
 type Vec3 = [number, number, number];
 

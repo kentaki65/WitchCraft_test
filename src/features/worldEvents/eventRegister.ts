@@ -1,4 +1,4 @@
-import { randomNumber, randomOnePick, tickToMs } from "src/utils/math";
+import { randomNumber, randomOnePick, tickToMs } from "../../utils/math";
 
 export interface IRegistrableEvent {
   minInterval: number;

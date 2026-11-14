@@ -1,4 +1,4 @@
-import { Vec3, Vec2 } from "src/core/types";
+import type { Vec2, Vec3 } from "../core/types";
 
 declare const normalizedBrand: unique symbol;
 

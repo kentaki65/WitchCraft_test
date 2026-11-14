@@ -1,6 +1,6 @@
 import { randomOnePick } from "../../utils/math";
 import type * as Types from "@bloxd";
-import { setInterval, setTimeout, clearTimeout, TimeoutId } from "@plugins/helpers";
+import { setInterval, setTimeout, clearTimeout, type TimeoutId } from "@plugins/helpers";
 
 const engagingMob = new Map<Types.PlayerId, Types.MobId>();
 
@@ -46,7 +46,13 @@ setInterval(() => {
   }
 }, 250);
 
-export function handlePlayerAttackingMob(playerId: Types.PlayerId, mobId: Types.MobId, damageDealt: number, withItem: Types.ItemName){
+export function handlePlayerAttackingMob(
+  playerId: Types.PlayerId, 
+  mobId: Types.MobId, 
+  damageDealt: number, 
+  withItem: Types
+  .ItemName
+): number | void {
   const meta = api.getMobSetting(mobId, "metaInfo") || "";
   const metaParts = meta.split("/");
   const [x, y, z] = api.getPosition(mobId);
@@ -132,7 +138,12 @@ export function handlePlayerAttackingMob(playerId: Types.PlayerId, mobId: Types.
   })
 };
 
-export function handleMobAttackingPlayer(attackingMob: Types.MobId, damagedPlayer: Types.PlayerId, damageDealt: number, withItem: Types.ItemName){
+export function handleMobAttackingPlayer(
+  attackingMob: Types.MobId, 
+  damagedPlayer: Types.PlayerId, 
+  damageDealt: number, 
+  withItem: Types.ItemName
+): number | void {
   const meta = api.getMobSetting(attackingMob, "metaInfo") || "";
   const metaParts = meta.split("/");
   const itemname = api.getHeldItem(damagedPlayer)?.name;

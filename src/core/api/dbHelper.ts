@@ -1,5 +1,5 @@
 import type * as Types from "@bloxd";
-import { PlayerDbKeys, PlayerData, WorldDbKeys, WorldData } from "../types";
+import type { PlayerDbKeys, PlayerData, WorldDbKeys, WorldData } from "../types";
 
 export function setWorldData<K extends WorldDbKeys>(
   key: K, data: WorldData[K]
@@ -19,6 +19,8 @@ export function getWorldData<K extends WorldDbKeys>(
       return undefined;
     }
   }
+  
+  return undefined;
 }
 
 export function setPlayerData<K extends PlayerDbKeys>(
@@ -45,4 +47,6 @@ export function getPlayerData<K extends PlayerDbKeys>(
       return undefined;
     }
   }
+
+  return undefined;
 }

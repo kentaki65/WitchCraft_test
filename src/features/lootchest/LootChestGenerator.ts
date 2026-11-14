@@ -1,6 +1,6 @@
-import { SeededRandom } from "src/core/worldgen/world";
-import { EnchantmentTier, FrequenciesItems, ItemAttributes } from "./types";
+import type { EnchantmentTier, FrequenciesItems, ItemAttributes } from "./types";
 import { MobNameGenerator } from "./MobNameGenerator";
+import type { SeededRandom } from "../../core/worldgen/world";
 
 class RandomIntRange {
   constructor(private readonly min: number, private readonly max: number) {
@@ -73,6 +73,8 @@ export class EnchantmentGenerator {
             ? itemName
             : itemName.split(" ").at(-1)!;
         }
+
+        return undefined;
       }
     });
   }

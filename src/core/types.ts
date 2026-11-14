@@ -1,5 +1,5 @@
-import { MobSetting } from "@bloxd";
-import { Biome } from "./worldgen/types";
+import type { MobSetting } from "@bloxd";
+import type { Biome } from "./worldgen/types";
 
 export type PlayerDbKeys = keyof PlayerData;
 export type WorldDbKeys = keyof WorldData;
@@ -22,15 +22,6 @@ export type ReturnType<T extends (...args: any[]) => any> =
 export type Parameters<
   T extends (...args: any[]) => any
 > = T extends (...args: infer P) => any ? P : never;
-
-export type Awaited<T> =
-  T extends null | undefined
-  ? T
-  : T extends object & { then(onfulfilled: infer F, ...args: any[]): any }
-  ? F extends (value: infer V, ...args: any[]) => any
-  ? Awaited<V>
-  : never
-  : T;
 
 export type ReachedBiomes = Biome[];
 

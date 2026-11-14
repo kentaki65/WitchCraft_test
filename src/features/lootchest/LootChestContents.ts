@@ -1,6 +1,6 @@
 import { LootChestGenerator } from "./LootChestGenerator";
 import { MobNameGenerator } from "./MobNameGenerator";
-import { Rarity, MaterialTier, FrequenciesItems } from "./types";
+import { Rarity, MaterialTier, type FrequenciesItems } from "./types";
 
 function normalizeFrequencies(items: FrequenciesItems[], targetTotal: number): FrequenciesItems[] {
   const totalFrequency = items.reduce((total, item) => total + item.frequency, 0);

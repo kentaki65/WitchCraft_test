@@ -23,8 +23,7 @@
     "target": "ES2015",
     "noEmit": true,
 
-    /* Bloxd */
-    "noLib": true,
+    "noLib": false,
     "skipLibCheck": true,
 
     /* Import aliases */

@@ -1,12 +1,12 @@
 import type * as Types from "@bloxd";
-import { world } from "src/core/api/worldGenerator";
 import { DungeonEntrance } from "./dungeons/dungeonEntrance";
 import { Dungeon } from "./Dungeon";
-import { SeededRandom } from "src/core/worldgen/world";
+import { world } from "../../core/api/worldGenerator";
+import { getWorldData } from "../../core/api/dbHelper";
+import { SeededRandom } from "../../core/worldgen/world";
+import { biomeNames } from "../../core/constance";
 import { DungeonGenerator } from "./dungeonGenerator";
-import { getWorldData } from "src/core/api/dbHelper";
-import { Vec3 } from "src/core/types";
-import { biomeNames } from "src/core/constance";
+import type { Vec3 } from "../../core/types";
 
 export class PointGenerator {
   private readonly dungeons: Dungeon[] = [

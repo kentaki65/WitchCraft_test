@@ -1,15 +1,17 @@
 import type * as Types from "@bloxd";
 
-import { setInterval, clearInterval, setTimeout, TimeoutId, clearTimeout, IntervalId } from "@plugins/helpers";
+import { clearInterval, type TimeoutId, clearTimeout, type IntervalId } from "@plugins/helpers";
 import { asyncAnimate } from "../../core/api/animateHelper";
 import { CustomButtonManager } from "../../core/managers/KeyManager";
-import { MagicButtonKeyId, magicButtonKeyIds } from "./magicManager";
-import { IMagicSystem } from "./IMagicSystem";
-import { Vec3 } from "src/core/types";
-import { dot, NormalizedVec3, subtractVec } from "src/utils/math";
+import { magicButtonKeyIds } from "./magicManager";
+import { type IMagicSystem } from "./IMagicSystem";
+import { dot, subtractVec, type NormalizedVec3 } from "../../utils/math";
+import type { Vec3 } from "../../core/types";
 
 //子が絶対持ってるものは abstractで
 //持ってるやつと持ってないやつがあるのは空実装にしてoverrideする
+
+type Colors = ["white", "white", "lime", "lime", "yellow", "yellow", "orange", "orange", "red"];
 
 export type RodSettings =
   | {
@@ -76,11 +78,20 @@ export abstract class MagicSystem<
   protected switchMode(): void {
     const index = this.skills.indexOf(this.currentMode);
     const nextIndex = (index + 1) % this.skills.length;
+    const nextMode = this.skills[nextIndex];
 
-    this.currentMode = this.skills[nextIndex];
+    if (nextMode === undefined) return;
+
+    this.currentMode = nextMode;
 
     const nextName = this.getNextSpellName();
-    if (nextName) this.keyManager.edit(magicButtonKeyIds.switchMagic, "description", `Change spell ${nextName}`);
+    if (nextName) {
+      this.keyManager.edit(
+        magicButtonKeyIds.switchMagic,
+        "description",
+        `Change spell ${nextName}`
+      );
+    }
   }
 
   calcPoint(chargeTime: number): number {
@@ -95,7 +106,8 @@ export abstract class MagicSystem<
 
   protected getChargeColor(chargeTime: number): string {
     const level = Math.min(8, Math.floor(chargeTime / 500));
-    return ["white", "white", "lime", "lime", "yellow", "yellow", "orange", "orange", "red"][level];
+    const color = ["white", "white", "lime", "lime", "yellow", "yellow", "orange", "orange", "red"][level] ?? "white";
+    return color ?? "white";
   }
 
   protected startCharging(): void {
@@ -383,9 +395,9 @@ export abstract class MagicSystem<
         }
       }
     }).then(() => {
-      if(this.rodSettings[this.currentMode].useThirdParsonView){
+      if (this.rodSettings[this.currentMode].useThirdParsonView) {
         api.setCameraZoom(this.playerId, 0);
-        api.setClientOptionToDefault(this.playerId, "cameraPositionOffset");        
+        api.setClientOptionToDefault(this.playerId, "cameraPositionOffset");
       }
     })
   }
@@ -459,8 +471,8 @@ export abstract class MagicSystem<
 
       return lateralDist <= maxRadius;
     }).filter(id => {
-      if(!exclude) true; //そもそもなかったら何も消さない
-      return !exclude?.has(id) 
+      if (!exclude) true; //そもそもなかったら何も消さない
+      return !exclude?.has(id)
     });
   }
 

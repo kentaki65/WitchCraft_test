@@ -1,7 +1,7 @@
 import type * as Types from "@bloxd";
 import { PlayerStates } from "../PlayerStates";
-import { ITickable } from "../SurvivalManager";
-import { createTickInterval } from "src/utils/loop";
+import type { ITickable } from "../SurvivalManager";
+import { createTickInterval } from "../../../utils/loop";
 
 export class StatusBarSystem implements ITickable {
   private readonly playerId: Types.PlayerId;
@@ -78,6 +78,8 @@ export class StatusBarSystem implements ITickable {
     const iconName = this.snowBallIcons[
       Math.max(0, Math.min(idx, this.snowBallIcons.length - 1))
     ];
+
+    if(!iconName) return;
 
     api.sendFlyingMiddleMessage(this.playerId, [
       this.emptyLineHunger,

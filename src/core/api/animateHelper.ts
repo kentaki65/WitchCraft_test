@@ -1,6 +1,6 @@
 import type { PlayerId, MobId } from "@bloxd";
 import { setTimeout } from "@plugins/helpers";
-import { Parameters } from "../types";
+import type { Parameters } from "../types";
 import { Promise } from "./promise";
 import type { PolyfillPromise } from "./promise";
 
@@ -12,9 +12,15 @@ export function asyncAnimate(
 ): PolyfillPromise<void> {
   return new Promise<void>((resolve) => {
     const duration =
-      animationSchema && "animationDurationMs" in animationSchema
+      typeof animationSchema === "object" &&
+        animationSchema !== null &&
+        "animationDurationMs" in animationSchema
         ? animationSchema.animationDurationMs
-        : 1000;
+        : typeof animationSchema === "object" &&
+          animationSchema !== null &&
+          "animation_length" in animationSchema
+          ? animationSchema.animation_length * 1000
+          : 1000;
 
     api.animateEntity(lifeformId, animationSchema);
     setTimeout(() => resolve(), duration);

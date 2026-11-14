@@ -1,8 +1,9 @@
-import { SeededRandom } from "src/core/worldgen/world";
-import { Vec3 } from "src/core/types";
+
+import type { Vec3 } from "../../core/types";
+import { SeededRandom } from "../../core/worldgen/world";
 import { lootChestGenerators } from "./LootChestContents";
 import { EnchantmentGenerator } from "./LootChestGenerator";
-import { Rarity, Seed } from "./types";
+import { Rarity, type Seed } from "./types";
 
 export interface LootChestGenerationOptions {
   seed?: Seed;
