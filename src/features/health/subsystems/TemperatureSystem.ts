@@ -45,7 +45,7 @@ export class TemperatureSystem implements ITickable {
 
   private _updateTemperature() {
     const [x, _, z] = api.getPosition(this.playerId);
-    const biome = world.getBiome(x, z);
+    const biome = world.getBiome(x, z) as Biome;
 
     const targetTemp = this.biomeTemperature[biome];
     const currentTemp = this.playerState.get("temp");

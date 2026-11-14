@@ -8,7 +8,6 @@ import type { Vec2 } from "../core/types";
 import { getPlayerData } from "../core/api/dbHelper";
 import { createTickInterval } from "../utils/loop";
 import { getDistance2D } from "../utils/math";
-import type { WeatherManager, WeatherType } from "./worldEvents/WeatherManager";
 
 type RightTextContent = Partial<{
   biome: Biome;
@@ -16,7 +15,6 @@ type RightTextContent = Partial<{
   playerLevel: number;
   unlockedAchv: number;
   foundDungeons: number;
-  weather: WeatherType;
 }>
 
 class RightTextData extends DataManager<RightTextContent> { };
@@ -24,12 +22,10 @@ class RightTextData extends DataManager<RightTextContent> { };
 export class RightTextManager {
   private playerId: Types.PlayerId;
   private rightTextData: RightTextData;
-  private weather: WeatherManager;
   private onTick: () => void;
 
-  constructor(playerId: Types.PlayerId, weather: WeatherManager) {
+  constructor(playerId: Types.PlayerId) {
     this.playerId = playerId;
-    this.weather = weather;
     this.rightTextData = new RightTextData({}, (data) => {
       api.setClientOption(this.playerId, "RightInfoText", this._serialize())
     })
@@ -42,7 +38,6 @@ export class RightTextManager {
       const playerLevel = getPlayerData(this.playerId, "playerLevel") ?? 0;
       const unlockedAchv = getPlayerData(this.playerId, "achievement")?.unlockedAchievements?.length ?? 0;
       const foundDungeons = getPlayerData(this.playerId, "foundDungeons") ?? 0;
-      const weather = this.weather.getCurrentWeather();
 
       this.rightTextData.update({
         biome,
@@ -50,7 +45,6 @@ export class RightTextManager {
         playerLevel,
         unlockedAchv,
         foundDungeons,
-        weather
       })
     })
   }
@@ -65,7 +59,7 @@ export class RightTextManager {
   }
 
   private _serialize(): Types.StyledText[] {
-    const { biome, riskLevel, playerLevel, unlockedAchv, foundDungeons, weather } = this.rightTextData.get();
+    const { biome, riskLevel, playerLevel, unlockedAchv, foundDungeons } = this.rightTextData.get();
 
     const toStyledText = (
       text: RightTextContent[keyof RightTextContent]
@@ -84,8 +78,6 @@ export class RightTextManager {
       toStyledText(unlockedAchv),
       { str: "発見したダンジョン数: ", style: {}},
       toStyledText(foundDungeons),
-      { str: "天気: ", style: {}},
-      toStyledText(weather),
     ]
   }
 
