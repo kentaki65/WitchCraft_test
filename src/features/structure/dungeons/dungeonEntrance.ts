@@ -4,6 +4,7 @@ import { Dungeon } from "../Dungeon";
 export class DungeonEntrance extends Dungeon {
   constructor() {
     super({
+      id: "dungeon_entrance",
       source: {
         type: "schematic",
         path: "dungeonEntrance.bloxdschem"

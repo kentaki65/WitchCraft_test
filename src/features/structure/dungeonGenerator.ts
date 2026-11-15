@@ -11,6 +11,7 @@ export type DungeonType = DungeonEntrance;
 
 export class DungeonGenerator {
   private dungeonType: DungeonType;
+  private currentOrigin!: Vec3;
 
   constructor(dungeon: DungeonType) {
     this.dungeonType = dungeon;
@@ -18,6 +19,7 @@ export class DungeonGenerator {
 
   placeDungeon(regionKey: string, origin: Vec3): PolyfillPromise<void> {
     const source = this.dungeonType.source;
+    this.currentOrigin = origin;
     let promise: PolyfillPromise<void>;
 
     switch (source.type) {
@@ -88,7 +90,7 @@ export class DungeonGenerator {
           const fromChunk = fromChunks[i];
           const toChunk = toChunks[i];
 
-          if(fromChunk && toChunk) api.copyChunk(fromChunk, toChunk);
+          if (fromChunk && toChunk) api.copyChunk(fromChunk, toChunk);
         }
         resolve();
       }).catch(reject);
@@ -96,13 +98,15 @@ export class DungeonGenerator {
   }
 
   private _saveGeneratedChunk(regionKey: string) {
-    //`${regionX}|${regionZ}`のような形式が返ってくる
-    const generatedChunks = getWorldData("generatedChunkKeys");
-    if (!generatedChunks) {
-      setWorldData("generatedChunkKeys", regionKey);
+    const generatedChunks = getWorldData("generatedChunkKeys") ?? {};
+
+    generatedChunks[regionKey] = {
+      timestamp: Date.now(),
+      dungeonId: this.dungeonType.id,
+      position: [...this.currentOrigin] as Vec3
     };
 
-    setWorldData("generatedChunkKeys", `${generatedChunks},${regionKey}`);
+    setWorldData("generatedChunkKeys", generatedChunks);
   }
 
   private _placeChestContents(origin: Vec3) {

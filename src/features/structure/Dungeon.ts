@@ -4,6 +4,7 @@ import type { Biome } from "../../core/worldgen/types";
 import { type ItemAttributes } from "../lootchest/types";
 
 interface DungeonConfig {
+  id: string;
   source: DungeonSource,
   y: number;
   biomes: Biome[];
@@ -39,6 +40,7 @@ export type DungeonSource =
   };
 
 export class Dungeon {
+  readonly id: string;
   readonly source: DungeonSource;
 
   readonly y: number;
@@ -55,6 +57,8 @@ export class Dungeon {
     if (config.y % 32 !== 0) {
       throw new Error("Dungeon Y must be a multiple of 32")
     }
+    
+    this.id = config.id;
     this.source = config.source;
     this.y = config.y;
     this.biomes = config.biomes;

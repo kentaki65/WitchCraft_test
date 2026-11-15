@@ -25,8 +25,14 @@ export type Parameters<
 
 export type ReachedBiomes = Biome[];
 
+export interface GeneratedDungeon {
+  timestamp: number;
+  dungeonId: string;
+  position: Vec3;
+}
+
 export interface WorldData {
-  generatedChunkKeys: string;
+  generatedChunkKeys: Record<string, GeneratedDungeon>;
 }
 
 export interface PlayerData {
