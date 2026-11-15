@@ -6,6 +6,7 @@ import { SpeedRod, SpeedRodSkillNames } from "./rods/speedRod";
 import { CustomButtonManager } from "../../core/managers/KeyManager";
 import type { IMagicSystem } from "./IMagicSystem";
 import { BlackIceRod, BlackIceSkillNames } from "./rods/blackIce";
+import { RustyRod, RustyRodSkillNames } from "./rods/rustyrod";
 
 export const magicButtonKeyIds = {
   switchMagic: "switchmagic_X",
@@ -158,6 +159,12 @@ export class MagicManager {
         magic = new BlackIceRod(
           id, BlackIceSkillNames.sacrifice, this.keyManager
         );
+        break;
+
+      case "Rusty Rod": 
+        magic = new RustyRod(
+          id, RustyRodSkillNames.magicAbsorption, this.keyManager
+        )
         break;
     }
 
