@@ -311,7 +311,11 @@ export class EventTarget<M extends { [K in keyof M]: unknown } = GameEventMap> {
     for (let i = 0; i < list.length; i++) {
       const listener = list[i];
       if (!listener) continue;
-      listener.callback(e);
+      try { 
+        listener.callback(e) 
+      } catch (e: any){
+        api.log(`${e.name}\nstack: ${e.stack}`)
+      };
       if (listener.once) {
         list.splice(i--, 1);
       }
