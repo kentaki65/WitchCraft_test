@@ -1,4 +1,5 @@
 //@ts-nocheck
+import "./core/api/eventListener";
 
 type UserCallbacks = "tick" | "onClose" | "onPlayerJoin" | "onPlayerLeave" | "onPlayerJump" | "onRespawnRequest" | "playerCommand" | "onPlayerChat" | "onPlayerAttemptChangeBlock" | "onPlayerChangeBlock" | "onBlockStand" | "onBlockStandStart" | "onBlockStandStop" | "onPlayerAttemptCraft" | "onPlayerCraft" | "onPlayerAttemptOpenChest" | "onPlayerOpenedChest" | "onPlayerMoveItemOutOfInventory" | "onPlayerDropItem" | "onPlayerPickedUpItem" | "onPlayerSelectInventorySlot" | "onPlayerAttack" | "onPlayerDamagingOtherPlayer" | "onPlayerDamagingMob" | "onMobDamagingPlayer" | "onMobDamagingOtherMob" | "onAttemptKillPlayer" | "onPlayerKilledOtherPlayer" | "onMobKilledPlayer" | "onPlayerKilledMob" | "onMobKilledOtherMob" | "onPlayerPotionEffect" | "onPlayerDamagingMeshEntity" | "onPlayerBreakMeshEntity" | "onPlayerUsedThrowable" | "onPlayerThrowableHitTerrain" | "onTouchscreenActionButton" | "onPlayerMoveInvenItem" | "onPlayerMoveItemIntoIdxs" | "onPlayerSwapInvenSlots" | "onPlayerMoveInvenItemWithAmt" | "onPlayerAttemptAltAction" | "onPlayerAltAction" | "onPlayerClick" | "onPlayerClickUp" | "onClientOptionUpdated" | "onMobSettingUpdated" | "onInventoryUpdated" | "onChestUpdated" | "onWorldAttemptChangeBlock" | "onWorldChangeBlock" | "onCreateBloxdMeshEntity" | "onEntityCollision" | "onPlayerAttemptSpawnMob" | "onWorldAttemptSpawnMob" | "onPlayerSpawnMob" | "onWorldSpawnMob" | "onWorldAttemptDespawnMob" | "onMobDespawned" | "onPlayerAttemptSpawnVehicle" | "onWorldAttemptSpawnVehicle" | "onPlayerSpawnVehicle" | "onWorldSpawnVehicle" | "onVehicleDespawned" | "onEntityDeleted" | "onChunkLoaded" | "onPlayerRequestChunk" | "onItemDropCreated" | "onPlayerStartChargingItem" | "onPlayerFinishChargingItem" | "onPlayerAttemptFish" | "onPlayerSucceededFishCatch" | "onPlayerFailedFishCatch" | "onPlayerFinishQTE" | "onPlayerToggledShopMenu" | "onPlayerBoughtShopItem" | "onPlayerPlayedEmote" | "onPlayerEnteredVehicle" | "onPlayerExitedVehicle" | "onPlayerPressedButton" | "onPlayerReleasedButton" | "onUiRequestResponded" | "doPeriodicSave";
 type Callback = (...args: any[]) => any
@@ -76,7 +77,13 @@ class Loader {
 		onChunkLoaded: [],
 		onPlayerRequestChunk: [],
 		onUiRequestResponded: [],
-		onItemDropCreated: []
+		onItemDropCreated: [],
+		onPlayerAttemptChangeBlock: ["preventChange"],
+		onWorldAttemptChangeBlock: ["preventChange"],
+		onPlayerAttemptSpawnVehicle: ["preventSpawn"],
+		onWorldAttemptSpawnVehicle: ["preventSpawn"],
+		onPlayerAttemptFish: ["preventFish", Object],
+		onPlayerSucceededFishCatch: ["preventDrop", "preventItemGrant"],
 	}
 
 	static INIT() {
@@ -142,8 +149,9 @@ import * as $1 from "./features/infernalMobs/index"
 import * as $2 from "./features/onDeath/index";
 import * as $3 from "./core/managers/index";
 import * as $4 from "./core/worldgen/world";
+import * as $5 from "./core/api/eventListener";
 
-Loader.modules = [$0, $1, $2, $3];
+Loader.modules = [$0, $1, $2, $3, $5];
 Loader.INIT()
 
 api.log("loaded!")
