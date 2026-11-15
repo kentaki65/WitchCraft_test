@@ -6,6 +6,7 @@ import type { Parameters } from "../types";
 import { RightTextManager } from "../../features/RightInfoTextManager";
 import { DungeonManager } from "../../features/structure/DungeonManager";
 import type { EventRegister } from "../../features/worldEvents/eventRegister";
+import { PlayerListener } from "../api/eventListener";
 
 type effectNames = "Damage" | "Speed" | "Damage Reduction" | "Invisible" | "Jump Boost" | "Knockback" | "Poisoned" | "Slowness" | "Weakness" | "Cleansed" | "Instant Damage" | "Health Regen" | "Healing Pulse" | "Instant Health" | "Haste" | "Shield" | "Double Jump" | "Heat Resistance" | "Thief" | "X-Ray Vision" | "Mining Yield" | "Brain Rot" | "Aura" | "Wall Climbing" | "Air Walk" | "Pickpocketer" | "Lifesteal" | "Bounciness" | "Blindness" | "Poopy" | "Glowing" | "Night Vision" | "Hydrated";
 export class PlayerManager {
@@ -16,11 +17,13 @@ export class PlayerManager {
   readonly dungeonManager: DungeonManager;
   readonly rightInfoTextManager: RightTextManager;
   private readonly worldEvents: EventRegister;
+  private readonly playerListener: PlayerListener;
 
   constructor (playerId: Types.PlayerId, worldEvent: EventRegister){
     this.playerId = playerId;
+    this.playerListener = new PlayerListener(playerId);
     this.customKeyManager = new CustomButtonManager(playerId);
-    this.magicManager = new MagicManager(playerId, this.customKeyManager);
+    this.magicManager = new MagicManager(playerId, this.customKeyManager, this.playerListener);
     this.healthManager = new SurvivalManager(playerId);
     this.rightInfoTextManager = new RightTextManager(playerId);
     this.dungeonManager = new DungeonManager();

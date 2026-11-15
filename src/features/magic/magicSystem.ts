@@ -7,6 +7,7 @@ import { magicButtonKeyIds } from "./magicManager";
 import { type IMagicSystem } from "./IMagicSystem";
 import { dot, subtractVec, type NormalizedVec3 } from "../../utils/math";
 import type { Vec3 } from "../../core/types";
+import type { PlayerListener } from "../../core/api/eventListener";
 
 //子が絶対持ってるものは abstractで
 //持ってるやつと持ってないやつがあるのは空実装にしてoverrideする
@@ -46,7 +47,12 @@ export abstract class MagicSystem<
   protected keyManager: CustomButtonManager;
   protected summonedMobs: Set<Types.MobId>;
 
-  constructor(playerId: Types.PlayerId, initialMode: TSkill, keyManager: CustomButtonManager) {
+  constructor(
+    playerId: Types.PlayerId, 
+    initialMode: TSkill, 
+    keyManager: CustomButtonManager,
+    playerListener: PlayerListener,
+  ) {
     this.currentMode = initialMode;
     this.playerId = playerId;
     this.keyManager = keyManager;
@@ -470,10 +476,7 @@ export abstract class MagicSystem<
       const lateralDist = Math.sqrt(dot(lateral, lateral));
 
       return lateralDist <= maxDetectionRadius;
-    }).filter(id => {
-      if (!exclude) true; //そもそもなかったら何も消さない
-      return !exclude?.has(id)
-    });
+    }).filter(id => !exclude || !exclude.has(id));
   }
 
   public onPlayerDeath(): void {
