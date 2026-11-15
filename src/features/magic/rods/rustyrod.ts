@@ -1,5 +1,5 @@
 import type { Vec3 } from "../../../core/types";
-import { normalize, spreadVector3D, type NormalizedVec3 } from "../../../utils/math";
+import { normalize, spreadVector3D } from "../../../utils/math";
 import { MagicSystem, type RodSettings } from "../magicSystem";
 
 export enum RustyRodSkillNames {
@@ -17,7 +17,7 @@ export class RustyRod extends MagicSystem<RustyRodSkillNames> {
     [RustyRodSkillNames.woodenThornOfGrudge]: {
       canCharge: true,
       minCharge: 1000,
-      useThirdParsonView: false
+      useThirdParsonView: true
     }
   };
 
@@ -26,14 +26,15 @@ export class RustyRod extends MagicSystem<RustyRodSkillNames> {
     RustyRodSkillNames.woodenThornOfGrudge
   ];
 
+  private lastFireTime = 0;
+
+  private readonly fireInterval = 500;
+  private readonly arrowsPerBurst = 3;
+
   protected override castSpell(mode: RustyRodSkillNames, chargeTime: number): void {
     switch (mode) {
       case RustyRodSkillNames.magicAbsorption:
         this.castFirstSpell(chargeTime);
-        break;
-
-      case RustyRodSkillNames.woodenThornOfGrudge:
-        this.castSecondSpell(chargeTime);
         break;
     }
   }
@@ -52,14 +53,13 @@ export class RustyRod extends MagicSystem<RustyRodSkillNames> {
   };
 
   //私怨の木の棘　木の棘を前に打ち出す　当たりにくいが攻撃力は高め(序盤基準)
-  private castSecondSpell(chargeTime: number) {
+  private castSecondSpell(arrowAmount: number) {
     const [x, y, z] = api.getPosition(this.playerId);
     const dir = normalize(api.getPlayerFacingInfo(this.playerId).dir);
     if (!dir) return;
 
     //TODO レベルに応じてダメージ倍率を変える
     const multipleDamage = 5;
-    const arrowAmount = this.calcPoint(chargeTime);
     const spreadAngle = 15 * (Math.PI / 180);
 
     for (let i = 0; i < arrowAmount; i++) {
@@ -75,4 +75,36 @@ export class RustyRod extends MagicSystem<RustyRodSkillNames> {
       );
     }
   };
+
+  public override tick(): void {
+    super.tick();
+
+    if (!this.charging || this.currentMode !== RustyRodSkillNames.woodenThornOfGrudge) return;
+
+    const now = api.now();
+    const chargeTime = this.diffCharging();
+
+    if (chargeTime < (this.rodSettings[this.currentMode].minCharge ?? 0)) return;
+    if (now - this.lastFireTime < this.fireInterval) return;
+
+    this.lastFireTime = now;
+    this.castSecondSpell(this.arrowsPerBurst);
+  }
+
+  public override onPlayerClick(wasAltClick: boolean): void {
+    if (this.currentMode === RustyRodSkillNames.woodenThornOfGrudge) {
+      this.lastFireTime = api.now();
+    }
+
+    this.startCharging();
+  }
+
+  public override onPlayerClickUp(): void {
+    const chargeTime = this.stopCharging();
+
+    if (this.currentMode === RustyRodSkillNames.woodenThornOfGrudge) return;
+    if (chargeTime === undefined || chargeTime < (this.rodSettings[this.currentMode]?.minCharge || 0)) return;
+
+    this.castSpell(this.currentMode, chargeTime);
+  }
 }
