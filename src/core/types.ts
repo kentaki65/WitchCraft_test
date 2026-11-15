@@ -1,5 +1,6 @@
 import type { MobSetting } from "@bloxd";
 import type { Biome } from "./worldgen/types";
+import type { Lang } from "../utils/translate.ts";
 
 export type PlayerDbKeys = keyof PlayerData;
 export type WorldDbKeys = keyof WorldData;
@@ -41,6 +42,7 @@ export interface PlayerData {
   foundDungeons: number;
   reachedBiomes: ReachedBiomes;
   achievement: AchievementSlot;
+  language: Lang;
 }
 
 export interface DeadPlayer {
