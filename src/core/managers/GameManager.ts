@@ -2,6 +2,7 @@ import type * as Types from "@bloxd";
 import { PlayerManager } from "./PlayerManager";
 import type { Parameters } from "../types";
 import { EventRegister } from "../../features/worldEvents/eventRegister";
+import { PlayerListener } from "../api/eventListener";
 
 export class GameManager {
   private players = new Map<Types.PlayerId, PlayerManager>();
