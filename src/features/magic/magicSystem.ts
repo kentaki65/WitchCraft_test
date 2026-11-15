@@ -447,7 +447,7 @@ export abstract class MagicSystem<
     playerPos: Vec3,
     dir: NormalizedVec3,
     maxDistance: number,
-    maxRadius: number = 2,
+    maxDetectionRadius: number = 2,
     exclude: Set<Types.MobId> | null = this.summonedMobs,
   ): Types.MobId[] {
 
@@ -469,7 +469,7 @@ export abstract class MagicSystem<
       const lateral = subtractVec(toMob, projected);
       const lateralDist = Math.sqrt(dot(lateral, lateral));
 
-      return lateralDist <= maxRadius;
+      return lateralDist <= maxDetectionRadius;
     }).filter(id => {
       if (!exclude) true; //そもそもなかったら何も消さない
       return !exclude?.has(id)

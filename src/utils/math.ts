@@ -168,6 +168,37 @@ export function normalize(arr: Vec3): NormalizedVec3 | null {
   ] as NormalizedVec3;
 }
 
+export function spreadVector3D(vec: NormalizedVec3, maxConeAngleRad: number): Vec3 {
+  const [dx, dy, dz] = vec;
+  const [ax, ay, az] = Math.abs(dy) < 0.99 ? [0, 1, 0] : [1, 0, 0];
+
+  let ux = ay * dz - az * dy;
+  let uy = az * dx - ax * dz;
+  let uz = ax * dy - ay * dx;
+  const uLen = Math.hypot(ux, uy, uz);
+  ux /= uLen;
+  uy /= uLen;
+  uz /= uLen;
+
+  const vx = dy * uz - dz * uy;
+  const vy = dz * ux - dx * uz;
+  const vz = dx * uy - dy * ux;
+
+  const cosMax = Math.cos(maxConeAngleRad);
+  const cosTheta = 1 - Math.random() * (1 - cosMax);
+  const sinTheta = Math.sqrt(1 - cosTheta * cosTheta);
+  const phi = Math.random() * Math.PI * 2;
+
+  const cosPhi = Math.cos(phi);
+  const sinPhi = Math.sin(phi);
+
+  return [
+    dx * cosTheta + (ux * cosPhi + vx * sinPhi) * sinTheta,
+    dy * cosTheta + (uy * cosPhi + vy * sinPhi) * sinTheta,
+    dz * cosTheta + (uz * cosPhi + vz * sinPhi) * sinTheta,
+  ];
+}
+
 export function dot(a: number[], b: number[]): number {
   return a.reduce((sum, value, index) => sum + value * (b[index] ?? 0), 0);
 }
