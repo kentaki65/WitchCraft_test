@@ -1,61 +1,69 @@
-export const LANGUAGES = ["ja", "en", "zh", "ko"] as const;
+import { getPlayerData, setPlayerData } from "../core/api/dbHelper";
+import type * as Types from "@bloxd";
 
+const LANGUAGES = ["en", "ja", "zh", "ko"] as const;
 export type Lang = typeof LANGUAGES[number];
-export type TrStr = string;
-export type TrObj = Record<Lang, TrStr>;
+type TranslationKey = string;
+type TranslatedText = string;
+type TranslationData = Record<Lang, TranslatedText>;
+type Dictionary = Record<TranslationKey, TranslationData>;
 
-type LangWithBefore = Lang | "before";
-type WandData = Record<LangWithBefore, TrStr>;
+export class Translator {
+  static dictionary: Dictionary = {};
 
-const baseTrData = {
-  language: {
-    ja: "日本語",
-    en: "英語",
-    zh: "中国語",
-    ko: "韓国語",
-  },
-  rodEnd: {
-    ja: "杖",
-    en: "Wand",
-    zh: "杖",
-    ko: "지팡이",
-  },
-} satisfies Record<string, TrObj>;
+  static getTranslation(translationKey: TranslationKey, language?: Lang): TranslationData | TranslatedText {
+    const translationData = this.dictionary[translationKey];
 
-export type TrKey =
-  | keyof typeof baseTrData
-  | (typeof wands)[number]["before"];
-
-export type TrData = Partial<Record<TrKey, TrObj>>;
-
-export const trData: TrData = { ...baseTrData };
-
-export function getTrObj(trKey: TrKey): TrObj {
-  const translateData = trData[trKey];
-
-  if (translateData === undefined) {
-    throw new Error(`${trKey} doesn't exist`);
+    if(!translationData) {
+      throw new Error(`${translationKey} doesn't exist`);
+    }else {
+      if(!language) return translationData;
+      return translationData[language];
+    }
   }
 
-  return translateData;
+  static setTranslation(translationKey: TranslationKey, translationData: TranslationData): void {
+    this.dictionary[translationKey] = translationData;
+  }
+
+  static addTranslations(dictionary: Dictionary): void {
+    Object.assign(this.dictionary,dictionary);
+  }
+
+  static getPlayerLanguage(playerId: Types.PlayerId): Lang {
+    return getPlayerData(playerId,"language") || LANGUAGES[0];
+  }
+
+  static setPlayerLanguage(playerId: Types.PlayerId, language: Lang): void {
+    setPlayerData(playerId,"language",language);
+  }
+
+  static getTranslationForPlayer(playerId: Types.PlayerId,translationKey: TranslationKey): TranslatedText {
+    // 第二引数を指定すると必ずTranslatedTextを返す関数にしているため、問題はない...はず。
+    return this.getTranslation(translationKey,this.getPlayerLanguage(playerId)) as TranslatedText;
+  }
 }
 
-export function getTr(
-  trKey: TrKey,
-  lang: Lang
-): TrStr | undefined {
-  return trData[trKey]?.[lang];
-}
+Translator.addTranslations(
+  {
+    language: {
+      ja: "日本語",
+      en: "英語",
+      zh: "中国語",
+      ko: "韓国語",
+    },
+    rodEnd: {
+      ja: "杖",
+      en: "Wand",
+      zh: "杖",
+      ko: "지팡이",
+    },
+  }
+)
 
-export function setTr(trKey: TrKey, data: TrObj): void {
-  trData[trKey] = data;
-}
-
-export function setTrs(addTrData: TrData): void {
-  Object.assign(trData, addTrData);
-}
 
 // Rodなどの共通部分を削除して後から一括で追加することも可能。
+/*
 const wands = [
   {
     "before": "Rusty Rod",
@@ -169,17 +177,6 @@ const wands = [
     "zh": "缠绕天使之翼的杖",
     "ko": "천사의 날개를 두른 지팡이"
   }
-] as const satisfies readonly WandData[];
-
-wands.forEach((wand) => {
-  const { before, ...translations } = wand;
-
-  const data: TrObj = {
-    ja: translations.ja,
-    en: translations.en,
-    zh: translations.zh,
-    ko: translations.ko,
-  };
-
-  setTr(before, data);
-});
+]
+  */
+ 
