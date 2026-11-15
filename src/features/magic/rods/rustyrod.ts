@@ -1,4 +1,3 @@
-import type { Vec3 } from "../../../core/types";
 import { normalize, spreadVector3D } from "../../../utils/math";
 import { MagicSystem, type RodSettings } from "../magicSystem";
 
