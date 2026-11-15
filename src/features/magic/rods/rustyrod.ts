@@ -1,3 +1,5 @@
+import { MobListener } from "../../../core/api/eventListener";
+import type { Vec3 } from "../../../core/types";
 import { normalize, spreadVector3D } from "../../../utils/math";
 import { MagicSystem, type RodSettings } from "../magicSystem";
 
@@ -57,9 +59,69 @@ export class RustyRod extends MagicSystem<RustyRodSkillNames> {
     const dir = normalize(api.getPlayerFacingInfo(this.playerId).dir);
     if (!dir) return;
 
-    //TODO レベルに応じてダメージ倍率を変える
+    //TODO レベルに応じてダメージ倍率/拡散度合いを変える
     const multipleDamage = 5;
     const spreadAngle = 15 * (Math.PI / 180);
+
+    const maxDistance = 30;
+    const maxDetectionRadius = maxDistance * Math.tan(spreadAngle);
+    const mobs = this.getMobsInSight([x, y, z], dir, 30, maxDetectionRadius);
+
+    for (const mob of mobs) {
+      const mobListener = new MobListener(mob);
+      mobListener.addEventListener("mobWasDamagedByPlayer", (e) => {
+        const { mobId } = e;
+        if (!api.checkValid(mobId)) return;
+
+        const mobPos = api.getPosition(mobId);
+        api.playParticleEffect({
+          dir1: [-1, -1, -1],
+          dir2: [1, 1, 1],
+          pos1: mobPos,
+          pos2: [mobPos[0], mobPos[1], mobPos[2]],
+          texture: "generic_2",
+          minLifeTime: 0.2,
+          maxLifeTime: 0.5,
+          minEmitPower: 1.5,
+          maxEmitPower: 8,
+          minSize: 0.6,
+          maxSize: 0.8,
+          manualEmitCount: 25,
+          gravity: [0, -25, 0],
+          colorGradients: [
+            {
+              timeFraction: 0,
+              minColor: [255, 255, 255, 1],
+              maxColor: [227, 227, 227, 1],
+            },
+            {
+              timeFraction: 0.4,
+              minColor: [196, 48, 40, 1],
+              maxColor: [155, 36, 33, 1],
+            },
+            {
+              timeFraction: 1,
+              minColor: [196, 48, 40, 1],
+              maxColor: [155, 36, 33, 1],
+            },
+          ],
+          velocityGradients: [
+            {
+              timeFraction: 0,
+              factor: 2,
+              factor2: 2,
+            },
+            {
+              timeFraction: 1,
+              factor: 0.5,
+              factor2: 0.5,
+            },
+          ],
+          blendMode: 1,
+          hideDist: 120,
+        });
+      }, { once: true });
+    }
 
     for (let i = 0; i < arrowAmount; i++) {
       const spreadDir = spreadVector3D(dir, spreadAngle);
