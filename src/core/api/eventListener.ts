@@ -1157,7 +1157,7 @@ const tableHooks: Record<string, HookFn> = Object.fromEntries(
   }),
 );
 
-const register: Record<string, HookFn> = {
+export const register: Record<string, HookFn> = {
   onWorldAttemptDespawnMob: (mobId: LifeformId) => {
     const target = mobMap.get(mobId);
     const data: AttemptDespawnData = { mobId, preventDespawn: false };
@@ -1468,20 +1468,4 @@ const register: Record<string, HookFn> = {
   ...tableHooks,
 };
 
-/**
- * Loader 用。`Loader.modules` にこのモジュールを入れると、
- * Loader.INIT() がこの handlers を他のモジュールと同じように登録する。
- * globalThis のプロパティには一切触らない。
- */
 export const handlers: Record<string, HookFn> = register;
-
-
-// export function installMixinHooks(): void {
-//   for (const [name, callback] of Object.entries(handlers)) {
-//     try {
-//       __mixinRegister(name, (...args: unknown[]) => callback(...args));
-//     } catch (error) {
-//       api.log(`[events] failed to register ${name}: ${(error as Error).message}`);
-//     }
-//   }
-// }
