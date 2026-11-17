@@ -8,11 +8,16 @@ import { type IMagicSystem } from "./IMagicSystem";
 import { dot, subtractVec, type NormalizedVec3 } from "../../utils/math";
 import type { Vec3 } from "../../core/types";
 import type { PlayerListener } from "../../core/api/eventListener";
+import type { PassiveEffect } from "./rods/PassiveEffect";
 
 //子が絶対持ってるものは abstractで
 //持ってるやつと持ってないやつがあるのは空実装にしてoverrideする
 
 type Colors = ["white", "white", "lime", "lime", "yellow", "yellow", "orange", "orange", "red"];
+
+export type PassiveConstructor = new (
+  listener: PlayerListener,
+) => PassiveEffect;
 
 export type RodSettings =
   | {
@@ -38,6 +43,16 @@ export abstract class MagicSystem<
   protected abstract readonly rodSettings: Record<TSkill, RodSettings>;
   protected abstract readonly skills: readonly TSkill[];
 
+  protected abstract readonly passiveClasses: readonly PassiveConstructor[];
+  protected passives!: PassiveEffect[];
+
+  //各杖のコンストラクタ内で絶対に呼ぶ!
+  protected initializePassives() {
+    this.passives = this.passiveClasses.map(
+      Passive => new Passive(this.playerListener)
+    );
+  }
+
   protected slot = 0;
   protected charging = false;
   protected chargeStart = 0;
@@ -45,18 +60,21 @@ export abstract class MagicSystem<
   protected currentMode: TSkill;
 
   protected keyManager: CustomButtonManager;
+  protected playerListener: PlayerListener;
   protected summonedMobs: Set<Types.MobId>;
 
   constructor(
-    playerId: Types.PlayerId, 
-    initialMode: TSkill, 
+    playerId: Types.PlayerId,
+    initialMode: TSkill,
     keyManager: CustomButtonManager,
     playerListener: PlayerListener,
   ) {
     this.currentMode = initialMode;
     this.playerId = playerId;
     this.keyManager = keyManager;
+    this.playerListener = playerListener;
     this.summonedMobs = new Set();
+    this.initializePassives();
   }
 
   public deactivate(): void {
@@ -79,6 +97,10 @@ export abstract class MagicSystem<
       }
     });
     this.clearTimers();
+
+    for (const passive of this.passives) {
+      passive.deactivate();
+    }
   }
 
   protected switchMode(): void {
@@ -440,6 +462,10 @@ export abstract class MagicSystem<
       "touchscreenActionButton",
       [{ icon: this.itemName }]
     );
+
+    for (const passive of this.passives) {
+      passive.activate();
+    }
   }
 
   public getNextSpellName(): string {
@@ -518,6 +544,8 @@ export abstract class MagicSystem<
   }
 
   tick(): void {
+    this.passives.forEach(passive => passive?.tick());
+    
     if (!this.charging) return;
     if (!this.rodSettings[this.currentMode].canCharge) return;
 
