@@ -1,13 +1,13 @@
 import type * as Types from "@bloxd";
 
 import { clearInterval, type TimeoutId, clearTimeout, type IntervalId } from "@plugins/helpers";
-import { asyncAnimate } from "../../core/api/animateHelper";
+import { asyncAnimate } from "../../core/helpers/animateHelper";
 import { CustomButtonManager } from "../../core/managers/KeyManager";
 import { magicButtonKeyIds } from "./magicManager";
 import { type IMagicSystem } from "./IMagicSystem";
 import { dot, subtractVec, type NormalizedVec3 } from "../../utils/math";
 import type { Vec3 } from "../../core/types";
-import type { PlayerListener } from "../../core/api/eventListener";
+import type { PlayerListener } from "../../core/helpers/eventListener";
 import type { PassiveEffect } from "./PassiveEffect";
 
 //子が絶対持ってるものは abstractで

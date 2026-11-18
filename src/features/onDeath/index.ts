@@ -1,6 +1,6 @@
 import { type DeadPlayer } from "../../core/types";
 import { toYMDHMS } from "../../utils/math";
-import { setPlayerData, getPlayerData } from "../../core/api/dbHelper";
+import { setPlayerData, getPlayerData } from "../../core/helpers/dbHelper";
 import type * as Types from "@bloxd";
 
 function onJoin(playerId: Types.PlayerId){

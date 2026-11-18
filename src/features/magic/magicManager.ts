@@ -7,7 +7,7 @@ import { CustomButtonManager } from "../../core/managers/KeyManager";
 import type { IMagicSystem } from "./IMagicSystem";
 import { BlackIceRod, BlackIceSkillNames } from "./rods/blackIceRod";
 import { RustyRod, RustyRodSkillNames } from "./rods/rustyrod";
-import type { PlayerListener } from "../../core/api/eventListener";
+import type { PlayerListener } from "../../core/helpers/eventListener";
 import { ObisidianRod, ObisidianRodSkillNames } from "./rods/obsidianRod";
 
 export const magicButtonKeyIds = {

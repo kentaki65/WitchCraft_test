@@ -6,7 +6,7 @@ import type { Parameters } from "../types";
 import { RightTextManager } from "../../features/RightInfoTextManager";
 import { DungeonManager } from "../../features/structure/DungeonManager";
 import type { EventRegister } from "../../features/worldEvents/eventRegister";
-import { PlayerListener } from "../api/eventListener";
+import { PlayerListener } from "../helpers/eventListener";
 
 type effectNames = "Damage" | "Speed" | "Damage Reduction" | "Invisible" | "Jump Boost" | "Knockback" | "Poisoned" | "Slowness" | "Weakness" | "Cleansed" | "Instant Damage" | "Health Regen" | "Healing Pulse" | "Instant Health" | "Haste" | "Shield" | "Double Jump" | "Heat Resistance" | "Thief" | "X-Ray Vision" | "Mining Yield" | "Brain Rot" | "Aura" | "Wall Climbing" | "Air Walk" | "Pickpocketer" | "Lifesteal" | "Bounciness" | "Blindness" | "Poopy" | "Glowing" | "Night Vision" | "Hydrated";
 export class PlayerManager {

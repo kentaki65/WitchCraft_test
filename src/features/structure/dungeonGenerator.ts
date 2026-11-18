@@ -1,10 +1,10 @@
 import { DungeonEntrance } from "./dungeons/dungeonEntrance";
 import type { DungeonSource } from "./Dungeon";
-import Promise, { type PolyfillPromise } from "../../core/api/promise";
+import Promise, { type PolyfillPromise } from "../../core/helpers/promise";
 import { getLootChestContents } from "../lootchest/LootChest";
 import { Rarity } from "../lootchest/types";
 import type { Vec3 } from "../../core/types";
-import { getWorldData, setWorldData } from "../../core/api/dbHelper";
+import { getWorldData, setWorldData } from "../../core/helpers/dbHelper";
 import { loadChunk, loadSchematic } from "../../core/structurePlacer/loadschematic";
 
 export type DungeonType = DungeonEntrance;

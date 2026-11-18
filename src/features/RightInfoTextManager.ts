@@ -3,9 +3,9 @@
 import type * as Types from "@bloxd";
 import type { Biome } from "../core/worldgen/types";
 import { DataManager } from "../core/managers/DataManager";
-import { world } from "../core/api/worldGenerator";
+import { world } from "../core/helpers/worldGenerator";
 import type { Vec2 } from "../core/types";
-import { getPlayerData } from "../core/api/dbHelper";
+import { getPlayerData } from "../core/helpers/dbHelper";
 import { createTickInterval } from "../utils/loop";
 import { getDistance2D } from "../utils/math";
 

@@ -4,7 +4,7 @@ import type { ITickable } from "../SurvivalManager";
 import { setTimeout } from "@plugins/helpers"
 import type { Biome } from "../../../core/worldgen/types";
 import { createTickInterval } from "../../../utils/loop";
-import { world } from "../../../core/api/worldGenerator";
+import { world } from "../../../core/helpers/worldGenerator";
 
 export class TemperatureSystem implements ITickable {
   private readonly playerId: Types.PlayerId;

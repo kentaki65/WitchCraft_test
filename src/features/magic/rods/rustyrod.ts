@@ -1,4 +1,4 @@
-import { MobListener } from "../../../core/api/eventListener";
+import { MobListener } from "../../../core/helpers/eventListener";
 import type { Vec3 } from "../../../core/types";
 import { normalize, spreadVector3D } from "../../../utils/math";
 import { MagicSystem, type PassiveConstructor, type RodSettings } from "../magicSystem";

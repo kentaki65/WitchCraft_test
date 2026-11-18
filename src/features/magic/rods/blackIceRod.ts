@@ -3,7 +3,7 @@ import { MagicSystem, type PassiveConstructor, type RodSettings } from "../magic
 import { setTimeout } from "@plugins/helpers";
 import type { Vec3 } from "../../../core/types";
 import { normalize } from "../../../utils/math";
-import { asyncAnimate } from "../../../core/api/animateHelper";
+import { asyncAnimate } from "../../../core/helpers/animateHelper";
 
 
 export enum BlackIceSkillNames {

@@ -1,7 +1,7 @@
 import type {
   GameEventMap,
   PlayerListener
-} from "../../core/api/eventListener";
+} from "../../core/helpers/eventListener";
 
 type Subscription = {
   unsubscribe: () => void;

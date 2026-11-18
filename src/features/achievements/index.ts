@@ -1,10 +1,10 @@
-import { getPlayerData, setPlayerData } from "../../core/api/dbHelper";
+import { getPlayerData, setPlayerData } from "../../core/helpers/dbHelper";
 import { achievementData } from "./data";
 import type { AchievementKeys, AchievementSlot, ReachedBiomes, Vec3 } from "../../core/types";
 import type * as Types from "@bloxd";
 import { progressChecker } from "./achv";
 import { getDistance } from "../../utils/math";
-import { world } from "../../core/api/worldGenerator";
+import { world } from "../../core/helpers/worldGenerator";
 import type { Biome } from "../../core/worldgen/types";
 
 

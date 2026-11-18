@@ -1,4 +1,4 @@
-import { ParticleStudio, type Layer } from "../../../core/api/particleHelper";
+import { ParticleStudio, type Layer } from "../../../core/helpers/particleHelper";
 import type { Vec3 } from "../../../core/types";
 import { normalize, spreadVector3D } from "../../../utils/math";
 import type { ParticleSystemBlendMode } from "@bloxd";
@@ -8,7 +8,7 @@ import {
 } from "../magicSystem";
 
 import { setInterval, clearInterval } from "@plugins/helpers";
-import { MobListener } from "../../../core/api/eventListener";
+import { MobListener } from "../../../core/helpers/eventListener";
 
 export enum ObisidianRodSkillNames {
   fireball = "火炎球",
