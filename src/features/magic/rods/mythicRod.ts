@@ -1,4 +1,4 @@
-import { MagicSystem, type RodSettings } from "../magicSystem";
+import { MagicSystem, type PassiveConstructor, type RodSettings } from "../magicSystem";
 
 export enum MythicRodSkillNames {
   Doom = "Doom",
@@ -22,7 +22,7 @@ export class MythicRod extends MagicSystem<MythicRodSkillNames> {
   protected readonly skills: readonly MythicRodSkillNames[] = [
     MythicRodSkillNames.Doom, MythicRodSkillNames.Singularity
   ];
-
+  protected override passiveClasses: readonly PassiveConstructor[] = [];
   castSpell(mode: MythicRodSkillNames, chargeTime: number): void {
     switch (mode) {
       case MythicRodSkillNames.Doom:

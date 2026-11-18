@@ -1,5 +1,5 @@
 import { tickToSeconds } from "../../../utils/math";
-import { MagicSystem, type RodSettings } from "../magicSystem";
+import { MagicSystem, type PassiveConstructor, type RodSettings } from "../magicSystem";
 import { setTimeout } from "@plugins/helpers";
 
 export enum DraugrRodSkillNames {
@@ -38,6 +38,7 @@ export class DraugrRod extends MagicSystem<DraugrRodSkillNames> {
     }
   };
 
+  protected override passiveClasses: readonly PassiveConstructor[] = [];
   protected spawnProjectile({ x, y, z, dx, dy, dz, dist, damage, chargeTime }: spawnProjectileProps) {
     let px = x + dx * dist;
     let py = y + dy * dist;

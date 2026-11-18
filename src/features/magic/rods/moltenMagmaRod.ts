@@ -1,4 +1,4 @@
-import { MagicSystem, type RodSettings } from "../magicSystem";
+import { MagicSystem, type PassiveConstructor, type RodSettings } from "../magicSystem";
 import { setTimeout } from "@plugins/helpers";
 import type { RodTypes, Vec3 } from "../../../core/types";
 import type * as Types from "@bloxd";
@@ -39,7 +39,7 @@ export class MoltenMagmaRod extends MagicSystem<MoltenMagmaRodSkillNames> {
       minCharge: 500
     }
   }
-
+  protected override passiveClasses: readonly PassiveConstructor[] = [];
   protected spawnProjectile({ x, y, z, dx, dy, dz, dist, damage }: spawnProjectileProps) {
     let px = x + dx * dist;
     let py = y + dy * dist;

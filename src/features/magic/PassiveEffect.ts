@@ -1,7 +1,7 @@
 import type {
   GameEventMap,
   PlayerListener
-} from "../../../core/api/eventListener";
+} from "../../core/api/eventListener";
 
 type Subscription = {
   unsubscribe: () => void;
@@ -20,7 +20,14 @@ export abstract class PassiveEffect {
     if (this.active) return;
 
     this.active = true;
-    this.onActivate();
+
+    try {
+      this.onActivate();
+    } catch (error) {
+      this.active = false;
+      this.onDeactivate();
+      throw error;
+    }
   }
 
   public deactivate(): void {
@@ -30,8 +37,7 @@ export abstract class PassiveEffect {
     this.onDeactivate();
   }
 
-  public tick(): void { };
-  public onInitialize(): void {};
+  public tick(): void { }
 
   protected subscribe<K extends keyof GameEventMap>(
     type: K,
@@ -46,8 +52,8 @@ export abstract class PassiveEffect {
     });
   }
 
-  abstract onActivate(): void;
-  protected onDeactivate() {
+  abstract onActivate(): void
+  protected onDeactivate(): void{
     for (const subscription of this.subscriptions) {
       subscription.unsubscribe();
     }
