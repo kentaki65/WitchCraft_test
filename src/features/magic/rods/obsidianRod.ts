@@ -1,14 +1,17 @@
 import { ParticleStudio, type Layer } from "../../../core/api/particleHelper";
 import type { Vec3 } from "../../../core/types";
-import { normalize } from "../../../utils/math";
+import { normalize, spreadVector3D } from "../../../utils/math";
 import type { ParticleSystemBlendMode } from "@bloxd";
+
 import {
   MagicSystem, type PassiveConstructor, type RodSettings
 } from "../magicSystem";
 
+import { setInterval, clearInterval } from "@plugins/helpers";
+import { MobListener } from "../../../core/api/eventListener";
+
 export enum ObisidianRodSkillNames {
   fireball = "火炎球",
-  explosion = "爆炎",
   megumin = "エクスプロージョン!",
   selfDestruct = "自爆"
 }
@@ -144,10 +147,6 @@ export class ObisidianRod extends MagicSystem<ObisidianRodSkillNames> {
       canCharge: false,
       useThirdParsonView: false,
     },
-    [ObisidianRodSkillNames.explosion]: {
-      canCharge: false,
-      useThirdParsonView: false,
-    },
     [ObisidianRodSkillNames.megumin]: {
       canCharge: true,
       minCharge: 11000,
@@ -162,7 +161,6 @@ export class ObisidianRod extends MagicSystem<ObisidianRodSkillNames> {
 
   protected override skills: readonly ObisidianRodSkillNames[] = [
     ObisidianRodSkillNames.fireball,
-    ObisidianRodSkillNames.explosion,
     ObisidianRodSkillNames.megumin,
     ObisidianRodSkillNames.selfDestruct
   ];
@@ -177,12 +175,108 @@ export class ObisidianRod extends MagicSystem<ObisidianRodSkillNames> {
     switch (mode) {
       case ObisidianRodSkillNames.fireball:
         this.castFirstSpell(chargeTime);
-
+        break;
+      
+      case ObisidianRodSkillNames.selfDestruct:
+        this.castThirdSpell();
+        break;
     }
   }
 
   private castFirstSpell(chargeTime: number) {
     //火炎球　相手に火の玉を飛ばす。5連発で少し拡散あり。当たった場合ダメとやけど（あるのか？まあ効果は毒と同じやね）を与える
+    const [x, y, z] = api.getPosition(this.playerId);
+    const dir = normalize(api.getPlayerFacingInfo(this.playerId).dir);
+    if (!dir) return;
+
+    //TODO レベルに応じてダメージ倍率/拡散度合いを変える
+    const multipleDamage = 5;
+    const fireballAmount = 5;
+    const spreadAngle = 15 * (Math.PI / 180);
+
+    const maxDistance = 30;
+    const maxDetectionRadius = maxDistance * Math.tan(spreadAngle);
+    const mobs = this.getMobsInSight([x, y, z], dir, 30, maxDetectionRadius);
+
+    for (const mob of mobs) {
+      const mobListener = new MobListener(mob);
+      mobListener.addEventListener("mobWasDamagedByPlayer", (e) => {
+        const { mobId } = e;
+        if (!api.checkValid(mobId)) return;
+
+        api.applyEffect(mob, "Poisoned", 5000, {
+          inbuiltLevel: 5
+        });
+
+        const mobPos = api.getPosition(mobId);
+        api.playParticleEffect({
+          dir1: [-1, -1, -1],
+          dir2: [1, 1, 1],
+          pos1: mobPos,
+          pos2: [mobPos[0], mobPos[1], mobPos[2]],
+          texture: "generic_2",
+          minLifeTime: 0.2,
+          maxLifeTime: 0.5,
+          minEmitPower: 1.5,
+          maxEmitPower: 8,
+          minSize: 0.6,
+          maxSize: 0.8,
+          manualEmitCount: 25,
+          gravity: [0, -25, 0],
+          colorGradients: [
+            {
+              timeFraction: 0,
+              minColor: [255, 255, 255, 1],
+              maxColor: [227, 227, 227, 1],
+            },
+            {
+              timeFraction: 0.4,
+              minColor: [196, 48, 40, 1],
+              maxColor: [155, 36, 33, 1],
+            },
+            {
+              timeFraction: 1,
+              minColor: [196, 48, 40, 1],
+              maxColor: [155, 36, 33, 1],
+            },
+          ],
+          velocityGradients: [
+            {
+              timeFraction: 0,
+              factor: 2,
+              factor2: 2,
+            },
+            {
+              timeFraction: 1,
+              factor: 0.5,
+              factor2: 0.5,
+            },
+          ],
+          blendMode: 1,
+          hideDist: 120,
+        });
+      }, { once: true });
+    }
+
+    let i = 0;
+    const intervalId = setInterval(() => {
+      const spreadDir = spreadVector3D(dir, spreadAngle);
+
+      api.attemptCreateThrowable(
+        this.playerId,
+        "Fireball",
+        [x, y + 1.5, z],
+        spreadDir,
+        1,
+        multipleDamage
+      );
+
+      i++;
+
+      if (i >= fireballAmount) {
+        clearInterval(intervalId);
+      }
+    }, 100);
   }
 
   //エクスプロージョン！　前方へ大きな爆発を起こす。詠唱時間が長いほど火力が上がる
@@ -232,7 +326,7 @@ export class ObisidianRod extends MagicSystem<ObisidianRodSkillNames> {
     this.particleStadio.play(1000);
   }
 
-  protected afterChargingBombing(pos: Vec3) {
+  protected bigExplosion(pos: Vec3) {
     const [x, y, z] = pos;
 
     const pos1 = [x, y, z]
@@ -379,19 +473,29 @@ export class ObisidianRod extends MagicSystem<ObisidianRodSkillNames> {
     const range = 10;
     const damage = 1000;
 
-    const mobs = api.getEntitiesInRect(pos.map(n => n - range), pos.map(n => n + range));
-    for(const mob of mobs){
-      try{
+    const mobs = api.getEntitiesInRect(
+      pos.map(n => n - range), 
+      pos.map(n => n + range)
+    ).filter(n => n !== this.playerId);
+    for (const mob of mobs) {
+      try {
         api.attemptApplyDamage({
           eId: this.playerId,
           hitEId: mob,
           attemptedDmgAmt: damage,
           withItem: this.itemName,
         })
-      }catch(e){}
+      } catch (e) { }
     }
 
   }
+
+  protected castThirdSpell(){
+    const pos = api.getPosition(this.playerId);
+    api.setHealth(this.playerId, 1);
+    this.bigExplosion(pos);
+  }
+
   protected override startCharging(): void {
     if (this.currentMode === ObisidianRodSkillNames.megumin) {
       const rodSetting = this.rodSettings[this.currentMode];
@@ -447,10 +551,14 @@ export class ObisidianRod extends MagicSystem<ObisidianRodSkillNames> {
         this.castSpell(this.currentMode, chargeTime);
 
         this.chargeStart = api.now();
+
         api.setClientOption(this.playerId, `runningSpeed`, 2);
         api.setClientOption(this.playerId, `walkingSpeed`, 2);
         this.stopCharging();
-        this.afterChargingBombing(this.particleStadio?.origin as Vec3);
+        this.bigExplosion(this.particleStadio?.origin as Vec3);
+
+        api.applyEffect(this.playerId, "Slowness", 900000, { inbuiltLevel: 2 });
+        api.applyEffect(this.playerId, "Weakness", 900000, { inbuiltLevel: 2 });
       }
     } else {
       super.tick()
