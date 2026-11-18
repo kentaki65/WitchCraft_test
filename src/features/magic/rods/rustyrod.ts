@@ -1,7 +1,7 @@
 import { MobListener } from "../../../core/api/eventListener";
 import type { Vec3 } from "../../../core/types";
 import { normalize, spreadVector3D } from "../../../utils/math";
-import { MagicSystem, type RodSettings } from "../magicSystem";
+import { MagicSystem, type PassiveConstructor, type RodSettings } from "../magicSystem";
 
 export enum RustyRodSkillNames {
   magicAbsorption = "魔力吸収",
@@ -27,6 +27,8 @@ export class RustyRod extends MagicSystem<RustyRodSkillNames> {
     RustyRodSkillNames.woodenThornOfGrudge
   ];
 
+  protected override passiveClasses: readonly PassiveConstructor[] = [];
+  
   private lastFireTime = 0;
 
   private readonly fireInterval = 500;
@@ -40,7 +42,6 @@ export class RustyRod extends MagicSystem<RustyRodSkillNames> {
     }
   }
 
-  //魔力吸収　HPが微回復。自身のスピード、攻撃力にバフ
   private castFirstSpell(chargeTime: number) {
     //TODO レベルに応じて動的に変える
 

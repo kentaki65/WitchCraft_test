@@ -1152,6 +1152,7 @@ const tableHooks: Record<string, HookFn> = Object.fromEntries(
         const result = returnIf(data);
         if (result !== undefined) return result;
       }
+      return;
     };
     return [handler, hook];
   }),
@@ -1167,6 +1168,7 @@ export const register: Record<string, HookFn> = {
     if (data.preventDespawn) {
       return "preventDespawn";
     }
+    return;
   },
 
   // プレイヤー → プレイヤー
@@ -1204,6 +1206,7 @@ export const register: Record<string, HookFn> = {
     if (data.damage !== damageDealt) {
       return data.damage;
     }
+    return;
   },
 
   // プレイヤー → モブ
@@ -1239,6 +1242,7 @@ export const register: Record<string, HookFn> = {
     if (data.damage !== damageDealt) {
       return data.damage;
     }
+    return;
   },
 
   // 攻撃者はプレイヤーかモブのどちらか
@@ -1262,6 +1266,7 @@ export const register: Record<string, HookFn> = {
     if (data.preventDeath) {
       return "preventDeath";
     }
+    return;
   },
 
   onPlayerKilledOtherPlayer: (
@@ -1286,6 +1291,7 @@ export const register: Record<string, HookFn> = {
     if (data.keepInventory) {
       return "keepInventory";
     }
+    return;
   },
 
   onMobKilledPlayer: (
@@ -1311,6 +1317,7 @@ export const register: Record<string, HookFn> = {
     if (data.keepInventory) {
       return "keepInventory";
     }
+    return;
   },
 
   onPlayerKilledMob: (
@@ -1329,6 +1336,7 @@ export const register: Record<string, HookFn> = {
     if (data.preventDrop) {
       return "preventDrop";
     }
+    return;
   },
 
   onMobKilledOtherMob: (
@@ -1347,6 +1355,7 @@ export const register: Record<string, HookFn> = {
     if (data.preventDrop) {
       return "preventDrop";
     }
+    return;
   },
 
   onPlayerChangeBlock: (
@@ -1392,6 +1401,7 @@ export const register: Record<string, HookFn> = {
     if (data.droppedItemPosition && Array.isArray(data.droppedItemPosition)) {
       return data.droppedItemPosition;
     }
+    return;
   },
 
   // モブ → プレイヤー
@@ -1425,6 +1435,7 @@ export const register: Record<string, HookFn> = {
     if (data.damage !== damageDealt) {
       return data.damage;
     }
+    return;
   },
 
   // モブ → モブ
@@ -1458,6 +1469,7 @@ export const register: Record<string, HookFn> = {
     if (data.damage !== damageDealt) {
       return data.damage;
     }
+    return;
   },
 
   onPlayerJoin: (playerId: LifeformId, fromGameReset: boolean) => {

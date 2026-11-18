@@ -1,5 +1,5 @@
 import { normalize } from "../../../utils/math";
-import { MagicSystem, type RodSettings } from "../magicSystem";
+import { MagicSystem, type PassiveConstructor, type RodSettings } from "../magicSystem";
 
 type Vec3 = [number, number, number];
 
@@ -26,7 +26,7 @@ export class SpeedRod extends MagicSystem<SpeedRodSkillNames> {
     SpeedRodSkillNames.Flashstep, SpeedRodSkillNames.Overdrive
   ];
 
-  protected readonly MIN_CHARGE = [1, 0] as const;
+  protected override passiveClasses: readonly PassiveConstructor[] = [];
 
   castSpell(mode: SpeedRodSkillNames, chargeTime: number): void {
     switch (mode) {

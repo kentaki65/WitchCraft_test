@@ -1,5 +1,5 @@
 import type * as Types from "@bloxd";
-import { MagicSystem, type RodSettings } from "../magicSystem";
+import { MagicSystem, type PassiveConstructor, type RodSettings } from "../magicSystem";
 import { setTimeout } from "@plugins/helpers";
 import type { Vec3 } from "../../../core/types";
 import { normalize } from "../../../utils/math";
@@ -35,6 +35,8 @@ export class BlackIceRod extends MagicSystem<BlackIceSkillNames> {
   protected readonly skills: BlackIceSkillNames[] = [
     BlackIceSkillNames.sacrifice, BlackIceSkillNames.bloodNeedle, BlackIceSkillNames.markTarget
   ];
+
+  protected override passiveClasses: readonly PassiveConstructor[] = [];
 
   castSpell(mode: BlackIceSkillNames, chargeTime: number): void {
     switch (mode) {

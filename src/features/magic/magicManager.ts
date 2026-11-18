@@ -8,6 +8,7 @@ import type { IMagicSystem } from "./IMagicSystem";
 import { BlackIceRod, BlackIceSkillNames } from "./rods/blackIceRod";
 import { RustyRod, RustyRodSkillNames } from "./rods/rustyrod";
 import type { PlayerListener } from "../../core/api/eventListener";
+import { ObisidianRod, ObisidianRodSkillNames } from "./rods/obsidianRod";
 
 export const magicButtonKeyIds = {
   switchMagic: "switchmagic_X",
@@ -184,6 +185,12 @@ export class MagicManager {
           this.keyManager,
           this.playerListener
         )
+        break;
+      case "Obsidian Rod": 
+        magic = new ObisidianRod(
+          id, ObisidianRodSkillNames.fireball,
+          this.keyManager, this.playerListener
+        );
         break;
     }
 

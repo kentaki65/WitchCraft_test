@@ -1,4 +1,4 @@
-import { MagicSystem, type RodSettings } from "../magicSystem";
+import { MagicSystem, type PassiveConstructor, type RodSettings } from "../magicSystem";
 import { setTimeout, clearTimeout } from "@plugins/helpers";
 
 export enum LuckyRodSkillNames {
@@ -31,6 +31,7 @@ export class LuckyRod extends MagicSystem<LuckyRodSkillNames> {
     LuckyRodSkillNames.byMyOwnHand
   ];
 
+  protected override passiveClasses: readonly PassiveConstructor[] = [];
   protected override castSpell(mode: LuckyRodSkillNames, chargeTime: number): void {
     switch (mode) {
       case LuckyRodSkillNames.magicOverload:

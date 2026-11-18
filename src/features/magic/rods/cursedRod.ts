@@ -1,5 +1,5 @@
 import { divideVec, findNearest, subtractVec, dot, normalize, tickToSeconds } from "../../../utils/math";
-import { MagicSystem, type RodSettings } from "../magicSystem";
+import { MagicSystem, type PassiveConstructor, type RodSettings } from "../magicSystem";
 import { setInterval, clearInterval, setTimeout, type TimeoutId, clearTimeout } from "@plugins/helpers";
 import type * as Types from "@bloxd";
 import type { Vec3 } from "../../../core/types";
@@ -30,6 +30,7 @@ export class CursedRod extends MagicSystem<CursedRodSkillNames> {
     CursedRodSkillNames.WraithChain, CursedRodSkillNames.SoulHex
   ]
 
+  protected override passiveClasses: readonly PassiveConstructor[] = [];
   protected markedMobs = new Set<Types.PlayerId | Types.MobId>();
 
   castSpell(mode: CursedRodSkillNames, chargeTime: number): void {
