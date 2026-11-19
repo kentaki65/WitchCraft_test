@@ -8,6 +8,7 @@ import type { Vec2 } from "../core/types";
 import { getPlayerData } from "../core/helpers/dbHelper";
 import { createTickInterval } from "../utils/loop";
 import { getDistance2D } from "../utils/math";
+import type { SurvivalManager } from "./health/SurvivalManager";
 
 type RightTextContent = Partial<{
   biome: Biome;
@@ -15,6 +16,9 @@ type RightTextContent = Partial<{
   playerLevel: number;
   unlockedAchv: number;
   foundDungeons: number;
+  hunger: number;
+  thirst: number;
+  temperature: number;
 }>
 
 class RightTextData extends DataManager<RightTextContent> { };
@@ -22,10 +26,14 @@ class RightTextData extends DataManager<RightTextContent> { };
 export class RightTextManager {
   private playerId: Types.PlayerId;
   private rightTextData: RightTextData;
+  private survivalManager: SurvivalManager;
+
   private onTick: () => void;
 
-  constructor(playerId: Types.PlayerId) {
+  constructor(playerId: Types.PlayerId, survivalManager: SurvivalManager) {
     this.playerId = playerId;
+    this.survivalManager = survivalManager;
+
     this.rightTextData = new RightTextData({}, (data) => {
       api.setClientOption(this.playerId, "RightInfoText", this._serialize())
     })
@@ -39,12 +47,19 @@ export class RightTextManager {
       const unlockedAchv = getPlayerData(this.playerId, "achievement")?.unlockedAchievements?.length ?? 0;
       const foundDungeons = getPlayerData(this.playerId, "foundDungeons") ?? 0;
 
+      const hunger = this.survivalManager.get("hunger");
+      const thirst = this.survivalManager.get("thirst");
+      const temperature = this.survivalManager.get("temp");
+
       this.rightTextData.update({
         biome,
         riskLevel,
         playerLevel,
         unlockedAchv,
         foundDungeons,
+        hunger,
+        thirst,
+        temperature,
       })
     })
   }
@@ -59,7 +74,16 @@ export class RightTextManager {
   }
 
   private _serialize(): Types.StyledText[] {
-    const { biome, riskLevel, playerLevel, unlockedAchv, foundDungeons } = this.rightTextData.get();
+    const {
+      biome,
+      riskLevel,
+      playerLevel,
+      unlockedAchv,
+      foundDungeons,
+      hunger,
+      thirst,
+      temperature
+    } = this.rightTextData.get();
 
     const toStyledText = (
       text: RightTextContent[keyof RightTextContent]
@@ -68,15 +92,21 @@ export class RightTextManager {
     };
 
     return [
+      { str: "気温: ", style: {} },
+      toStyledText(temperature),
+      { str: "空腹度: ", style: {} },
+      toStyledText(hunger),
+      { str: "喉の渇き: ", style: {} },
+      toStyledText(thirst),
       { str: "バイオーム: ", style: {} },
       toStyledText(biome),
-      { str: "危険度: ", style: {}},
+      { str: "危険度: ", style: {} },
       toStyledText(riskLevel),
-      { str: "プレイヤーレベル: ", style: {}},
+      { str: "プレイヤーレベル: ", style: {} },
       toStyledText(playerLevel),
-      { str: "解除した実績数: ", style: {}},
+      { str: "解除した実績数: ", style: {} },
       toStyledText(unlockedAchv),
-      { str: "発見したダンジョン数: ", style: {}},
+      { str: "発見したダンジョン数: ", style: {} },
       toStyledText(foundDungeons),
     ]
   }

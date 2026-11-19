@@ -2,6 +2,7 @@ import type {
   GameEventMap,
   PlayerListener
 } from "../../core/helpers/eventListener";
+import type { ISurvivalAccessor } from "../health/SurvivalManager";
 
 type Subscription = {
   unsubscribe: () => void;
@@ -9,10 +10,16 @@ type Subscription = {
 
 export abstract class PassiveEffect {
   private readonly listener: PlayerListener;
+  protected readonly survival: ISurvivalAccessor;
+
   private readonly subscriptions: Subscription[] = [];
   private active = false;
 
-  constructor(listener: PlayerListener) {
+  constructor(
+    listener: PlayerListener, 
+    survival: ISurvivalAccessor
+  ) {
+    this.survival = survival;
     this.listener = listener;
   }
 

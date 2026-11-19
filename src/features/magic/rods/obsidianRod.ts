@@ -9,6 +9,7 @@ import {
 
 import { setInterval, clearInterval } from "@plugins/helpers";
 import { MobListener } from "../../../core/helpers/eventListener";
+import { PassiveEffect } from "../PassiveEffect";
 
 export enum ObisidianRodSkillNames {
   fireball = "火炎球",
@@ -140,6 +141,44 @@ const LAYERS: Layer[] = [
     ]],
 ]
 
+class FirePassive extends PassiveEffect {
+  private id: string | undefined;
+
+  override onActivate(): void {
+    api.log("はつどう!")
+    this.id = this.survival.temperature.addModifier({
+      minTemperature: 40,
+      ignoreHeatstroke: true
+    })
+  }
+
+  protected override onDeactivate(): void {
+    super.onDeactivate();
+
+    if (this.id !== undefined) {
+      this.survival.temperature.removeModifier(this.id);
+      this.id = undefined;
+    }
+  }
+}
+
+class ThermalArmorPassive extends PassiveEffect {
+  override onActivate(): void {
+    //パッシブ:熱装甲　被ダメを-20%。武器などで殴られた場合、相手に一定ダメージ与える。
+    this.subscribe("playerWasDamagedByMob", (e) => {
+      e.damage = e.damageDealt * 0.8; //8割
+
+      const damage = 20;
+      api.attemptApplyDamage({
+        eId: e.damagedPlayer,
+        hitEId: e.attackingMob,
+        attemptedDmgAmt: damage,
+        withItem: e.withItem
+      })
+    })
+  }
+}
+
 export class ObisidianRod extends MagicSystem<ObisidianRodSkillNames> {
   protected override itemName: string = "Obsidian Rod";
   protected override rodSettings: Record<ObisidianRodSkillNames, RodSettings> = {
@@ -165,7 +204,11 @@ export class ObisidianRod extends MagicSystem<ObisidianRodSkillNames> {
     ObisidianRodSkillNames.selfDestruct
   ];
 
-  protected override passiveClasses: readonly PassiveConstructor[] = [];
+  protected override passiveClasses: readonly PassiveConstructor[] = [
+    FirePassive,
+    ThermalArmorPassive,
+  ];
+
   protected particleStadio: ParticleStudio | null = null;
   protected isChargingExplosion = false;
 
@@ -176,7 +219,7 @@ export class ObisidianRod extends MagicSystem<ObisidianRodSkillNames> {
       case ObisidianRodSkillNames.fireball:
         this.castFirstSpell(chargeTime);
         break;
-      
+
       case ObisidianRodSkillNames.selfDestruct:
         this.castThirdSpell();
         break;
@@ -474,7 +517,7 @@ export class ObisidianRod extends MagicSystem<ObisidianRodSkillNames> {
     const damage = 1000;
 
     const mobs = api.getEntitiesInRect(
-      pos.map(n => n - range), 
+      pos.map(n => n - range),
       pos.map(n => n + range)
     ).filter(n => n !== this.playerId);
     for (const mob of mobs) {
@@ -490,7 +533,7 @@ export class ObisidianRod extends MagicSystem<ObisidianRodSkillNames> {
 
   }
 
-  protected castThirdSpell(){
+  protected castThirdSpell() {
     const pos = api.getPosition(this.playerId);
     api.setHealth(this.playerId, 1);
     this.bigExplosion(pos);
