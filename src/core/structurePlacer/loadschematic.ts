@@ -1,7 +1,7 @@
-import Promise from "../api/promise";
-import type { PolyfillPromise, PromiseLike as CustomPromiseLike } from "../api/promise";
+import Promise from "../helpers/promise";
+import type { PolyfillPromise, PromiseLike as CustomPromiseLike } from "../helpers/promise";
 import { forceLoadChunk, setTimeout } from "@plugins/helpers";
-import { world } from "../api/worldGenerator";
+import { world } from "../helpers/worldGenerator";
 import type { SchematicPath } from "../types";
 import { TICK_CONFIG } from "../constance";
 

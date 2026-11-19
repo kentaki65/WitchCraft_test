@@ -1,14 +1,13 @@
 import type * as Types from "@bloxd"
 import { CustomButtonManager } from "./KeyManager";
 import { MagicManager } from "../../features/magic/magicManager";
-import { SurvivalManager } from "../../features/health/SurvivalManager";
+import { SurvivalManager, type ISurvivalAccessor } from "../../features/health/SurvivalManager";
 import type { Parameters } from "../types";
 import { RightTextManager } from "../../features/RightInfoTextManager";
 import { DungeonManager } from "../../features/structure/DungeonManager";
 import type { EventRegister } from "../../features/worldEvents/eventRegister";
-import { PlayerListener } from "../api/eventListener";
+import { PlayerListener } from "../helpers/eventListener";
 
-type effectNames = "Damage" | "Speed" | "Damage Reduction" | "Invisible" | "Jump Boost" | "Knockback" | "Poisoned" | "Slowness" | "Weakness" | "Cleansed" | "Instant Damage" | "Health Regen" | "Healing Pulse" | "Instant Health" | "Haste" | "Shield" | "Double Jump" | "Heat Resistance" | "Thief" | "X-Ray Vision" | "Mining Yield" | "Brain Rot" | "Aura" | "Wall Climbing" | "Air Walk" | "Pickpocketer" | "Lifesteal" | "Bounciness" | "Blindness" | "Poopy" | "Glowing" | "Night Vision" | "Hydrated";
 export class PlayerManager {
   readonly playerId: Types.PlayerId;
   readonly magicManager: MagicManager;
@@ -16,16 +15,24 @@ export class PlayerManager {
   readonly healthManager: SurvivalManager;
   readonly dungeonManager: DungeonManager;
   readonly rightInfoTextManager: RightTextManager;
-  private readonly worldEvents: EventRegister;
-  private readonly playerListener: PlayerListener;
+  readonly worldEvents: EventRegister;
+  readonly playerListener: PlayerListener;
 
   constructor (playerId: Types.PlayerId, worldEvent: EventRegister){
     this.playerId = playerId;
+
+    this.healthManager = new SurvivalManager(playerId);
     this.playerListener = new PlayerListener(playerId);
     this.customKeyManager = new CustomButtonManager(playerId);
-    this.magicManager = new MagicManager(playerId, this.customKeyManager, this.playerListener);
-    this.healthManager = new SurvivalManager(playerId);
-    this.rightInfoTextManager = new RightTextManager(playerId);
+    this.magicManager = new MagicManager(
+      playerId, this.customKeyManager, 
+      this.playerListener, 
+      this.healthManager.accessor
+    );
+    this.rightInfoTextManager = new RightTextManager(
+      playerId, 
+      this.healthManager
+    );
     this.dungeonManager = new DungeonManager();
     this.worldEvents = worldEvent;
     this.onPlayerJoin();

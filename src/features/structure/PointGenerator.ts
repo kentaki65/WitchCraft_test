@@ -2,8 +2,8 @@
 import type * as Types from "@bloxd";
 import { DungeonEntrance } from "./dungeons/dungeonEntrance";
 import { Dungeon } from "./Dungeon";
-import { world } from "../../core/api/worldGenerator";
-import { getWorldData } from "../../core/api/dbHelper";
+import { world } from "../../core/helpers/worldGenerator";
+import { getWorldData } from "../../core/helpers/dbHelper";
 import { SeededRandom } from "../../core/worldgen/world";
 import { biomeNames } from "../../core/constance";
 import { DungeonGenerator } from "./dungeonGenerator";

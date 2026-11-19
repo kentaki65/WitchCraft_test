@@ -4,6 +4,7 @@ import type * as Types from "@bloxd";
 export interface IMagicSystem {
   onEquip(): void;
   deactivate(): void;
+  initializePassives(): void;
 
   tick(): void;
   onPlayerDeath(): void;

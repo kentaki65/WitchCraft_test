@@ -4,11 +4,19 @@ import type { ITickable } from "../SurvivalManager";
 import { setTimeout } from "@plugins/helpers"
 import type { Biome } from "../../../core/worldgen/types";
 import { createTickInterval } from "../../../utils/loop";
-import { world } from "../../../core/api/worldGenerator";
+import { world } from "../../../core/helpers/worldGenerator";
+import { Modifiable } from "../../../core/managers/Modifiable";
+
+export interface TemperatureModifier {
+  minTemperature?: number;
+  ignoreHeatstroke?: boolean;
+}
 
 export class TemperatureSystem implements ITickable {
   private readonly playerId: Types.PlayerId;
   private readonly playerState: PlayerStates;
+  public readonly modifiers = new Modifiable<TemperatureModifier>();
+
   private readonly biomeTemperature: Record<Biome, number> = {
     Jungle: 32,
     Desert: 42,
@@ -38,9 +46,36 @@ export class TemperatureSystem implements ITickable {
   constructor(playerId: Types.PlayerId, playerState: PlayerStates) {
     this.playerId = playerId;
     this.playerState = playerState;
-    
+
     this.updateTemperature = createTickInterval(6, () => this._updateTemperature());
     this.updateTemperatureTint = createTickInterval(10, () => this._updateTemperatureTint());
+  }
+
+  public addModifier(modifier: TemperatureModifier): string {
+    return this.modifiers.addModifier(modifier);
+  }
+
+  public removeModifier(id: string): void {
+    this.modifiers.removeModifier(id);
+  }
+
+  private isIgnoreHeatstroke(): boolean {
+    return [...this.modifiers.getModifiers()].some(n => n.ignoreHeatstroke);
+  }
+
+  private _getMinTemperature(): number | undefined {
+    let minTemperature: number | undefined;
+
+    for (const modifier of this.modifiers.getModifiers()) {
+      if (modifier.minTemperature === undefined) continue;
+
+      minTemperature = Math.max(
+        minTemperature ?? -Infinity,
+        modifier.minTemperature
+      );
+    }
+
+    return minTemperature;
   }
 
   private _updateTemperature() {
@@ -49,23 +84,27 @@ export class TemperatureSystem implements ITickable {
 
     const targetTemp = this.biomeTemperature[biome];
     const currentTemp = this.playerState.get("temp");
+    const minTemperature = this._getMinTemperature();
 
     const difference = targetTemp - currentTemp;
+    const nextTemp = Math.abs(difference) < 0.1
+      ? targetTemp
+      : currentTemp + difference * 0.1;
 
-    if (Math.abs(difference) < 0.1) this.playerState.set("temp", targetTemp);
-    else this.playerState.update("temp", difference * 0.1);
+    this.playerState.set(
+      "temp",
+      Math.max(nextTemp, minTemperature ?? -Infinity)
+    );
   }
 
-  private _updateTemperatureTint() {
+  private _updateTemperatureEffects() {
     const t = this.playerState.get("temp");
-    const center = 25;
-    let r = 0, g = 0, b = 0, a = 0;
 
     const chestplate = api.getItemSlot(this.playerId, 47);
     const hasHydrated = api.getEffects(this.playerId).includes("Hydrated");
 
     if (t > 40) {
-      if (!hasHydrated) {
+      if (!hasHydrated || !this.isIgnoreHeatstroke()) {
         api.applyEffect(this.playerId, "Heatstroke", 1000, { icon: "Heat Resistance" });
         api.attemptApplyDamage({ eId: this.playerId, hitEId: this.playerId, attemptedDmgAmt: 5, withItem: "Fireball" });
       }
@@ -75,6 +114,14 @@ export class TemperatureSystem implements ITickable {
         api.attemptApplyDamage({ eId: this.playerId, hitEId: this.playerId, attemptedDmgAmt: 5, withItem: "Iceball" });
       }
     }
+  }
+
+  private _updateTemperatureTint() {
+    const t = this.playerState.get("temp");
+    const center = 25;
+    let r = 0, g = 0, b = 0, a = 0;
+
+    this._updateTemperatureEffects();
 
     if (t > center) {
       const intensity = Math.min((t - center) / 40, 1);
@@ -108,13 +155,13 @@ export class TemperatureSystem implements ITickable {
       });
     }
   }
-  
-  onPlayerPotionEffect(effectName: string){
-    if(effectName === "Hydrated"){
+
+  onPlayerPotionEffect(effectName: string) {
+    if (effectName === "Hydrated") {
       setTimeout(() => api.applyEffect(this.playerId, "Hydrated", 720000, {}), 100);
     }
   }
-  
+
   tick() {
     this.updateTemperature();
     this.updateTemperatureTint();

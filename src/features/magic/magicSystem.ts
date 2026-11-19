@@ -1,14 +1,15 @@
 import type * as Types from "@bloxd";
 
 import { clearInterval, type TimeoutId, clearTimeout, type IntervalId } from "@plugins/helpers";
-import { asyncAnimate } from "../../core/api/animateHelper";
+import { asyncAnimate } from "../../core/helpers/animateHelper";
 import { CustomButtonManager } from "../../core/managers/KeyManager";
 import { magicButtonKeyIds } from "./magicManager";
 import { type IMagicSystem } from "./IMagicSystem";
 import { dot, subtractVec, type NormalizedVec3 } from "../../utils/math";
 import type { Vec3 } from "../../core/types";
-import type { PlayerListener } from "../../core/api/eventListener";
+import type { PlayerListener } from "../../core/helpers/eventListener";
 import type { PassiveEffect } from "./PassiveEffect";
+import type { ISurvivalAccessor } from "../health/SurvivalManager";
 
 //子が絶対持ってるものは abstractで
 //持ってるやつと持ってないやつがあるのは空実装にしてoverrideする
@@ -17,6 +18,7 @@ type Colors = ["white", "white", "lime", "lime", "yellow", "yellow", "orange", "
 
 export type PassiveConstructor = new (
   listener: PlayerListener,
+  survival: ISurvivalAccessor
 ) => PassiveEffect;
 
 export type RodSettings =
@@ -47,9 +49,9 @@ export abstract class MagicSystem<
   protected passives: PassiveEffect[] = [];
 
   //各杖のコンストラクタ内で絶対に呼ぶ!
-  protected initializePassives() {
+  public initializePassives(): void {
     this.passives = this.passiveClasses.map(
-      Passive => new Passive(this.playerListener)
+      Passive => new Passive(this.playerListener, this.survivalAccessor)
     );
   }
 
@@ -61,6 +63,7 @@ export abstract class MagicSystem<
 
   protected keyManager: CustomButtonManager;
   protected playerListener: PlayerListener;
+  protected survivalAccessor: ISurvivalAccessor;
   protected summonedMobs: Set<Types.MobId>;
 
   constructor(
@@ -68,11 +71,14 @@ export abstract class MagicSystem<
     initialMode: TSkill,
     keyManager: CustomButtonManager,
     playerListener: PlayerListener,
+    survivalAccessor: ISurvivalAccessor,
   ) {
     this.currentMode = initialMode;
     this.playerId = playerId;
     this.keyManager = keyManager;
     this.playerListener = playerListener;
+    this.survivalAccessor = survivalAccessor;
+    
     this.summonedMobs = new Set();
   }
 
@@ -461,7 +467,9 @@ export abstract class MagicSystem<
       [{ icon: this.itemName }]
     );
 
+    api.log(this.passives);
     for (const passive of this.passives) {
+      api.log("activate!");
       passive?.activate()
     }
   }

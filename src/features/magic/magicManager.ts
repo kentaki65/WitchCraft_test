@@ -7,8 +7,9 @@ import { CustomButtonManager } from "../../core/managers/KeyManager";
 import type { IMagicSystem } from "./IMagicSystem";
 import { BlackIceRod, BlackIceSkillNames } from "./rods/blackIceRod";
 import { RustyRod, RustyRodSkillNames } from "./rods/rustyrod";
-import type { PlayerListener } from "../../core/api/eventListener";
+import type { PlayerListener } from "../../core/helpers/eventListener";
 import { ObisidianRod, ObisidianRodSkillNames } from "./rods/obsidianRod";
+import type { ISurvivalAccessor } from "../health/SurvivalManager";
 
 export const magicButtonKeyIds = {
   switchMagic: "switchmagic_X",
@@ -20,16 +21,19 @@ export class MagicManager {
   protected readonly playerId: Types.PlayerId;
   protected readonly keyManager: CustomButtonManager;
   protected readonly playerListener: PlayerListener;
+  protected readonly survivalAccessor: ISurvivalAccessor;
   protected magicSystem: IMagicSystem | null;
 
   constructor(
     playerId: Types.PlayerId, 
     keyManager: CustomButtonManager,
     playerListener: PlayerListener,
+    survivalAccessor: ISurvivalAccessor,
   ) {
     this.playerId = playerId;
     this.keyManager = keyManager;
     this.playerListener = playerListener;
+    this.survivalAccessor = survivalAccessor
 
     this.magicSystem = null;
   }
@@ -138,58 +142,58 @@ export class MagicManager {
 
     let magic: IMagicSystem | undefined;
 
+    const dependencies = [
+      this.keyManager,
+      this.playerListener,
+      this.survivalAccessor
+    ] as const;
+
     switch (item?.name) {
       case "Molten Magma Rod":
         magic = new MoltenMagmaRod(
           id, MoltenMagmaRodSkillNames.MagmaBarrage, 
-          this.keyManager,
-          this.playerListener
+          ...dependencies
         );
         break;
 
       case "Draugr Rod":
         magic = new DraugrRod(
           id, DraugrRodSkillNames.FrostBurial, 
-          this.keyManager,
-          this.playerListener
+          ...dependencies
         );
         break;
 
       case "Cursed Rod":
         magic = new CursedRod(
           id, CursedRodSkillNames.WraithChain, 
-          this.keyManager,
-          this.playerListener
+          ...dependencies
         );
         break;
 
       case "Speed Rod":
         magic = new SpeedRod(
           id, SpeedRodSkillNames.Flashstep, 
-          this.keyManager,
-          this.playerListener
+          ...dependencies
         );
         break;
 
       case "Black Ice Rod": 
         magic = new BlackIceRod(
           id, BlackIceSkillNames.sacrifice, 
-          this.keyManager,
-          this.playerListener
+          ...dependencies
         );
         break;
 
       case "Rusty Rod": 
         magic = new RustyRod(
           id, RustyRodSkillNames.magicAbsorption, 
-          this.keyManager,
-          this.playerListener
+          ...dependencies
         )
         break;
       case "Obsidian Rod": 
         magic = new ObisidianRod(
           id, ObisidianRodSkillNames.fireball,
-          this.keyManager, this.playerListener
+         ...dependencies
         );
         break;
     }
@@ -206,5 +210,6 @@ export class MagicManager {
     
     this.handleRegisterKeys();
     magic.onEquip();
+    magic.initializePassives();
   }
 }

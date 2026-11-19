@@ -1,4 +1,4 @@
-interface PlayerState {
+export interface PlayerState {
   hunger: number,
   thirst: number,
   temp: number,

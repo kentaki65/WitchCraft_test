@@ -1,7 +1,7 @@
 //@ts-nocheck
 import { World } from "../types";
 import { setTimeout } from "@plugins/helpers";
-import { Promise } from "../api/promise";
+import { Promise } from "../helpers/promise";
 import { TICK_CONFIG } from "../constance";
 
 // src/lru.ts

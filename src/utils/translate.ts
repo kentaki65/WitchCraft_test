@@ -1,4 +1,4 @@
-import { getPlayerData, setPlayerData } from "../core/api/dbHelper";
+import { getPlayerData, setPlayerData } from "../core/helpers/dbHelper";
 import type * as Types from "@bloxd";
 
 const LANGUAGES = ["en", "ja", "zh", "ko"] as const;
