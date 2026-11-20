@@ -209,7 +209,7 @@ export class MagicManager {
     this.magicSystem?.onMagicUpdated(nextMagicName);
     
     this.handleRegisterKeys();
-    magic.onEquip();
     magic.initializePassives();
+    magic.onEquip();
   }
 }
