@@ -9,6 +9,7 @@ import { getPlayerData } from "../core/helpers/dbHelper";
 import { createTickInterval } from "../utils/loop";
 import { getDistance2D } from "../utils/math";
 import type { SurvivalManager } from "./health/SurvivalManager";
+import { biomeNameMap } from "../core/constance";
 
 type RightTextContent = Partial<{
   biome: Biome;
@@ -73,7 +74,18 @@ export class RightTextManager {
     return Math.round(max * (1 - Math.exp(-distance / constantK)));
   }
 
-  private _serialize(): Types.StyledText[] {
+  private makeIcons(
+    count: number, max: number,
+    fullIcon: Types.IngameIconName | Types.BlockName,
+    emptyIcon: Types.IngameIconName | Types.BlockName
+  ): Types.StyledIcon[] {
+    return Array.from({ length: max }, (_, i) => ({
+      icon: i < count ? fullIcon : emptyIcon,
+      style: {}
+    } as Types.StyledIcon));
+  }
+
+  private _serialize(): (Types.StyledText | Types.StyledIcon)[] {
     const {
       biome,
       riskLevel,
@@ -82,33 +94,64 @@ export class RightTextManager {
       foundDungeons,
       hunger,
       thirst,
-      temperature
+      temperature,
     } = this.rightTextData.get();
 
-    const toStyledText = (
-      text: RightTextContent[keyof RightTextContent]
-    ): Types.StyledText => {
-      return { str: text == null ? "" : String(text) + "\n", style: {} };
+    const result: (Types.StyledText | Types.StyledIcon)[] = [];
+
+    const section = (name: string) => {
+      result.push(
+        { str: `${name}\n`, style: { fontSize: "16px", fontWeight: "bold", color: "#E5C878" } },
+      );
     };
 
-    return [
-      { str: "気温: ", style: {} },
-      toStyledText(temperature),
-      { str: "空腹度: ", style: {} },
-      toStyledText(hunger),
-      { str: "喉の渇き: ", style: {} },
-      toStyledText(thirst),
-      { str: "バイオーム: ", style: {} },
-      toStyledText(biome),
-      { str: "危険度: ", style: {} },
-      toStyledText(riskLevel),
-      { str: "プレイヤーレベル: ", style: {} },
-      toStyledText(playerLevel),
-      { str: "解除した実績数: ", style: {} },
-      toStyledText(unlockedAchv),
-      { str: "発見したダンジョン数: ", style: {} },
-      toStyledText(foundDungeons),
-    ]
+    const label = (name: string) => {
+      result.push({
+        str: `${name}\n`,
+        style: { color: "#AAB3C2", fontSize: "12px" },
+      });
+    };
+
+    const value = (content: unknown) => {
+      result.push({
+        str: `${content ?? "—"}\n`,
+        style: { color: "#FFFFFF", fontWeight: "bold" },
+      });
+    };
+
+    section("ENVIRONMENT");
+
+    label("気温");
+    value(`${Math.floor(temperature ?? 0) ?? "—"} °C`);
+
+    label("バイオーム");
+    value(biomeNameMap[biome ?? "Plains"]);
+
+    label("危険度");
+    value(`LEVEL ${riskLevel ?? "—"}`);
+
+    section("VITALITY");
+
+    label("空腹度");
+    result.push(...this.makeIcons(hunger ?? 0, 8, "Steak", "Ball"));
+    result.push({ str: "\n", style: {} });
+
+    label("水分量");
+    result.push(...this.makeIcons(thirst ?? 0, 8, "Water Bottle", "Empty Bottle"));
+    result.push({ str: "\n", style: {} });
+
+    section("ADVENTURE RECORD");
+
+    label("冒険者レベル");
+    value(`Lv. ${playerLevel ?? "—"}`);
+
+    label("実績解除数");
+    value(unlockedAchv);
+
+    label("ダンジョン発見数");
+    value(foundDungeons);
+
+    return result;
   }
 
   tick() {
