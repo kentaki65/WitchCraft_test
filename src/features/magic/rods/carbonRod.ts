@@ -1,9 +1,70 @@
+import { setTimeout } from "@plugins/helpers";
+import type { AttemptKillData } from "../../../core/helpers/eventListener";
+import type { Vec3 } from "../../../core/types";
+import { normalize, subtractVec } from "../../../utils/math";
 import { MagicSystem, type PassiveConstructor, type RodSettings } from "../magicSystem";
+import { PassiveEffect } from "../PassiveEffect";
 
 export enum CarbonRodSkillNames {
   ironHammer = "鉄槌",
   magicArmor = "魔装甲",
   feignedRetreat = "偽装退却"
+}
+
+class magicPropagation extends PassiveEffect {
+  override onActivate(): void {
+    const equipmentsMap = {
+      "Helmet": "ヘルメット",
+      "Chestplate": "チェストプレート",
+      "Gauntlets": "ガントレット",
+      "Leggings": "レギンス",
+      "Boots": "ブーツ",
+      "Equipment": "装備"
+    } as const;
+
+    for (let i = 45; i <= 50; i++) {
+      const item = api.getItemSlot(this.playerId, i);
+      if (!item) continue;
+
+      const type = item.name.split(" ").at(-1) ?? "Equipment";
+      const equipmentName = Object.prototype.hasOwnProperty.call(equipmentsMap, type)
+        ? equipmentsMap[type as keyof typeof equipmentsMap]
+        : equipmentsMap.Equipment;
+
+      api.setItemSlot(this.playerId, i, item.name, 1, {
+        customDisplayName: `魔鐵の${equipmentName}`,
+        customDescription: "魔鐵によりエンチャントされている...",
+        customAttributes: {
+          //TODO: 杖のレベルによってエンチャントのレベルを変えよう
+          ...api.createEnchantmentAttributesForItem(item.name, 100),
+        }
+      })
+    }
+  }
+}
+
+class ironWill extends PassiveEffect {
+  override onActivate(): void {
+    const onAttemptKill = (e: AttemptKillData) => {
+      setTimeout(() => {
+        api.setHealth(e.killedPlayer, api.getClientOption(e.killedPlayer, "maxHealth"));
+        api.applyEffect(e.killedPlayer, "Damage Reduction", 30000, { inbuiltLevel: 10 });
+        if (api.checkValid(e.attackingLifeform)) {
+          const attakerPos = api.getPosition(e.attackingLifeform);
+          const victimPos = api.getPosition(e.killedPlayer);
+
+          const dir = normalize(subtractVec(victimPos, attakerPos));
+          if (!dir) return;
+
+          api.applyImpulse(e.attackingLifeform, ...dir as Vec3);
+        }
+      }, 100, e.killedPlayer);
+      e.preventDeath = true;
+    }
+
+    this.subscribe("playerAttemptToBeKilledByMob", e => onAttemptKill(e));
+    //this.subscribe("playerAttemptToBeKilledByPlayer", e => onAttemptKill(e));
+  }
 }
 
 //### 魔鐵の杖
@@ -38,10 +99,11 @@ export class CarbonRod extends MagicSystem<CarbonRodSkillNames> {
   ];
 
   protected override passiveClasses: readonly PassiveConstructor[] = [
-
+    magicPropagation,
+    ironWill
   ];
 
   protected override castSpell(mode: CarbonRodSkillNames, chargeTime: number): void {
-    
+
   }
 }

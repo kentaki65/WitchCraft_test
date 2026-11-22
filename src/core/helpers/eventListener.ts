@@ -1,8 +1,3 @@
-// Bloxd.io イベントディスパッチャ (TypeScript版)
-// 使い方は2通り:
-//  - Loader を使う場合: このモジュールを Loader.modules に入れる (handlers を Loader が登録する)
-//  - Loader を使わない場合: installMixinHooks() を呼ぶ (__mixinRegister 経由で globalThis に登録する)
-
 import type { 
   LifeformId, 
   ShopCategoryKey, 
@@ -39,8 +34,14 @@ interface BlockPos {
   z: number;
 }
 
+/** フックが返せる値 (undefined は「何も返さない」扱い) */
 type HookResult = string | number | boolean | number[] | object | null | undefined | void;
 type HookFn = (...args: any[]) => HookResult;
+
+/* ------------------------------------------------------------------ */
+/* MixinLoader                                                         */
+/* ------------------------------------------------------------------ */
+
 type MixinCallback = (this: unknown, ...args: any[]) => unknown;
 
 const mixinCallbacks = new Map<string, MixinCallback[]>();
@@ -216,6 +217,10 @@ export const EVENT_NAMES = Object.freeze({
 } as const);
 
 export type EventName = (typeof EVENT_NAMES)[keyof typeof EVENT_NAMES];
+
+/* ------------------------------------------------------------------ */
+/* イベントデータの型                                                  */
+/* ------------------------------------------------------------------ */
 
 interface PlayerIdData {
   playerId: LifeformId;
@@ -665,6 +670,8 @@ const mobMap = new Map<LifeformId, MobListener>();
 const playerMap = new Map<LifeformId, PlayerListener>();
 
 export const gameEvents = new EventTarget<GameEventMap>();
+
+const exclusion = new Set<string>([]);
 
 interface EventHookDef {
   /** グローバルに登録するフック名 */
@@ -1152,13 +1159,16 @@ const tableHooks: Record<string, HookFn> = Object.fromEntries(
         const result = returnIf(data);
         if (result !== undefined) return result;
       }
-      return;
     };
     return [handler, hook];
   }),
 );
 
-export const register: Record<string, HookFn> = {
+/* ------------------------------------------------------------------ */
+/* 個別フック                                                          */
+/* ------------------------------------------------------------------ */
+
+const register: Record<string, HookFn> = {
   onWorldAttemptDespawnMob: (mobId: LifeformId) => {
     const target = mobMap.get(mobId);
     const data: AttemptDespawnData = { mobId, preventDespawn: false };
@@ -1168,7 +1178,6 @@ export const register: Record<string, HookFn> = {
     if (data.preventDespawn) {
       return "preventDespawn";
     }
-    return;
   },
 
   // プレイヤー → プレイヤー
@@ -1206,7 +1215,6 @@ export const register: Record<string, HookFn> = {
     if (data.damage !== damageDealt) {
       return data.damage;
     }
-    return;
   },
 
   // プレイヤー → モブ
@@ -1242,17 +1250,16 @@ export const register: Record<string, HookFn> = {
     if (data.damage !== damageDealt) {
       return data.damage;
     }
-    return;
   },
 
-  // 攻撃者はプレイヤーかモブのどちらか
+  // 攻撃者はプレイヤーかモブ。PlayerListener 登録済みならプレイヤー、それ以外はモブ扱い。
+  // (MobListener が未登録のモブでも、倒される側のイベントは必ず発火する)
   onAttemptKillPlayer: (killedPlayer: LifeformId, attackingLifeform?: LifeformId) => {
+    // 攻撃者なし (落下・虚空など) は対象外
     if (attackingLifeform === undefined) return;
+
     const victim = playerMap.get(killedPlayer);
     const attackerPlayer = playerMap.get(attackingLifeform);
-    const attackerMob = attackerPlayer ? undefined : mobMap.get(attackingLifeform);
-    if (!attackerPlayer && !attackerMob) return;
-
     const data: AttemptKillData = { killedPlayer, attackingLifeform, preventDeath: false };
 
     if (attackerPlayer) {
@@ -1260,13 +1267,12 @@ export const register: Record<string, HookFn> = {
       attackerPlayer.dispatchEvent(EVENT_NAMES.PLAYER_ATTEMPT_TO_KILL_PLAYER, data);
     } else {
       victim?.dispatchEvent(EVENT_NAMES.PLAYER_ATTEMPT_TO_BE_KILLED_BY_MOB, data);
-      attackerMob?.dispatchEvent(EVENT_NAMES.MOB_ATTEMPT_TO_KILL_PLAYER, data);
+      mobMap.get(attackingLifeform)?.dispatchEvent(EVENT_NAMES.MOB_ATTEMPT_TO_KILL_PLAYER, data);
     }
 
     if (data.preventDeath) {
       return "preventDeath";
     }
-    return;
   },
 
   onPlayerKilledOtherPlayer: (
@@ -1291,7 +1297,6 @@ export const register: Record<string, HookFn> = {
     if (data.keepInventory) {
       return "keepInventory";
     }
-    return;
   },
 
   onMobKilledPlayer: (
@@ -1317,7 +1322,6 @@ export const register: Record<string, HookFn> = {
     if (data.keepInventory) {
       return "keepInventory";
     }
-    return;
   },
 
   onPlayerKilledMob: (
@@ -1336,7 +1340,6 @@ export const register: Record<string, HookFn> = {
     if (data.preventDrop) {
       return "preventDrop";
     }
-    return;
   },
 
   onMobKilledOtherMob: (
@@ -1355,7 +1358,6 @@ export const register: Record<string, HookFn> = {
     if (data.preventDrop) {
       return "preventDrop";
     }
-    return;
   },
 
   onPlayerChangeBlock: (
@@ -1401,7 +1403,6 @@ export const register: Record<string, HookFn> = {
     if (data.droppedItemPosition && Array.isArray(data.droppedItemPosition)) {
       return data.droppedItemPosition;
     }
-    return;
   },
 
   // モブ → プレイヤー
@@ -1435,7 +1436,6 @@ export const register: Record<string, HookFn> = {
     if (data.damage !== damageDealt) {
       return data.damage;
     }
-    return;
   },
 
   // モブ → モブ
@@ -1469,9 +1469,9 @@ export const register: Record<string, HookFn> = {
     if (data.damage !== damageDealt) {
       return data.damage;
     }
-    return;
   },
 
+  // プレイヤー参加時は PlayerListener を自動作成し、gameEvents に通知する
   onPlayerJoin: (playerId: LifeformId, fromGameReset: boolean) => {
     const player = playerMap.get(playerId) ?? new PlayerListener(playerId);
     gameEvents.dispatchEvent(EVENT_NAMES.PLAYER_JOINED_LOBBY, { playerId, fromGameReset, player });
@@ -1480,4 +1480,6 @@ export const register: Record<string, HookFn> = {
   ...tableHooks,
 };
 
-export const handlers: Record<string, HookFn> = register;
+export const handlers: Record<string, HookFn> = Object.fromEntries(
+  Object.entries(register).filter(([name]) => !exclusion.has(name)),
+);

@@ -1,3 +1,4 @@
+import type { PlayerId } from "@bloxd";
 import type {
   GameEventMap,
   PlayerListener
@@ -10,15 +11,18 @@ type Subscription = {
 
 export abstract class PassiveEffect {
   private readonly listener: PlayerListener;
+  protected playerId: PlayerId; 
   protected readonly survival: ISurvivalAccessor;
 
   private readonly subscriptions: Subscription[] = [];
   private active = false;
 
   constructor(
-    listener: PlayerListener, 
-    survival: ISurvivalAccessor
+    listener: PlayerListener,
+    survival: ISurvivalAccessor,
+    playerId: PlayerId
   ) {
+    this.playerId = playerId;
     this.survival = survival;
     this.listener = listener;
   }
