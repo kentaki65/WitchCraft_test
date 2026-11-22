@@ -155,6 +155,7 @@ export abstract class MagicSystem<
 
     this.charging = true;
     this.chargeStart = api.now();
+    this.onChargeStart();
     this.startChargingAnimation(rodSetting.useThirdParsonView);
 
     api.initiateMiddleScreenBar(this.playerId, 5000, true, 0);
@@ -559,6 +560,8 @@ export abstract class MagicSystem<
     const chargeTime = this.diffCharging();
     const color = this.getChargeColor(chargeTime);
 
+    this.onChargeTick(chargeTime);
+
     api.shakePlayerCamera(this.playerId, chargeTime / 1e5, 50);
     api.sendFlyingMiddleMessage(this.playerId, [
       { icon: `fa-solid fa-crosshairs`, style: { color, opacity: 0.3 } },
@@ -574,6 +577,10 @@ export abstract class MagicSystem<
       api.setClientOption(this.playerId, `walkingSpeed`, 2);
     }
   }
+
+  //Hooks
+  protected onChargeStart(): void { }
+  protected onChargeTick(chargeTime: number): void {}
 
   protected abstract castSpell(mode: TSkill, chargeTime: number): void;
 }

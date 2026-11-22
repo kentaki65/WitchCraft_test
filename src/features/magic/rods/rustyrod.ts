@@ -28,7 +28,7 @@ export class RustyRod extends MagicSystem<RustyRodSkillNames> {
   ];
 
   protected override passiveClasses: readonly PassiveConstructor[] = [];
-  
+
   private lastFireTime = 0;
 
   private readonly fireInterval = 500;
@@ -138,27 +138,22 @@ export class RustyRod extends MagicSystem<RustyRodSkillNames> {
     }
   };
 
-  public override tick(): void {
-    super.tick();
+  protected override onChargeStart(): void {
+    if (this.currentMode === RustyRodSkillNames.woodenThornOfGrudge) {
+      this.lastFireTime = api.now();
+    }
+  }
 
-    if (!this.charging || this.currentMode !== RustyRodSkillNames.woodenThornOfGrudge) return;
+  protected override onChargeTick(chargeTime: number): void {
+    if (this.currentMode !== RustyRodSkillNames.woodenThornOfGrudge) return;
 
     const now = api.now();
-    const chargeTime = this.diffCharging();
 
-    if (chargeTime < (this.rodSettings[this.currentMode].minCharge ?? 0)) return;
+    if (chargeTime < (this.rodSettings[this.currentMode]?.minCharge || 0)) return;
     if (now - this.lastFireTime < this.fireInterval) return;
 
     this.lastFireTime = now;
     this.castSecondSpell(this.arrowsPerBurst);
-  }
-
-  public override onPlayerClick(wasAltClick: boolean): void {
-    if (this.currentMode === RustyRodSkillNames.woodenThornOfGrudge) {
-      this.lastFireTime = api.now();
-    }
-
-    this.startCharging();
   }
 
   public override onPlayerClickUp(): void {
