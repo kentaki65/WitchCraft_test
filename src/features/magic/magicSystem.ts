@@ -18,7 +18,8 @@ type Colors = ["white", "white", "lime", "lime", "yellow", "yellow", "orange", "
 
 export type PassiveConstructor = new (
   listener: PlayerListener,
-  survival: ISurvivalAccessor
+  survival: ISurvivalAccessor,
+  playerId: Types.PlayerId
 ) => PassiveEffect;
 
 export type RodSettings =
@@ -51,7 +52,7 @@ export abstract class MagicSystem<
   //各杖のコンストラクタ内で絶対に呼ぶ!
   public initializePassives(): void {
     this.passives = this.passiveClasses.map(
-      Passive => new Passive(this.playerListener, this.survivalAccessor)
+      Passive => new Passive(this.playerListener, this.survivalAccessor, this.playerId)
     );
   }
 

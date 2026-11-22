@@ -10,6 +10,7 @@ import { RustyRod, RustyRodSkillNames } from "./rods/rustyrod";
 import type { PlayerListener } from "../../core/helpers/eventListener";
 import { ObisidianRod, ObisidianRodSkillNames } from "./rods/obsidianRod";
 import type { ISurvivalAccessor } from "../health/SurvivalManager";
+import { CarbonRod, CarbonRodSkillNames } from "./rods/carbonRod";
 
 export const magicButtonKeyIds = {
   switchMagic: "switchmagic_X",
@@ -194,6 +195,12 @@ export class MagicManager {
         magic = new ObisidianRod(
           id, ObisidianRodSkillNames.fireball,
          ...dependencies
+        );
+        break;
+      case "Carbon Rod":
+        magic = new CarbonRod(
+          id, CarbonRodSkillNames.magicArmor,
+          ...dependencies
         );
         break;
     }

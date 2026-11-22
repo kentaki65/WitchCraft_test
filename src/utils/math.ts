@@ -115,13 +115,8 @@ export function findNearest(points: string[], target: Vec3): string | undefined 
   const nearest = targets.reduce<Target | undefined>((nearest, current) => {
     if (!nearest) return current;
 
-    const dx = current.position[0] - target[0];
-    const dy = current.position[1] - target[1];
-    const dz = current.position[2] - target[2];
-
-    const ndx = nearest.position[0] - target[0];
-    const ndy = nearest.position[1] - target[1];
-    const ndz = nearest.position[2] - target[2];
+    const [dx, dy, dz] = subtractVec(current.position, target);
+    const [ndx, ndy, ndz] = subtractVec(nearest.position, target);
 
     const distance = dx * dx + dy * dy + dz * dz;
     const nearestDistance = ndx * ndx + ndy * ndy + ndz * ndz;
