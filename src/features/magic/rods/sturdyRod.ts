@@ -41,6 +41,32 @@ export class SturdyRod extends MagicSystem<SturdyRodSkillNames> {
   ];
   
   protected override castSpell(mode: SturdyRodSkillNames, chargeTime: number): void {
-    
+    switch (mode) {
+      case SturdyRodSkillNames.crisisAndRest:
+        this.castFirstSpell(chargeTime);
+        break;
+
+      case SturdyRodSkillNames.pastAndOblivion:
+        this.castSecondSpell(chargeTime);
+        break;
+
+      case SturdyRodSkillNames.resignationAndResistance:
+        this.castThirdSpell(chargeTime);
+        break;
+    }
+  }
+
+  protected castFirstSpell(chargeTime: number): void {
+    ["Health Regen","Speed","Damage Reduction"].forEach(effectName=>{
+      api.applyEffect(this.playerId,effectName,5*1000,{});
+    })
+  }
+
+  protected castSecondSpell(chargeTime: number): void {
+
+  }
+
+  protected castThirdSpell(chargeTime: number): void {
+
   }
 }
