@@ -1276,7 +1276,7 @@ function handleTick() {
   if (jobs.length > 0) scheduleTick();
 }
 
-function createWorld(options?): World{
+function createWorld(options?): World {
   const seed = options !== void 0 && options.seed !== void 0 ? options.seed : api.getLobbyName();
   const biomes = new BiomeField(seed);
   const terrain = new TerrainNoise(seed);
