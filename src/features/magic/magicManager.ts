@@ -11,11 +11,13 @@ import type { PlayerListener } from "../../core/helpers/eventListener";
 import { ObisidianRod, ObisidianRodSkillNames } from "./rods/obsidianRod";
 import type { ISurvivalAccessor } from "../health/SurvivalManager";
 import { CarbonRod, CarbonRodSkillNames } from "./rods/carbonRod";
+import { FrostRod, FrostRodSkillNames } from "./rods/frostRod";
 
 export const magicButtonKeyIds = {
   switchMagic: "switchmagic_X",
 } as const;
 
+type magicRodNames = "Black Ice" | "Carbon" | "Cursed" | "Deep Sea" | "Draugr" | "Frost" | ""
 export type MagicButtonKeyId = typeof magicButtonKeyIds[keyof typeof magicButtonKeyIds];
 
 export class MagicManager {
@@ -200,6 +202,12 @@ export class MagicManager {
       case "Carbon Rod":
         magic = new CarbonRod(
           id, CarbonRodSkillNames.magicArmor,
+          ...dependencies
+        );
+        break;
+      case "Frost Rod":
+        magic = new FrostRod(
+          id, FrostRodSkillNames.iceAquarium,
           ...dependencies
         );
         break;

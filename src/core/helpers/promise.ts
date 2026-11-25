@@ -61,7 +61,7 @@ export interface PolyfillPromise<T> extends PromiseLike<T> {
   ): PolyfillPromise<TResult1 | TResult2>;
 }
 
-interface PolyfillPromiseConstructor {
+export interface PolyfillPromiseConstructor {
   new <T>(executor: Executor<T>): PolyfillPromise<T>;
   prototype: PolyfillPromise<unknown>;
   all<T>(values: Iterable<T | PromiseLike<T>> | ArrayLike<T | PromiseLike<T>>): PolyfillPromise<Awaited<T>[]>;

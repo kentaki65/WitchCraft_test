@@ -37,7 +37,7 @@ export class DungeonGenerator {
       this.dungeonType.onPlaced(origin);
       this._placeChestContents(origin);
 
-      this._saveGeneratedChunk(regionKey);
+      //this._saveGeneratedChunk(regionKey);
     })
   }
 

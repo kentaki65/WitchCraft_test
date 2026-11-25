@@ -145,7 +145,6 @@ class FirePassive extends PassiveEffect {
   private id: string | undefined;
 
   override onActivate(): void {
-    api.log("はつどう!")
     this.id = this.survival.temperature.addModifier({
       minTemperature: 40,
       ignoreHeatstroke: true

@@ -1,3 +1,5 @@
+import type { PolyfillPromise } from "../helpers/promise";
+
 interface TerrainBlocksLike {
   constructor(seed: string, biomes: any, column: any);
   blockAt(x: any, y: any, z: any): any;
@@ -11,9 +13,6 @@ interface TerrainBlocksLike {
   riverbed(x: any, z: any): any;
   clayCell(cx: any, cz: any): any;
 }
-
-export type Vec2 = [number, number];
-export type Vec3 = [number, number, number];
 
 export type Bounds2D = {
   min: Vec2;
@@ -83,11 +82,11 @@ export interface World {
   getBiomeMap(bounds: Bounds2D): Biome[];
 
   async: {
-    getBlockId(pos: Vec3): PromiseConstructorLike<number>;
-    getHeight(x: number, z: number): PromiseConstructorLike<number>;
-    getBiome(x: number, z: number): PromiseConstructorLike<Biome>;
-    getHeightMap(bounds: Bounds2D): PromiseConstructorLike<Int32Array>;
-    getBiomeMap(bounds: Bounds2D): PromiseConstructorLike<Biome[]>;
+    getBlockId(pos: Vec3): PolyfillPromise<number>;
+    getHeight(x: number, z: number): PolyfillPromise<number>;
+    getBiome(x: number, z: number): PolyfillPromise<Biome>;
+    getHeightMap(bounds: Bounds2D): PolyfillPromise<Int32Array>;
+    getBiomeMap(bounds: Bounds2D): PolyfillPromise<Biome[]>;
   }
 
   terrainBlocks: TerrainBlocksLike

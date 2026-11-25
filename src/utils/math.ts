@@ -135,20 +135,59 @@ export function subtractVec(a: Vec3, b: Vec3): Vec3 {
   ];
 }
 
-export function divideVec(a: Vec3, b: Vec3, x: number): Vec3[] | undefined {
-  if (x <= 1) return;
+export function getOffsetPosition(
+  vec: Vec3 | NormalizedVec3,
+  playerPos: Vec3,
+  distance: number
+): Vec3 {
+  const [vx, vy, vz] = vec;
+  const [px, py, pz] = playerPos;
+
+  return [
+    vx * distance + px,
+    vy * distance + py,
+    vz * distance + pz
+  ]
+}
+
+export function divideVec(start: Vec3, end: Vec3, divideNum: number): Vec3[] | undefined {
+  if (divideNum <= 1) return;
   const points: Vec3[] = [];
 
-  for (let k = 1; k < x; k++) {
+  for (let k = 1; k < divideNum; k++) {
     // 内分点の公式: ((x - k) * a + k * b) / x
-    const targetX = ((x - k) * a[0] + k * b[0]) / x;
-    const targetY = ((x - k) * a[1] + k * b[1]) / x;
-    const targetZ = ((x - k) * a[2] + k * b[2]) / x;
+    const targetX = ((divideNum - k) * start[0] + k * end[0]) / divideNum;
+    const targetY = ((divideNum - k) * start[1] + k * end[1]) / divideNum;
+    const targetZ = ((divideNum - k) * start[2] + k * end[2]) / divideNum;
 
     points.push([targetX, targetY, targetZ]);
   }
 
   return points;
+}
+
+export function distanceToSegment(
+  point: Vec3,
+  start: Vec3,
+  end: Vec3
+): number {
+  const [dx, dy, dz] = subtractVec(end, start);
+  const lengthSq = dx * dx + dy * dy + dz * dz;
+
+  if (lengthSq === 0) {
+    return getDistance(point, start);
+  }
+
+  const t = Math.max(0, Math.min(1,
+    (
+      (point[0] - start[0]) * dx +
+      (point[1] - start[1]) * dy +
+      (point[2] - start[2]) * dz
+    ) / lengthSq
+  ));
+
+  const closest = getOffsetPosition([dx, dy, dz], start, t);
+  return getDistance(point, closest);
 }
 
 export function normalize(arr: Vec3): NormalizedVec3 | null {

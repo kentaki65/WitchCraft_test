@@ -469,9 +469,7 @@ export abstract class MagicSystem<
       [{ icon: this.itemName }]
     );
 
-    api.log(this.passives);
     for (const passive of this.passives) {
-      api.log("activate!");
       passive?.activate()
     }
   }

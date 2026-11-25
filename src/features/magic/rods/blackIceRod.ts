@@ -4,6 +4,7 @@ import { setTimeout } from "@plugins/helpers";
 import type { Vec3 } from "../../../core/types";
 import { normalize } from "../../../utils/math";
 import { asyncAnimate } from "../../../core/helpers/animateHelper";
+import { MobListener } from "../../../core/helpers/eventListener";
 
 
 export enum BlackIceSkillNames {
@@ -180,11 +181,11 @@ export class BlackIceRod extends MagicSystem<BlackIceSkillNames> {
   castFirstSpell(chargeTime: number): void {
     const playerPos = api.getPosition(this.playerId);
     const dir = normalize(api.getPlayerFacingInfo(this.playerId).dir ?? [0, 0, 1]);
-    if(!dir) return;
+    if (!dir) return;
 
     const [mob] = this.getMobsInSight(playerPos, dir, 20);
-    if(mob === undefined) return;
-    
+    if (mob === undefined) return;
+
     const [x, y, z] = api.getPosition(mob);
     this.playEffect(mob, [x, y + 2.5, z]);
   }
@@ -341,10 +342,10 @@ export class BlackIceRod extends MagicSystem<BlackIceSkillNames> {
       } else {
         const playerPos = api.getPosition(this.playerId);
         const dir = normalize(api.getPlayerFacingInfo(this.playerId).dir ?? [0, 0, 1]);
-        if(!dir) return;
+        if (!dir) return;
 
         const [mob] = this.getMobsInSight(playerPos, dir, 20, 5, null);
-        if(mob === undefined) return;
+        if (mob === undefined) return;
 
         const mobPos = api.getPosition(mob);
 
@@ -360,10 +361,10 @@ export class BlackIceRod extends MagicSystem<BlackIceSkillNames> {
   castSecondSpell(chargeTime: number): void {
     const playerPos = api.getPosition(this.playerId);
     const dir = normalize(api.getPlayerFacingInfo(this.playerId).dir ?? [0, 0, 1]);
-    if(!dir) return;
-    
+    if (!dir) return;
+
     const [mob] = this.getMobsInSight(playerPos, dir, 20, 5);
-    if(mob === undefined) return;
+    if (mob === undefined) return;
 
     api.updateEntityNodeMeshAttachment(
       mob,
