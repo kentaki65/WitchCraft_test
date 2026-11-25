@@ -623,13 +623,17 @@ export class EventTarget<M extends { [K in keyof M]: unknown } = GameEventMap> {
     const list = this._listeners[type];
     if (!list) return;
 
-    for (let i = 0; i < list.length; i++) {
-      const listener = list[i];
-      if (!listener) continue;
-      listener.callback(e);
+    // once のリスナーは「実行前」に外す。実行後に外すと、コールバック内の処理が
+    // 同じイベントを再度発火させたとき (例: リスナー内で attemptApplyDamage →
+    // 同じ mobWasDamagedByPlayer) に自分自身が再実行され、無限再帰になる。
+    // また、実行中の add/remove の影響を受けないようコピーを走査する。
+    for (const listener of [...list]) {
       if (listener.once) {
-        list.splice(i--, 1);
+        const idx = list.indexOf(listener);
+        if (idx === -1) continue; // 実行中に他のリスナーが外した
+        list.splice(idx, 1);
       }
+      listener.callback(e);
     }
   }
 
@@ -643,7 +647,6 @@ export class EventTarget<M extends { [K in keyof M]: unknown } = GameEventMap> {
     }
   }
 }
-
 export class MobListener extends EventTarget<GameEventMap> {
   constructor(public readonly id: LifeformId) {
     super();
