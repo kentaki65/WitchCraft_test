@@ -1,7 +1,6 @@
+import type { Vec3 } from "../../../core/types";
 import { normalize } from "../../../utils/math";
 import { MagicSystem, type PassiveConstructor, type RodSettings } from "../magicSystem";
-
-type Vec3 = [number, number, number];
 
 export enum SpeedRodSkillNames {
   Flashstep = "Flashstep",

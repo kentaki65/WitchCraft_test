@@ -2,10 +2,8 @@ import Promise from "../helpers/promise";
 import type { PolyfillPromise, PromiseLike as CustomPromiseLike } from "../helpers/promise";
 import { forceLoadChunk, setTimeout } from "@plugins/helpers";
 import { world } from "../helpers/worldGenerator";
-import type { SchematicPath } from "../types";
+import type { SchematicPath, Vec3 } from "../types";
 import { TICK_CONFIG } from "../constance";
-
-type Vec3 = [number, number, number];
 
 interface TerrainColumns {
   indexes: Int32Array[];
