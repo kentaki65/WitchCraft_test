@@ -46,9 +46,13 @@ class magicPropagation extends PassiveEffect {
 class ironWill extends PassiveEffect {
   override onActivate(): void {
     const onAttemptKill = (e: AttemptKillData) => {
+      if(this.cooldownManager.isOnCooldown("iron_will")) return;
+
       setTimeout(() => {
+        this.cooldownManager.set("iron_will", 900000);
+
         api.setHealth(e.killedPlayer, api.getClientOption(e.killedPlayer, "maxHealth"));
-        api.applyEffect(e.killedPlayer, "Damage Reduction", 30000, { inbuiltLevel: 10 });
+        api.applyEffect(e.killedPlayer, "Damage Reduction", 180000 , { inbuiltLevel: 10 });
         if (api.checkValid(e.attackingLifeform)) {
           const attakerPos = api.getPosition(e.attackingLifeform);
           const victimPos = api.getPosition(e.killedPlayer);
@@ -63,7 +67,7 @@ class ironWill extends PassiveEffect {
     }
 
     this.subscribe("playerAttemptToBeKilledByMob", e => onAttemptKill(e));
-    //this.subscribe("playerAttemptToBeKilledByPlayer", e => onAttemptKill(e));
+    this.subscribe("playerAttemptToBeKilledByPlayer", e => onAttemptKill(e));
   }
 }
 

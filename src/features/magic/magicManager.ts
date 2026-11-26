@@ -12,6 +12,7 @@ import { ObisidianRod, ObisidianRodSkillNames } from "./rods/obsidianRod";
 import type { ISurvivalAccessor } from "../health/SurvivalManager";
 import { CarbonRod, CarbonRodSkillNames } from "./rods/carbonRod";
 import { FrostRod, FrostRodSkillNames } from "./rods/frostRod";
+import type { CooldownManager } from "../../core/managers/CoolTimeManager";
 
 export const magicButtonKeyIds = {
   switchMagic: "switchmagic_X",
@@ -25,6 +26,7 @@ export class MagicManager {
   protected readonly keyManager: CustomButtonManager;
   protected readonly playerListener: PlayerListener;
   protected readonly survivalAccessor: ISurvivalAccessor;
+  protected readonly cooldownManager: CooldownManager; 
   protected magicSystem: IMagicSystem | null;
 
   constructor(
@@ -32,11 +34,13 @@ export class MagicManager {
     keyManager: CustomButtonManager,
     playerListener: PlayerListener,
     survivalAccessor: ISurvivalAccessor,
+    cooldownManager: CooldownManager,
   ) {
     this.playerId = playerId;
     this.keyManager = keyManager;
     this.playerListener = playerListener;
     this.survivalAccessor = survivalAccessor
+    this.cooldownManager = cooldownManager;
 
     this.magicSystem = null;
   }
@@ -148,7 +152,8 @@ export class MagicManager {
     const dependencies = [
       this.keyManager,
       this.playerListener,
-      this.survivalAccessor
+      this.survivalAccessor,
+      this.cooldownManager
     ] as const;
 
     switch (item?.name) {

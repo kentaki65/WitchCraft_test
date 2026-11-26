@@ -10,6 +10,7 @@ import type { Vec3 } from "../../core/types";
 import type { PlayerListener } from "../../core/helpers/eventListener";
 import type { PassiveEffect } from "./PassiveEffect";
 import type { ISurvivalAccessor } from "../health/SurvivalManager";
+import type { CooldownManager } from "../../core/managers/CoolTimeManager";
 
 //子が絶対持ってるものは abstractで
 //持ってるやつと持ってないやつがあるのは空実装にしてoverrideする
@@ -19,6 +20,7 @@ type Colors = ["white", "white", "lime", "lime", "yellow", "yellow", "orange", "
 export type PassiveConstructor = new (
   listener: PlayerListener,
   survival: ISurvivalAccessor,
+  cooldownManager: CooldownManager,
   playerId: Types.PlayerId
 ) => PassiveEffect;
 
@@ -52,7 +54,7 @@ export abstract class MagicSystem<
   //各杖のコンストラクタ内で絶対に呼ぶ!
   public initializePassives(): void {
     this.passives = this.passiveClasses.map(
-      Passive => new Passive(this.playerListener, this.survivalAccessor, this.playerId)
+      Passive => new Passive(this.playerListener, this.survivalAccessor, this.cooldownManager, this.playerId)
     );
   }
 
@@ -65,6 +67,7 @@ export abstract class MagicSystem<
   protected keyManager: CustomButtonManager;
   protected playerListener: PlayerListener;
   protected survivalAccessor: ISurvivalAccessor;
+  protected cooldownManager: CooldownManager;
   protected summonedMobs: Set<Types.MobId>;
 
   constructor(
@@ -73,12 +76,14 @@ export abstract class MagicSystem<
     keyManager: CustomButtonManager,
     playerListener: PlayerListener,
     survivalAccessor: ISurvivalAccessor,
+    cooldownManager: CooldownManager,
   ) {
     this.currentMode = initialMode;
     this.playerId = playerId;
     this.keyManager = keyManager;
     this.playerListener = playerListener;
     this.survivalAccessor = survivalAccessor;
+    this.cooldownManager = cooldownManager;
     
     this.summonedMobs = new Set();
   }
