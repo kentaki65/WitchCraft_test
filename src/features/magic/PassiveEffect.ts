@@ -4,6 +4,7 @@ import type {
   PlayerListener
 } from "../../core/helpers/eventListener";
 import type { ISurvivalAccessor } from "../health/SurvivalManager";
+import type { CooldownManager } from "../../core/managers/CoolTimeManager";
 
 type Subscription = {
   unsubscribe: () => void;
@@ -11,8 +12,9 @@ type Subscription = {
 
 export abstract class PassiveEffect {
   private readonly listener: PlayerListener;
-  protected playerId: PlayerId; 
+  protected readonly playerId: PlayerId; 
   protected readonly survival: ISurvivalAccessor;
+  protected readonly cooldownManager: CooldownManager;
 
   private readonly subscriptions: Subscription[] = [];
   private active = false;
@@ -20,11 +22,13 @@ export abstract class PassiveEffect {
   constructor(
     listener: PlayerListener,
     survival: ISurvivalAccessor,
+    cooldownManager: CooldownManager,
     playerId: PlayerId
   ) {
     this.playerId = playerId;
     this.survival = survival;
     this.listener = listener;
+    this.cooldownManager = cooldownManager;
   }
 
   public activate(): void {

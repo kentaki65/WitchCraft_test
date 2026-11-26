@@ -1,7 +1,7 @@
 import type * as Types from "@bloxd";
 import { setTimeout, setInterval, clearInterval } from "@plugins/helpers";
 import { createTickInterval } from "../../../utils/loop";
-import { distanceToSegment, divideVec, getOffsetPosition, normalize, subtractVec } from "../../../utils/math";
+import { divideVec, getOffsetPosition, normalize, subtractVec } from "../../../utils/math";
 import { MagicSystem, type RodSettings } from "../magicSystem";
 import { MobListener } from "../../../core/helpers/eventListener";
 import type { Vec2, Vec3 } from "../../../core/types";
@@ -19,6 +19,9 @@ export enum FrostRodSkillNames {
 // - 氷剣吹雪　氷の剣のような形をしたものを前方へ飛ばす 
 // - アイス・ロード　自身の後ろに氷の道を形成し、素早く滑ることで後方へ脱出する。
 // - 氷塊の降る夜　前方の広い範囲に大きな氷の塊を降らせる　落ちてくる速度はゆっくりだが、威力が大変高い。◯
+
+
+//パッシブとして寒いところでもダメージを受けないなど
 
 export class FrostRod extends MagicSystem<FrostRodSkillNames> {
   protected override itemName: string = "Frost Rod";

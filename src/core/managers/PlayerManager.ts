@@ -1,12 +1,13 @@
 import type * as Types from "@bloxd"
 import { CustomButtonManager } from "./KeyManager";
 import { MagicManager } from "../../features/magic/magicManager";
-import { SurvivalManager, type ISurvivalAccessor } from "../../features/health/SurvivalManager";
+import { SurvivalManager } from "../../features/health/SurvivalManager";
 import type { Parameters } from "../types";
 import { RightTextManager } from "../../features/RightInfoTextManager";
 import { DungeonManager } from "../../features/structure/DungeonManager";
 import type { EventRegister } from "../../features/worldEvents/eventRegister";
 import { PlayerListener } from "../helpers/eventListener";
+import { CooldownManager } from "./CoolTimeManager";
 
 export class PlayerManager {
   readonly playerId: Types.PlayerId;
@@ -17,6 +18,7 @@ export class PlayerManager {
   readonly rightInfoTextManager: RightTextManager;
   readonly worldEvents: EventRegister;
   readonly playerListener: PlayerListener;
+  readonly cooldownManager: CooldownManager;
 
   constructor (playerId: Types.PlayerId, worldEvent: EventRegister){
     this.playerId = playerId;
@@ -24,21 +26,27 @@ export class PlayerManager {
     this.healthManager = new SurvivalManager(playerId);
     this.playerListener = new PlayerListener(playerId);
     this.customKeyManager = new CustomButtonManager(playerId);
+    this.cooldownManager = new CooldownManager(playerId);
+
     this.magicManager = new MagicManager(
       playerId, this.customKeyManager, 
       this.playerListener, 
-      this.healthManager.accessor
+      this.healthManager.accessor,
+      this.cooldownManager
     );
+
     this.rightInfoTextManager = new RightTextManager(
       playerId, 
       this.healthManager
     );
+    
     this.dungeonManager = new DungeonManager();
     this.worldEvents = worldEvent;
     this.onPlayerJoin();
   }
 
   onPlayerJoin(){
+    this.cooldownManager.onPlayerJoin(this.playerId);
     this.magicManager.onPlayerJoin(this.playerId);
   }
 
@@ -70,6 +78,7 @@ export class PlayerManager {
     this.magicManager.tick();
     this.healthManager.tick();
     this.rightInfoTextManager.tick();
+    this.cooldownManager.tick();
   };
 
   onPlayerAltAction = (playerId: string, x: number, y: number, z: number, block: string, targetEId: string | null) => {

@@ -36,6 +36,8 @@ export interface WorldData {
   generatedChunkKeys: Record<string, GeneratedDungeon>;
 }
 
+export type CoolDown = Record<string, number>;
+
 export interface PlayerData {
   deadPlayer: DeadPlayer;
   playerLevel: number;
@@ -43,6 +45,7 @@ export interface PlayerData {
   reachedBiomes: ReachedBiomes;
   achievement: AchievementSlot;
   language: Lang;
+  cooldowns: CoolDown
 }
 
 export interface DeadPlayer {
